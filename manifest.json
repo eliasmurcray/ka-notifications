@@ -1,0 +1,50 @@
+{
+	"manifest_version": 3,
+	"name": "Khan Academy Notifications",
+	"short_name": "KA Notifications",
+	"author": "Elias Murcray",
+  "version": "1.0",
+	"homepage_url": "https://github.com/eliasmurcray/khanacademynotifications",
+	"description": "Get Khan Academy Notifications in real time!",
+	"minimum_chrome_version": "65.0.3299",
+	"icons": {
+		"16": "16.png",
+    "32": "32.png",
+		"48": "48.png",
+		"128": "128.png"
+	},
+	"action": {
+		"default_title": "Khan Academy Notifications",
+		"default_icon": {
+			"16": "16.png",
+      "32": "32.png",
+      "48": "48.png",
+      "128": "128.png"
+		},
+		"default_popup": "popup/popup.html"
+	},
+	"content_scripts": [{
+		"js": ["dist/content.js"],
+		"matches": ["*://*.khanacademy.org/*"],
+		"css": ["dist/style.css"]
+	}],
+	"permissions": [
+		"cookies",
+		"webNavigation",
+		"alarms"
+	],
+	"host_permissions": [
+		"https://www.khanacademy.org/*"
+	],
+	"web_accessible_resources": [{
+		"resources": [
+			"dist/index.js",
+			"dist/popup.js",
+			"styles/*"
+		],
+		"matches": ["*://*.khanacademy.org/*"]
+	}],
+	"background": {
+		"service_worker": "dist/background.js"
+	}
+}
