@@ -1,37 +1,34 @@
 self.addEventListener("install", () => {
   checkForNewNotifications();
-
   chrome.action.setBadgeBackgroundColor({
     color: "#00BFA5"
   });
-
   const ALARM_NAME = "ka-notification";
-
   // For a faster timer, use window.setInterval
   chrome.alarms.create(ALARM_NAME, {
     periodInMinutes: 1
   });
-
-  chrome.alarms.onAlarm.addListener(({ name }) => {
-    if(name === ALARM_NAME) checkForNewNotifications();
+  chrome.alarms.onAlarm.addListener(({
+    name
+  }) => {
+    if (name === ALARM_NAME) checkForNewNotifications();
   });
 
   function checkForNewNotifications() {
-    fetchUserData()
-      .then(({ newNotificationCount }) => {
-        if(newNotificationCount === 0 || newNotificationCount === undefined) return;
-        chrome.action.setBadgeText({
-          text: newNotificationCount > 9 ? "9+" : String(newNotificationCount)
-        });
-      })
-      .catch(console.error);
+    fetchUserData().then(({
+      newNotificationCount
+    }) => {
+      if (newNotificationCount === 0 || newNotificationCount === undefined) return;
+      chrome.action.setBadgeText({
+        text: newNotificationCount > 9 ? "9+" : String(newNotificationCount)
+      });
+    }).catch(console.error);
   }
 });
 
 function fetchUserData() {
   return getChromeFkey().then((fkey) => graphQLFetch("getFullUserProfile", fkey));
 }
-
 const queries = {
   "getFullUserProfile": "query getFullUserProfile($kaid: String, $username: String) {\n  user(kaid: $kaid, username: $username) {\n    id\n    kaid\n    key\n    userId\n    email\n    username\n    profileRoot\n    gaUserId\n    qualarooId\n    isPhantom\n    isDeveloper: hasPermission(name: \"can_do_what_only_admins_can_do\")\n    isCurator: hasPermission(name: \"can_curate_tags\", scope: ANY_ON_CURRENT_LOCALE)\n    isCreator: hasPermission(name: \"has_creator_role\", scope: ANY_ON_CURRENT_LOCALE)\n    isPublisher: hasPermission(name: \"can_publish\", scope: ANY_ON_CURRENT_LOCALE)\n    isModerator: hasPermission(name: \"can_moderate_users\", scope: GLOBAL)\n    isParent\n    isSatStudent\n    isTeacher\n    isDataCollectible\n    isChild\n    isOrphan\n    isCoachingLoggedInUser\n    canModifyCoaches\n    nickname\n    hideVisual\n    joined\n    points\n    countVideosCompleted\n    bio\n    profile {\n      accessLevel\n      __typename\n    }\n    soundOn\n    muteVideos\n    showCaptions\n    prefersReducedMotion\n    noColorInVideos\n    autocontinueOn\n    newNotificationCount\n    canHellban: hasPermission(name: \"can_ban_users\", scope: GLOBAL)\n    canMessageUsers: hasPermission(name: \"can_send_moderator_messages\", scope: GLOBAL)\n    isSelf: isActor\n    hasStudents: hasCoachees\n    hasClasses\n    hasChildren\n    hasCoach\n    badgeCounts\n    homepageUrl\n    isMidsignupPhantom\n    includesDistrictOwnedData\n    canAccessDistrictsHomepage\n    preferredKaLocale {\n      id\n      kaLocale\n      status\n      __typename\n    }\n    underAgeGate {\n      parentEmail\n      daysUntilCutoff\n      approvalGivenAt\n      __typename\n    }\n    authEmails\n    signupDataIfUnverified {\n      email\n      emailBounced\n      __typename\n    }\n    pendingEmailVerifications {\n      email\n      __typename\n    }\n    tosAccepted\n    shouldShowAgeCheck\n    __typename\n  }\n  actorIsImpersonatingUser\n}\n",
   "VoteEntityMutation": "mutation VoteEntityMutation($postKey: String!, $voteType: Int!) {\n  voteEntity(entityKey: $postKey, voteType: $voteType) {\n    error {\n      code\n      __typename\n    }\n    __typename\n  }\n}\n",
@@ -52,22 +49,21 @@ function graphQLFetch(query, fkey) {
         query: queries[query]
       }),
       credentials: "same-origin"
-    })
-      .then(async (response) => {
-        if (response.status === 200) return resolve((await response.json()).data.user);
-        response.text().then((body) => reject(`Error in GraphQL ${query} call: Server responded with status ${JSON.stringify(response.status)} and body ${JSON.stringify(body)}`));
-      });
+    }).then(async (response) => {
+      if (response.status === 200) return resolve((await response.json()).data.user);
+      response.text().then((body) => reject(`Error in GraphQL ${query} call: Server responded with status ${JSON.stringify(response.status)} and body ${JSON.stringify(body)}`));
+    });
   });
 }
 
-function getChromeFkey () {
-	return new Promise((resolve, reject) => {
-		chrome.cookies.get({
-			url: "https://www.khanacademy.org",
-			name: "fkey"
-		}, (cookie) => {
-			if (cookie === null || !cookie) reject("fkey cookie not found.");
-			resolve(cookie?.value);
-		});
-	});
+function getChromeFkey() {
+  return new Promise((resolve, reject) => {
+    chrome.cookies.get({
+      url: "https://www.khanacademy.org",
+      name: "fkey"
+    }, (cookie) => {
+      if (cookie === null || !cookie) reject("fkey cookie not found.");
+      resolve(cookie?.value);
+    });
+  });
 }
