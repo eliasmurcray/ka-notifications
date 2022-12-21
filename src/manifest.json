@@ -35,7 +35,6 @@
 	],
 	"permissions": [
 		"cookies",
-		"webNavigation",
 		"alarms"
 	],
 	"host_permissions": [
