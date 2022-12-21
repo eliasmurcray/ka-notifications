@@ -4,7 +4,7 @@
 	"short_name": "KA Notifications",
 	"author": "Elias Murcray",
 	"version": "1.0",
-	"homepage_url": "https://github.com/eliasmurcray/khanacademynotifications",
+	"homepage_url": "https://github.com/eliasmurcray/ka-notifications",
 	"description": "Get Khan Academy Notifications in real time!",
 	"minimum_chrome_version": "65.0.3299",
 	"icons": {
@@ -52,6 +52,6 @@
 		}
 	],
 	"background": {
-		"service_worker": ""
+		"service_worker": "background.js"
 	}
 }

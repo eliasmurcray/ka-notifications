@@ -12,7 +12,7 @@ const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 //       });
 
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: {
     "content": "/src/js/content.js",
     "background": "/src/js/background.js",

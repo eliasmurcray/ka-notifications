@@ -1,5 +1,9 @@
 const ALARM_NAME = "ka-notification";
 
+chrome.action.setBadgeBackgroundColor({
+  color: "#FF0000"
+});
+
 // For a faster timer, use window.setInterval
 chrome.alarms.create(ALARM_NAME, {
   periodInMinutes: 1
