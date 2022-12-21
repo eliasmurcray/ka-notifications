@@ -14,8 +14,9 @@ const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 module.exports = {
   mode: "development",
   entry: {
-    "index": "/src/js/index.js",
-    "background": "/src/js/background.js"
+    "content": "/src/js/content.js",
+    "background": "/src/js/background.js",
+    "popup": "/src/js/popup.js"
   },
   plugins: [
     new MiniCssExtractPlugin({
@@ -29,6 +30,10 @@ module.exports = {
         },
         {
           from: "src/LICENSE",
+          to: ""
+        },
+        {
+          from: "src/html",
           to: ""
         }
       ]

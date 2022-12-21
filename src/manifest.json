@@ -30,9 +30,6 @@
 			],
 			"matches": [
 				"https://www.khanacademy.org/*"
-			],
-			"css": [
-				"dist/style.css"
 			]
 		}
 	],
@@ -47,9 +44,7 @@
 	"web_accessible_resources": [
 			{
 			"resources": [
-				"index.js",
-				"popup.js",
-				"styles/*"
+				"popup.js"
 			],
 			"matches": [
 				"https://www.khanacademy.org/*"

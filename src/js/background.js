@@ -1,17 +1,24 @@
-// const ALARM_NAME = "ka-notification";
+const ALARM_NAME = "ka-notification";
 
-// If you want a faster timer, use window.setInterval
-// chrome.alarms.create(ALARM_NAME, {
-//   periodInMinutes: 1
-// });
+// For a faster timer, use window.setInterval
+chrome.alarms.create(ALARM_NAME, {
+  periodInMinutes: 1
+});
 
-// chrome.alarms.onAlarm = (alarm) => {
-//   if(alarm.name !== ALARM_NAME) return;
-  
-// };
+chrome.alarms.onAlarm = ({ name }) => {
+  if(name !== ALARM_NAME) return;
+  fetchUserData()
+    .then(({ newNotificationCount }) => {
+      if(newNotificationCount === 0 || newNotificationCount === null) return;
+      chrome.action.setBadgeText({
+        text: newNotificationCount > 9 ? "9+" : newNotificationCount
+      });
+    })
+    .catch(console.error);
+};
 
 function fetchUserData() {
-  return getChromeFkey().then((fkey) => graphQLFetch("getFullUserProfile"));
+  return getChromeFkey().then((fkey) => graphQLFetch("getFullUserProfile", fkey));
 }
 
 const queries = {

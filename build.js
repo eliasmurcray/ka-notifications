@@ -10,7 +10,9 @@ async function updateManifest() {
 
     // Update the extension's manifest.json file with the compiled file names that include the hash
     extensionManifest.background.service_worker = manifest['background.js'];
-    // extensionManifest.content_scripts[0].js[0] = manifest['content.js'];
+    extensionManifest.web_accessible_resources[0].resources[0] = manifest['content.js'];
+    extensionManifest.web_accessible_resources[0].resources[1] = manifest['popup.js'];
+    extensionManifest.content_scripts[0].js[0] = manifest['content.js'];
 
     // Write the updated manifest to the extension's manifest.json file
     await fs.writeJson('dist/manifest.json', extensionManifest, { spaces: 2 });
