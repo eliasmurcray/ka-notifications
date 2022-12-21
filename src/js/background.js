@@ -1,25 +1,35 @@
-const ALARM_NAME = "ka-notification";
+self.addEventListener("install", () => {
+  checkForNewNotifications();
 
-chrome.action.setBadgeBackgroundColor({
-  color: "#FF0000"
+  // const ALARM_NAME = "ka-notification";
+
+  chrome.action.setBadgeBackgroundColor({
+    color: "#FF0000"
+  });
+
+  // For a faster timer, use window.setInterval
+  // chrome.alarms.create(ALARM_NAME, {
+  //   periodInMinutes: 1
+  // });
+
+  // chrome.alarms.onAlarm.addListener(({ name }) => {
+  //   if(name === ALARM_NAME) checkForNewNotifications();
+  // });
+
+  setInterval(checkForNewNotifications, 100);
+
+  function checkForNewNotifications() {
+    fetchUserData()
+      .then(({ newNotificationCount }) => {
+        if(newNotificationCount === 0 || newNotificationCount === undefined) return;
+        console.log(newNotificationCount);
+        chrome.action.setBadgeText({
+          text: newNotificationCount > 9 ? "9+" : String(newNotificationCount)
+        });
+      })
+      .catch(console.error);
+  }
 });
-
-// For a faster timer, use window.setInterval
-chrome.alarms.create(ALARM_NAME, {
-  periodInMinutes: 1
-});
-
-chrome.alarms.onAlarm = ({ name }) => {
-  if(name !== ALARM_NAME) return;
-  fetchUserData()
-    .then(({ newNotificationCount }) => {
-      if(newNotificationCount === 0 || newNotificationCount === null) return;
-      chrome.action.setBadgeText({
-        text: newNotificationCount > 9 ? "9+" : newNotificationCount
-      });
-    })
-    .catch(console.error);
-};
 
 function fetchUserData() {
   return getChromeFkey().then((fkey) => graphQLFetch("getFullUserProfile", fkey));
@@ -34,7 +44,7 @@ const queries = {
 
 function graphQLFetch(query, fkey) {
   return new Promise((resolve, reject) => {
-    fetch("https://www.khanacademy.org/api/internal/graphql" + query, {
+    fetch("https://www.khanacademy.org/api/internal/graphql/_mt/" + query, {
       method: "POST",
       headers: {
         "X-KA-fkey": fkey,
@@ -46,11 +56,10 @@ function graphQLFetch(query, fkey) {
       }),
       credentials: "same-origin"
     })
-      .then((response) => {
-        if (response.status === 200) resolve(response.json());
-        response.text().then((body) => reject(`Error in GraphQL ${query} call: Server responded with status ${JSON.stringify(response.statusText)} and body ${JSON.stringify(body)}`));
-      })
-      .then((json) => resolve(json.data));
+      .then(async (response) => {
+        if (response.status === 200) return resolve((await response.json()).data.user);
+        response.text().then((body) => reject(`Error in GraphQL ${query} call: Server responded with status ${JSON.stringify(response.status)} and body ${JSON.stringify(body)}`));
+      });
   });
 }
 
