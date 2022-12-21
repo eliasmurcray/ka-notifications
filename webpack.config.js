@@ -1,15 +1,8 @@
 const path = require("path");
-// const HtmlWebpackPlugin = require("html-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
-
-//       new HtmlWebpackPlugin({
-//         template: `./src/html/${name}.html`,
-//         filename: name + ".html",
-//         chunks: [name],
-//         scriptLoading: "module"
-//       });
 
 module.exports = {
   mode: "production",
@@ -31,12 +24,14 @@ module.exports = {
         {
           from: "src/LICENSE",
           to: ""
-        },
-        {
-          from: "src/html",
-          to: ""
         }
       ]
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/html/popup.html",
+      filename: "popup.html",
+      chunks: ["popup"]
+      // scriptLoading: "module"
     }),
     new WebpackManifestPlugin({
       fileName: "manifest.json",
