@@ -1,5 +1,5 @@
 self.addEventListener("install", () => {
-  
+
   checkForNewNotifications();
 
   chrome.action.setBadgeBackgroundColor({
@@ -12,9 +12,7 @@ self.addEventListener("install", () => {
   chrome.alarms.create(ALARM_NAME, {
     periodInMinutes: 1
   });
-  chrome.alarms.onAlarm.addListener(({
-    name
-  }) => {
+  chrome.alarms.onAlarm.addListener(({ name }) => {
     if (name === ALARM_NAME) checkForNewNotifications();
   });
 
