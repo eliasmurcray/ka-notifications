@@ -1,9 +1,13 @@
 self.addEventListener("install", () => {
+  
   checkForNewNotifications();
+
   chrome.action.setBadgeBackgroundColor({
     color: "#00BFA5"
   });
+
   const ALARM_NAME = "ka-notification";
+
   // For a faster timer, use window.setInterval
   chrome.alarms.create(ALARM_NAME, {
     periodInMinutes: 1
