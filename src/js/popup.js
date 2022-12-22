@@ -1,5 +1,28 @@
 import queries from "../graphql-queries.json";
 
+/*
+{
+  "__typename": "ProgramFeedbackNotification",
+  "authorAvatarSrc": "https://cdn.kastatic.org/images/avatars/svg/old-spice-man.svg",
+  "authorNickname": "John",
+  "brandNew": true,
+  "class_": [
+    "BaseNotification",
+    "ReadableNotification",
+    "BaseFeedbackNotification",
+    "ScratchpadFeedbackNotification"
+  ],
+  "content": "It's always a good day when Polar posts",
+  "date": "2022-12-22T04:10:25.032488Z",
+  "feedbackType": "COMMENT",
+  "kaid": "kaid_80710011086149831327935",
+  "read": false,
+  "translatedScratchpadTitle": "Gimbal.js",
+  "url": "/computer-programming/gimbaljs/6426176054149120?qa_expand_key=ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfOTY0MjAxNDc0MzQyODQ1NjU4ODkxMzIwMQwLEghGZWVkYmFjaxiAgOPnyufUCww&qa_expand_type=comment",
+  "urlsafeKey": "ag5zfmtoYW4tYWNhZGVteXIdCxIQQmFzZU5vdGlmaWNhdGlvbhiAgOOn87i3Cgw"
+}
+ */
+
 getUserNotifications().then((notifications) => {
   let pre = document.createElement("pre");
   pre.innerText = JSON.stringify(notifications, null, "  ");
@@ -11,11 +34,9 @@ async function* cursorList(query, getVars, findCursor, findList, pageCap) {
   for (; !complete && (pageCap === undefined || i < pageCap); i++) {
     const vars = getVars(cursor);
     const results = await graphQLFetch(query, await getChromeFkey(), vars);
-
     ({ complete, cursor } = findCursor(results));
     yield findList(results);
   }
-
   return i;
 }
 
@@ -60,4 +81,32 @@ function getChromeFkey() {
       resolve(cookie?.value);
     });
   });
+}
+
+function timeSince(date) {
+
+  var seconds = Math.floor((new Date() - date) / 1000);
+
+  var interval = seconds / 31536000;
+
+  if (interval > 1) {
+    return Math.floor(interval) + " years";
+  }
+  interval = seconds / 2592000;
+  if (interval > 1) {
+    return Math.floor(interval) + " months";
+  }
+  interval = seconds / 86400;
+  if (interval > 1) {
+    return Math.floor(interval) + " days";
+  }
+  interval = seconds / 3600;
+  if (interval > 1) {
+    return Math.floor(interval) + " hours";
+  }
+  interval = seconds / 60;
+  if (interval > 1) {
+    return Math.floor(interval) + " minutes";
+  }
+  return Math.floor(seconds) + " seconds";
 }

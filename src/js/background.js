@@ -8,14 +8,17 @@ chrome.alarms.onAlarm.addListener(({ name }) => {
 // Initialize alarm on install
 chrome.runtime.onInstalled.addListener(() => {
 
+  // Set background color of badge to teal
   chrome.action.setBadgeBackgroundColor({
     color: "#00BFA5"
   });
 
-  // For a faster timer, use window.setInterval
+  // Check if alarm already exists
   chrome.alarms.get(ALARM_NAME, (alarm) => {
     if(!alarm) {
       checkForNewNotifications();
+
+      // For a faster timer, use window.setInterval
       chrome.alarms.create(ALARM_NAME, {
         periodInMinutes: 1
       });
@@ -25,7 +28,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 function checkForNewNotifications() {
   fetchUserData().then(({ newNotificationCount }) => {
-    if (newNotificationCount === 0 || newNotificationCount === undefined) return;
+    if (newNotificationCount === 0) return;
     chrome.action.setBadgeText({
       text: newNotificationCount > 9 ? "9+" : String(newNotificationCount)
     });
