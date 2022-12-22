@@ -1,34 +1,36 @@
 import queries from "../graphql-queries.json";
 
-self.addEventListener("install", () => {
+const ALARM_NAME = "ka-notification";
+chrome.alarms.onAlarm.addListener(({ name }) => {
+  if (name === ALARM_NAME) checkForNewNotifications();
+});
 
-  checkForNewNotifications();
+// Initialize alarm on install
+chrome.runtime.onInstalled.addListener(() => {
 
   chrome.action.setBadgeBackgroundColor({
     color: "#00BFA5"
   });
 
-  const ALARM_NAME = "ka-notification";
-
   // For a faster timer, use window.setInterval
-  chrome.alarms.create(ALARM_NAME, {
-    periodInMinutes: 1
-  });
-  chrome.alarms.onAlarm.addListener(({ name }) => {
-    if (name === ALARM_NAME) checkForNewNotifications();
-  });
-
-  function checkForNewNotifications() {
-    fetchUserData().then(({
-      newNotificationCount
-    }) => {
-      if (newNotificationCount === 0 || newNotificationCount === undefined) return;
-      chrome.action.setBadgeText({
-        text: newNotificationCount > 9 ? "9+" : String(newNotificationCount)
+  chrome.alarms.get(ALARM_NAME, (alarm) => {
+    if(!alarm) {
+      checkForNewNotifications();
+      chrome.alarms.create(ALARM_NAME, {
+        periodInMinutes: 1
       });
-    }).catch(console.error);
-  }
+    }
+  });
 });
+
+function checkForNewNotifications() {
+  fetchUserData().then(({ newNotificationCount }) => {
+    if (newNotificationCount === 0 || newNotificationCount === undefined) return;
+    chrome.action.setBadgeText({
+      text: newNotificationCount > 9 ? "9+" : String(newNotificationCount)
+    });
+  }).catch(console.error);
+}
 
 function fetchUserData() {
   return getChromeFkey().then((fkey) => graphQLFetch("getFullUserProfile", fkey));
