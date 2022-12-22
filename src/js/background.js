@@ -28,9 +28,8 @@ chrome.runtime.onInstalled.addListener(() => {
 
 function checkForNewNotifications() {
   fetchUserData().then(({ newNotificationCount }) => {
-    if (newNotificationCount === 0) return;
     chrome.action.setBadgeText({
-      text: newNotificationCount > 9 ? "9+" : String(newNotificationCount)
+      text: newNotificationCount === 0 ? "" : newNotificationCount > 9 ? "9+" : String(newNotificationCount)
     });
   }).catch(console.error);
 }

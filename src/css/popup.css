@@ -1,0 +1,27 @@
+body {
+  width: 500px;
+  height: 444px;
+}
+.hyperlink {
+  text-decoration-color: #0000;
+  color: #1890ff;
+  transition: text-decoration-color .1s ease-in-out;
+}
+.hyperlink:hover {
+  text-decoration-color: #1890ff;
+}
+.notifications-modal {
+  width: 500px;
+  height: 444px;
+}
+#notifications-container {
+  overflow: hidden auto;
+  height: 444px;
+  width: 500px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-flow: column;
+  align-items: flex-start;
+}

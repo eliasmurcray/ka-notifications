@@ -1,53 +1,36 @@
 import queries from "../graphql-queries.json";
+import "../css/popup.css";
 
-/*
-{
-  "__typename": "ProgramFeedbackNotification",
-  "authorAvatarSrc": "https://cdn.kastatic.org/images/avatars/svg/old-spice-man.svg",
-  "authorNickname": "John",
-  "brandNew": true,
-  "class_": [
-    "BaseNotification",
-    "ReadableNotification",
-    "BaseFeedbackNotification",
-    "ScratchpadFeedbackNotification"
-  ],
-  "content": "It's always a good day when Polar posts",
-  "date": "2022-12-22T04:10:25.032488Z",
-  "feedbackType": "COMMENT",
-  "kaid": "kaid_80710011086149831327935",
-  "read": false,
-  "translatedScratchpadTitle": "Gimbal.js",
-  "url": "/computer-programming/gimbaljs/6426176054149120?qa_expand_key=ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfOTY0MjAxNDc0MzQyODQ1NjU4ODkxMzIwMQwLEghGZWVkYmFjaxiAgOPnyufUCww&qa_expand_type=comment",
-  "urlsafeKey": "ag5zfmtoYW4tYWNhZGVteXIdCxIQQmFzZU5vdGlmaWNhdGlvbhiAgOOn87i3Cgw"
+getNextNotifications();
+function getNextNotifications() {
+  window.notificationsLoader = getUserNotifications();
+  window.notificationsLoader.next().then(({ value: notifications }) => {
+    let pre = document.createElement("pre");
+    pre.innerText = JSON.stringify(notifications, null, "  ");
+    document.body.append(pre);
+  });
 }
- */
 
-getUserNotifications().then((notifications) => {
-  let pre = document.createElement("pre");
-  pre.innerText = JSON.stringify(notifications, null, "  ");
-  document.body.append(pre);
-});
+// Returns generator function that gets user notifications
+async function* getUserNotifications() {
+  let i = 0;
+  let complete = false;
+  let cursor = "";
+  for(;!complete; i++) {
+    // Retrieve user notifications as JSON
+    const json = (await graphQLFetch("getNotificationsForUser", await getChromeFkey(), { after: cursor })).data;
 
-async function* cursorList(query, getVars, findCursor, findList, pageCap) {
-  let i = 0, complete = false, cursor = "";
-  for (; !complete && (pageCap === undefined || i < pageCap); i++) {
-    const vars = getVars(cursor);
-    const results = await graphQLFetch(query, await getChromeFkey(), vars);
-    ({ complete, cursor } = findCursor(results));
-    yield findList(results);
+    // Retrieve a cursor from the JSON
+    const nextCursor = json.user.notifications.pageInfo.nextCursor;
+
+    // Update loop control variables
+    complete = !nextCursor;
+    cursor = nextCursor ?? "";
+
+    // Return this set of notifications as JSON
+    yield json.user.notifications.notifications;
   }
   return i;
-}
-
-
-
-function updateNewNotifications() {
-  
-}
-
-function getUserNotifications() {
-  return getChromeFkey().then(async (fkey) => (await graphQLFetch("getNotificationsForUser", fkey)).data.user.notifications.notifications);
 }
 
 function graphQLFetch(query, fkey, variables = {}) {
@@ -83,7 +66,7 @@ function getChromeFkey() {
   });
 }
 
-function timeSince(date) {
+/*function timeSince(date) {
 
   var seconds = Math.floor((new Date() - date) / 1000);
 
@@ -109,4 +92,4 @@ function timeSince(date) {
     return Math.floor(interval) + " minutes";
   }
   return Math.floor(seconds) + " seconds";
-}
+}*/
