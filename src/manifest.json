@@ -35,6 +35,7 @@
 	],
 	"permissions": [
 		"cookies",
+		"storage",
 		"alarms"
 	],
 	"host_permissions": [

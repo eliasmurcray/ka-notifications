@@ -1,5 +1,8 @@
 import queries from "../graphql-queries.json";
 
+// Clear our storage variables on extension download (this script initializes only once)
+chrome.storage.local.remove(["popupState", "notificationsCursor", "newNotificationCount"]);
+
 const ALARM_NAME = "ka-notification";
 chrome.alarms.onAlarm.addListener(({ name }) => {
   if (name === ALARM_NAME) checkForNewNotifications();
@@ -28,6 +31,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 function checkForNewNotifications() {
   fetchUserData().then(({ newNotificationCount }) => {
+    chrome.storage.local.set({ "newNotificationCount": newNotificationCount });
     chrome.action.setBadgeText({
       text: newNotificationCount === 0 ? "" : newNotificationCount > 9 ? "9+" : String(newNotificationCount)
     });
