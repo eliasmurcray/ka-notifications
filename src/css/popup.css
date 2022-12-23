@@ -9,7 +9,7 @@ body.light {
   --notification-content-text-color: #424242;
   --notification-author-text-color: #bdbdbd;
   --notification-border-color: #eeeeee;
-  --unread-color: #e7f3f3;
+  --unread-color: #d9f5ec;
   background: #ffffff;
 }
 body.dark {
@@ -41,7 +41,7 @@ body.dark {
   height: 38px;
   width: 100%;
   background: var(--header-background);
-  transition: background-color .1s ease-in-out;
+  transition: border-color .1s ease-in-out, background-color .1s ease-in-out;
   padding: 0 20px;
   column-gap: 16px;
   box-sizing: border-box;
@@ -83,10 +83,10 @@ body.dark {
   box-sizing: border-box;
   border-bottom: solid 1px var(--notification-border-color);
   background-color: var(--notification-default-background-color);
-  transition: background-color .1s ease-in-out;
+  transition: background-color .1s ease-in-out, border-color .1s ease-in-out;
 }
-.notification.unread {
-  background-color: var(--unread-color);
+.unread {
+  animation: unread-transition 1s ease-in-out;
 }
 .notification:hover {
   background-color: var(--notification-hover-background-color);
@@ -98,6 +98,12 @@ body.dark {
   height: 18px;
   box-sizing: border-box;
   margin-bottom: 7px;
+}
+#mark-all-read svg path {
+  fill: #ffffff;
+}
+#mark-all-read:disabled svg path {
+  fill: #dde7e5;
 }
 .notification-author--avatar {
   width: 18px;
@@ -155,11 +161,45 @@ body.dark {
   border-left-color: #1890ff;
   animation: spin .6s ease-in-out infinite;
 }
+#mark-read-loading {
+  width: 18px;
+  height: 18px;
+  position: relative;
+  display: none;
+}
+#mark-read-loading div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+  border-color: #ffffff #00000000 #00000000 #00000000;
+  width: 18px;
+  height: 18px;
+  animation: spin 1.2s cubic-bezier(.5, 0, .5, 1) infinite
+}
+#mark-read-loading div:nth-child(1) {
+  animation-delay: -.45s
+}
+#mark-read-loading div:nth-child(2) {
+  animation-delay: -.3s
+}
+#mark-read-loading div:nth-child(3) {
+  animation-delay: -.15s
+}
 @keyframes spin {
   0% {
     transform: rotate(0deg);
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+@keyframes unread-transition {
+  0%, 50% {
+    background-color: var(--unread-color);
+  }
+  100% {
+    background-color: var(--notification-default-background-color);
   }
 }

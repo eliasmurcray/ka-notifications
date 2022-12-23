@@ -23,6 +23,7 @@ themeButton.onclick = () => {
   updateFromTheme();
   chrome.storage.local.set({ "notificationsTheme": notificationsTheme });
 };
+
 function updateFromTheme() {
   if(notificationsTheme === "light") {
     themeButton.innerHTML = '<svg stroke="#ffffff" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="18px" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
@@ -33,6 +34,7 @@ function updateFromTheme() {
   }
 }
 
+// Add scroll listener
 let notLoading = true;
 notificationsSection.addEventListener("scroll", checkScroll, { passive: true });
 function checkScroll() {
@@ -41,6 +43,18 @@ function checkScroll() {
     getNextNotifications();
   }
 }
+
+// Add mark all as read button
+const markAllRead = document.getElementById("mark-all-read");
+const markReadLoading = document.getElementById("mark-read-loading");
+markAllRead.onclick = () => {
+  markReadLoading.style.display = "inline-block";
+  markAllRead.disabled = true;
+  clearNotifications().then(() => {
+    markReadLoading.style.display = "none";
+    markAllRead.disabled = false;
+  });
+};
 
 async function getNextNotifications() {
   // If we have new notifications, refresh notification page
@@ -54,45 +68,49 @@ async function getNextNotifications() {
     var elementString = "";
     for(let i = 0, len = notifications.length; i < len; i++) {
       const notification = notifications[i];
-      switch(notification.__typename) {
-        case "ResponseFeedbackNotification": {
-          const { authorAvatarUrl, authorNickname, brandNew, content, date, focusTranslatedTitle, url } = notification;
-          elementString += `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">commented on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${escapeHTML(content)}</p></li>`;
-        }
-        break;
-        case "ProgramFeedbackNotification": {
-          const { authorAvatarSrc, authorNickname, brandNew, content, date, translatedScratchpadTitle, url } = notification;
-          elementString += `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">left feedback on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${escapeHTML(content)}</p></li>`;
-        }
-        break;
-        case "GroupedBadgeNotification": {
-          let badgeString = "";
-          const { badgeNotifications, brandNew, date, url } = notification;
-          if(badgeNotifications.length === 2)
-            badgeString = badgeNotifications[0].badge.description + " and " + badgeNotifications[1].badge.description;
-          else
-            badgeString = badgeNotifications.map((badge) => badge.badge.description).slice(0, -1).join(", ") + ", and " + badgeNotifications[badgeNotifications.length - 1].badge.description;
-          elementString += `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${badgeNotifications[0].badge.icons.compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${badgeString}! Congratulations!</p></li>`;
-        }
-        break;
-        case "BadgeNotification": {
-          const { badge: { description, icons: { compactUrl }, relativeUrl }, brandNew, date } = notification;
-          elementString += `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${relativeUrl}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${description}! Congratulations!</p></li>`;
-        }
-        break;
-        case "ModeratorNotification": {
-          const { brandNew, date, text } = notification;
-          elementString += `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="guardian-icon.png"><h3 class="notification-author--nickname">KA Badges</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${text}</p></li>`;
-        }
-        break;
-        default:
-          elementString += `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
-      }
+      elementString += createNotificationString(notification);
     }
     notificationsContainer.innerHTML += elementString;
     notLoading = true;
     chrome.storage.local.set({ "popupState": document.body.innerHTML });
   });
+}
+
+function createNotificationString(notification) {
+  switch(notification.__typename) {
+    case "ResponseFeedbackNotification": {
+      const { authorAvatarUrl, authorNickname, brandNew, content, date, focusTranslatedTitle, url } = notification;
+      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">commented on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${escapeHTML(content)}</p></li>`;
+    }
+    break;
+    case "ProgramFeedbackNotification": {
+      const { authorAvatarSrc, authorNickname, brandNew, content, date, translatedScratchpadTitle, url } = notification;
+      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">left feedback on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${escapeHTML(content)}</p></li>`;
+    }
+    break;
+    case "GroupedBadgeNotification": {
+      let badgeString = "";
+      const { badgeNotifications, brandNew, date, url } = notification;
+      if(badgeNotifications.length === 2)
+        badgeString = badgeNotifications[0].badge.description + " and " + badgeNotifications[1].badge.description;
+      else
+        badgeString = badgeNotifications.map((badge) => badge.badge.description).slice(0, -1).join(", ") + ", and " + badgeNotifications[badgeNotifications.length - 1].badge.description;
+      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${badgeNotifications[0].badge.icons.compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${badgeString}! Congratulations!</p></li>`;
+    }
+    break;
+    case "BadgeNotification": {
+      const { badge: { description, icons: { compactUrl }, relativeUrl }, brandNew, date } = notification;
+      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${relativeUrl}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${description}! Congratulations!</p></li>`;
+    }
+    break;
+    case "ModeratorNotification": {
+      const { brandNew, date, text } = notification;
+      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="guardian-icon.png"><h3 class="notification-author--nickname">KA Badges</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${text}</p></li>`;
+    }
+    break;
+    default:
+      return `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
+    }
 }
 
 // Gets text ready to be appended to innerHTML
@@ -125,6 +143,17 @@ async function* createNotificationsGenerator(cursor = "") {
   }
 }
 
+function clearNotifications() {
+  return new Promise((resolve, reject) => {
+    getChromeFkey().then((fkey) => {
+      graphQLFetch("clearBrandNewNotifications", fkey)
+      .then(resolve)
+      .catch(reject);
+    }).catch(console.error)
+  });
+}
+
+// This function accepts an fkey and variables to
 function graphQLFetch(query, fkey, variables = {}) {
   return new Promise((resolve, reject) => {
     fetch("https://www.khanacademy.org/api/internal/graphql/_mt/" + query, {
@@ -158,11 +187,6 @@ function getChromeFkey() {
   });
 }
 
-function loggedOutError() {
-  loadingContainer.remove();
-  notificationsContainer.innerHTML = `<li class="notification unread"><div class="notification-header"><img class="notification-author--avatar" src="32.png"><h3 class="notification-author--nickname">KA Notifications</h3><span class="notification-date">${timeSince(new Date())} ago</span></div><p class="notification-content">You must be <a class="hyperlink" href="https://www.khanacademy.org/login/" target="_blank">logged in</a> to use this extension.</p></li>`;
-}
-
 function timeSince(date) {
 
   var seconds = Math.floor((new Date() - date) / 1000);
@@ -190,4 +214,9 @@ function timeSince(date) {
   }
   interval = ~~interval;
   return interval + ((interval > 1 || interval === 0) ? " seconds" : " second");
+}
+
+function loggedOutError() {
+  loadingContainer.remove();
+  notificationsContainer.innerHTML = `<li class="notification unread"><div class="notification-header"><img class="notification-author--avatar" src="32.png"><h3 class="notification-author--nickname">KA Notifications</h3><span class="notification-date">${timeSince(new Date())} ago</span></div><p class="notification-content">You must be <a class="hyperlink" href="https://www.khanacademy.org/login/" target="_blank">logged in</a> to use this extension.</p></li>`;
 }

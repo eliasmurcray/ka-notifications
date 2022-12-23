@@ -10,28 +10,29 @@ chrome.alarms.onAlarm.addListener(({ name }) => {
 
 // Initialize alarm on install
 chrome.runtime.onInstalled.addListener(() => {
-
   // Set background color of badge to teal
   chrome.action.setBadgeBackgroundColor({
     color: "#00BFA5"
   });
 
-  // Check if alarm already exists
-  chrome.alarms.get(ALARM_NAME, (alarm) => {
-    if(!alarm) {
-      checkForNewNotifications();
+  checkForNewNotifications();
 
-      // For a faster timer, use window.setInterval
-      chrome.alarms.create(ALARM_NAME, {
-        periodInMinutes: 1
-      });
-    }
+  // For a faster timer, use window.setInterval
+  chrome.alarms.create(ALARM_NAME, {
+    periodInMinutes: 1
   });
 });
 
 function checkForNewNotifications() {
   fetchUserData().then((result) => {
-    if(result === null) return;
+    // If user is not logged in
+    if(result === null) {
+      chrome.action.setBadgeText({
+        text: "!"
+      });
+      return;
+    };
+
     const { newNotificationCount } = result;
     chrome.storage.local.set({ "newNotificationCount": newNotificationCount });
     chrome.action.setBadgeText({
@@ -41,7 +42,15 @@ function checkForNewNotifications() {
 }
 
 function fetchUserData() {
-  return getChromeFkey().then((fkey) => graphQLFetch("getFullUserProfile", fkey)).catch(console.error);
+  return getChromeFkey()
+    .then((fkey) => graphQLFetch("getFullUserProfile", fkey))
+    .catch((error) => {
+      chrome.action.setBadgeText({
+        text: "!"
+      });
+      
+      console.error(error);
+    });
 }
 
 function graphQLFetch(query, fkey) {
