@@ -1,6 +1,6 @@
 import queries from "../graphql-queries.json";
 
-// Clear our storage variables on extension download (this script initializes only once)
+// Clear our storage variables on background load
 chrome.storage.local.remove(["popupState", "notificationsCursor", "newNotificationCount"]);
 
 const ALARM_NAME = "ka-notification";
@@ -30,7 +30,9 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 function checkForNewNotifications() {
-  fetchUserData().then(({ newNotificationCount }) => {
+  fetchUserData().then((result) => {
+    if(result === null) return;
+    const { newNotificationCount } = result;
     chrome.storage.local.set({ "newNotificationCount": newNotificationCount });
     chrome.action.setBadgeText({
       text: newNotificationCount === 0 ? "" : newNotificationCount > 9 ? "9+" : String(newNotificationCount)
@@ -39,7 +41,7 @@ function checkForNewNotifications() {
 }
 
 function fetchUserData() {
-  return getChromeFkey().then((fkey) => graphQLFetch("getFullUserProfile", fkey));
+  return getChromeFkey().then((fkey) => graphQLFetch("getFullUserProfile", fkey)).catch(console.error);
 }
 
 function graphQLFetch(query, fkey) {
@@ -68,7 +70,7 @@ function getChromeFkey() {
       url: "https://www.khanacademy.org",
       name: "fkey"
     }, (cookie) => {
-      if (cookie === null || !cookie) reject("fkey cookie not found.");
+      if (cookie === null) reject("fkey cookie not found.");
       resolve(cookie?.value);
     });
   });
