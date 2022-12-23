@@ -22,6 +22,34 @@ body.dark {
   --unread-color: #343939;
   background: #222222;
 }
+::-webkit-scrollbar {
+  width: 14px;
+  transition: .1s ease-in-out;
+}
+::-webkit-scrollbar-thumb {
+  width: 5px;
+  border-radius: 10px;
+}
+body.light ::-webkit-scrollbar {
+  background: #ffffff;
+}
+body.light ::-webkit-scrollbar-thumb {
+  border: 4px solid #ffffff;
+  background: #aaaaaa;
+}
+body.light ::-webkit-scrollbar-thumb:active {
+  background: #838383;
+}
+body.dark ::-webkit-scrollbar {
+  background: #272727;
+}
+body.dark ::-webkit-scrollbar-thumb {
+  border: 4px solid #272727;
+  background: #505050;
+}
+body.dark ::-webkit-scrollbar-thumb:active {
+  background: #808080;
+}
 .hyperlink {
   text-decoration-color: #0000;
   color: #1890ff;

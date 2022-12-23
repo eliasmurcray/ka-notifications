@@ -53,6 +53,9 @@ markAllRead.onclick = () => {
   clearNotifications().then(() => {
     markReadLoading.style.display = "none";
     markAllRead.disabled = false;
+    chrome.action.setBadgeText({
+      text: ""
+    });
   });
 };
 
