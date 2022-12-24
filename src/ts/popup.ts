@@ -236,7 +236,7 @@ function clearNotifications(): Promise<{ [key: string]: string }> {
     getChromeFkey()
       .then((fkey) => graphQLFetch("clearBrandNewNotifications", fkey))
       .then((json) => {
-        if(json.data.clearBrandNewNotifications.error.code === "UNAUTHORIZED") {
+        if(json.data.clearBrandNewNotifications.error?.code === "UNAUTHORIZED") {
           reject();
         } else {
           resolve(json);
