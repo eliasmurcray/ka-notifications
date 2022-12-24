@@ -4,7 +4,6 @@ import "../css/popup.css";
 type Badge = {
   description: string,
   relativeUrl: string,
-  compactUrl: string,
   icons: {
     compactUrl: string
   }
