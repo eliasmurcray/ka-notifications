@@ -131,7 +131,7 @@ body.dark ::-webkit-scrollbar-thumb:active {
   fill: #ffffff;
 }
 #mark-all-read:disabled svg path {
-  fill: #dde7e5;
+  fill: #a8c0bb;
 }
 .notification-author--avatar {
   width: 18px;

@@ -239,7 +239,13 @@ function clearNotifications(): Promise<{ [key: string]: string }> {
   return new Promise((resolve, reject) => {
     getChromeFkey()
       .then((fkey) => graphQLFetch("clearBrandNewNotifications", fkey))
-      .then(resolve)
+      .then((json) => {
+        if(json.data.clearBrandNewNotifications.error.code === "UNAUTHORIZED") {
+          reject();
+        } else {
+          resolve(json);
+        }
+      })
       .catch(reject)
   });
 }
@@ -266,7 +272,8 @@ function AddEventListeners() {
   markAllRead.onclick = () => {
     markReadLoading.style.display = "inline-block";
     markAllRead.disabled = true;
-    clearNotifications().then(() => {
+    clearNotifications().then((json) => {
+      console.log(json);
       markReadLoading.style.display = "none";
       markAllRead.disabled = false;
       chrome.action.setBadgeText({
@@ -275,7 +282,8 @@ function AddEventListeners() {
     })
     .catch((error) => {
       markReadLoading.style.display = "none";
-      console.error(error);
+      notificationsContainer.insertAdjacentHTML("afterbegin", `<li class="notification unread"><div class="notification-header"><img class="notification-author--avatar" src="32.png"><h3 class="notification-author--nickname">KA Notifications</h3><span class="notification-date">${timeSince(new Date())} ago</span></div><p class="notification-content">Failed to clear notifications: user must be logged in.</p></li>`);
+      console.log(error);
     });
   };
 
