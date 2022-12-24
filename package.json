@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/eliasmurcray/ka-notifications#readme",
   "devDependencies": {
+    "@types/chrome": "^0.0.206",
     "babel-loader": "^9.1.0",
     "bootstrap": "^5.2.3",
     "copy-webpack-plugin": "^11.0.0",
@@ -25,8 +26,12 @@
     "fs-extra": "^11.1.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.2",
+    "ts-loader": "^9.4.2",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-manifest-plugin": "^5.0.0"
+  },
+  "dependencies": {
+    "chrome": "^0.1.0"
   }
 }

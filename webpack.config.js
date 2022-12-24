@@ -7,9 +7,9 @@ const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 module.exports = {
   mode: "production",
   entry: {
-    "content": "/src/js/content.js",
-    "background": "/src/js/background.js",
-    "popup": "/src/js/popup.js"
+    "content": "/src/ts/content.ts",
+    "background": "/src/ts/background.ts",
+    "popup": "/src/ts/popup.ts"
   },
   plugins: [
     new MiniCssExtractPlugin({
@@ -31,7 +31,6 @@ module.exports = {
       template: "./src/html/popup.html",
       filename: "popup.html",
       chunks: ["popup"]
-      // scriptLoading: "module"
     }),
     new WebpackManifestPlugin({
       fileName: "manifest.json",
@@ -44,8 +43,13 @@ module.exports = {
         test: /\.css$/,
         use: [
           MiniCssExtractPlugin.loader,
-          'css-loader'
+          "css-loader"
         ],
+      },
+      {
+        test: /\.ts$/,
+        use: "ts-loader",
+        exclude: /node_modules/
       }
     ],
   },
