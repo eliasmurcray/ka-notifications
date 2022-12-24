@@ -38,7 +38,6 @@ function checkForNewNotifications(): void {
       }
 
       const { newNotificationCount } = user;
-      console.log(user);
       chrome.storage.local.set({ "newNotifications": newNotificationCount > 0 });
       chrome.action.setBadgeText({
         text: newNotificationCount === 0 ? "" : newNotificationCount > 9 ? "9+" : String(newNotificationCount)

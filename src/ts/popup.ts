@@ -25,7 +25,8 @@ type Notification = {
   url?: string,
   text?: string,
   translatedScratchpadTitle?: string,
-  __typename: string
+  __typename: string,
+  urlsafeKey?: string
 };
 
 type NotificationsResponse = {
@@ -53,6 +54,11 @@ const markReadLoading = document.getElementById("mark-read-loading") as HTMLDivE
 
 // Persist notifications cursor from last time, if possible
 let notificationsGenerator = createNotificationsGenerator(notificationsCursor ?? "");
+// If we have new notifications, refresh notification page
+if((await chrome.storage.local.get("newNotifications")).newNotifications === true) {
+  notificationsGenerator = createNotificationsGenerator();
+  await chrome.storage.local.set({ "newNotifications": false });
+}
 
 // Initial load, only if there is no key
 if(!notificationsCursor)
@@ -63,15 +69,8 @@ AddEventListeners();
 // Whether or not we are currently loading data, used by the scroll listener
 let notLoading: boolean = true;
 
-// Uses the notificationGenerator to retrieve the next page of notifications
+// Retrieve the next page of notifications
 async function getNextNotifications(): Promise<void> {
-  // If we have new notifications, refresh notification page
-  if((await chrome.storage.local.get("newNotifications")).newNotifications === true) {
-    notificationsGenerator = createNotificationsGenerator();
-    await chrome.storage.local.set({ "newNotifications": false });
-  }
-
-  // Retrieve next page of notifications
   notificationsGenerator.next().then(({ value: notifications }) => {
     // If user is not logged in
     if(notifications === undefined) {
@@ -93,7 +92,7 @@ async function getNextNotifications(): Promise<void> {
 }
 
 // Returns generator function that gets user notifications
-async function* createNotificationsGenerator(cursor = ""):  AsyncGenerator<Notification[], Notification[]>{
+async function* createNotificationsGenerator(cursor: string = ""):  AsyncGenerator<Notification[], Notification[]>{
   let complete = false;
   for(;!complete;) {
     // Retrieve user notifications as JSON
@@ -103,6 +102,7 @@ async function* createNotificationsGenerator(cursor = ""):  AsyncGenerator<Notif
       // Retrieve a cursor from the JSON
       const nextCursor = json.pageInfo.nextCursor;
 
+      console.log(json, nextCursor);
       // Update loop control variables
       complete = !nextCursor;
       cursor = nextCursor ?? "";
@@ -117,7 +117,7 @@ async function* createNotificationsGenerator(cursor = ""):  AsyncGenerator<Notif
   return;
 }
 
-function graphQLFetch(query: string, fkey: string, variables: { [key: string]: string } = {}): Promise<{ [key:string]: any }> {
+function graphQLFetch(query: string, fkey: string, variables: { [key:string]: string } = {}): Promise<{ [key:string]: any }> {
   return new Promise((resolve, reject) => {
     fetch("https://www.khanacademy.org/api/internal/graphql/_mt/" + query, {
       method: "POST",
@@ -127,7 +127,8 @@ function graphQLFetch(query: string, fkey: string, variables: { [key: string]: s
       },
       body: JSON.stringify({
         operationName: query,
-        query: QUERIES[query]
+        query: QUERIES[query],
+        variables
       }),
       credentials: "same-origin"
     })
@@ -192,12 +193,10 @@ function createNotificationString(notification: Notification): string {
       const { authorAvatarUrl, authorNickname, brandNew, content, date, focusTranslatedTitle, url } = notification;
       return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">commented on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${escapeHTML(content)}</p></li>`;
     }
-    break;
     case "ProgramFeedbackNotification": {
       const { authorAvatarSrc, authorNickname, brandNew, content, date, feedbackType, translatedScratchpadTitle, url } = notification;
       return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${escapeHTML(content)}</p></li>`;
     }
-    break;
     case "GroupedBadgeNotification": {
       let badgeString = "";
       const { badgeNotifications, brandNew, date, url } = notification;
@@ -207,17 +206,14 @@ function createNotificationString(notification: Notification): string {
         badgeString = badgeNotifications.map((badge) => badge.badge.description).slice(0, -1).join(", ") + ", and " + badgeNotifications[badgeNotifications.length - 1].badge.description;
       return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${badgeNotifications[0].badge.icons.compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${badgeString}! Congratulations!</p></li>`;
     }
-    break;
     case "BadgeNotification": {
       const { badge: { description, icons: { compactUrl }, relativeUrl }, brandNew, date } = notification;
       return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${relativeUrl}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${description}! Congratulations!</p></li>`;
     }
-    break;
     case "ModeratorNotification": {
       const { brandNew, date, text } = notification;
       return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="guardian-icon.png"><h3 class="notification-author--nickname">KA Badges</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${text}</p></li>`;
     }
-    break;
     default:
       return `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
     }
