@@ -2,12 +2,6 @@ import QUERIES from "../graphql-queries.json";
 import { AssignmentCreatedNotification, AssignmentDueDateNotification, AvatarNotification, BadgeNotification, BasicNotification, CoachRequestAcceptedNotification, CoachRequestNotification, CourseMasteryGoalCreatedNotification, GroupedBadgeNotification, InfoNotification, ModeratorNotification, Notification, NotificationsResponse, ProgramFeedbackNotification, ResponseFeedbackNotification } from "../notification";
 import "../css/popup.css";
 
-// First, detect if user is logged in to Khan Academy
-const userLoggedIn = await getChromeFkey()
-  .then((fkey) => graphQLFetch("getFullUserProfile", fkey))
-  .then((result) => result.data.user !== null)
-  .catch(() => false);
-
 // Fomat a number based on current location format
 function energyPointRequirement(points: number) {
   return `Earn ${Intl.NumberFormat(navigator.language).format(points)} energy points.`;
@@ -81,6 +75,7 @@ const AVATAR_SHORTNAMES = {
   "ohnoes_default_style": "Oh noes, the Error Buddy"
 };
 
+// Lookup table for avatar requirements
 const AVATAR_REQUIREMENTS = {
   "leafers_seedling_style": energyPointRequirement(1e4),
   "piceratops_seedling_style": energyPointRequirement(1e4),
@@ -139,11 +134,14 @@ const AVATAR_REQUIREMENTS = {
 };
 
 // Retrieve items from local storage
-const THEME: string = (await chrome.storage.local.get("notificationsTheme"))?.notificationsTheme;
-let notificationsTheme = THEME ?? "light";
-let notificationsGenerator: AsyncGenerator<Notification[], Notification[]> = createNotificationsGenerator();
+const STORAGE: { [key:string]: any } = await chrome.storage.local.get(["notificationsTheme", "notificationsCache"]);
+const THEME: string = STORAGE?.notificationsTheme;
+const CACHED_DATA = STORAGE?.notificationsCache;
 
-loadNotifications();
+console.log(typeof CACHED_DATA, CACHED_DATA);
+
+let notificationsTheme = THEME ?? "light";
+let notificationsGenerator: AsyncGenerator<Notification[], Notification[]> = createNotificationsGenerator(CACHED_DATA?.cursor ?? "");
 
 // Retrieve DOM elements
 const loadingContainer = document.getElementById("loading-container") as HTMLDivElement;
@@ -152,6 +150,12 @@ const notificationsSection = document.getElementById("notifications-section") as
 const themeButton = document.getElementById("theme-button") as HTMLButtonElement;
 const markAllRead = document.getElementById("mark-all-read") as HTMLButtonElement;
 const markReadLoading = document.getElementById("mark-read-loading") as HTMLDivElement;
+
+if(CACHED_DATA) {
+  notificationsContainer.innerHTML += CACHED_DATA.preloadString;
+} else {
+  loadNotifications();
+}
 
 function checkScroll(): void {
   if(notLoading && Math.abs(notificationsSection.scrollHeight - notificationsSection.scrollTop - notificationsSection.clientHeight) <= 76) {
@@ -211,11 +215,8 @@ async function loadNotifications(): Promise<void> {
 
     // Log notifications for development purposes
     console.log(notifications);
-
-    console.time("create-notifications-html");
     // Add notifications to DOM
-    notificationsContainer.innerHTML += notifications.map((notification) => createNotificationString(notification)).join("");
-    console.timeEnd("create-notifications-html");
+    notificationsContainer.innerHTML += notifications.map(createNotificationString).join("");
 
     // Allow notification loading now that task is complete
     notLoading = true;
