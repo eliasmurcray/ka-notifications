@@ -138,8 +138,6 @@ const STORAGE: { [key:string]: any } = await chrome.storage.local.get(["notifica
 const THEME: string = STORAGE?.notificationsTheme;
 const CACHED_DATA = STORAGE?.notificationsCache;
 
-console.log(typeof CACHED_DATA, CACHED_DATA);
-
 let notificationsTheme = THEME ?? "light";
 let notificationsGenerator: AsyncGenerator<Notification[], Notification[]> = createNotificationsGenerator(CACHED_DATA?.cursor ?? "");
 
@@ -366,7 +364,6 @@ function timeSince(date: Date): string {
 
 // Creates an HTML parsable string from a Notification object
 function createNotificationString(notification: Notification): string {
-  console.log(notification as unknown);
   const { __typename, brandNew, date, url } = notification;
   switch(__typename) {
     case "ResponseFeedbackNotification": {

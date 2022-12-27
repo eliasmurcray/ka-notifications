@@ -6,9 +6,6 @@ chrome.action.setBadgeBackgroundColor({
   color: "#00BFA5"
 });
 
-// Remove old storage elements to start fresh
-chrome.storage.local.remove(["notificationsTheme", "notificationsCache"]);
-
 // Add event listener to user logout sessions
 chrome.cookies.onChanged.addListener(({ cookie, removed }) => {
   if(cookie.name === "KAAS")
@@ -28,6 +25,9 @@ chrome.alarms.onAlarm.addListener(({ name }) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
+  // Remove old storage elements to start fresh
+  chrome.storage.local.remove(["notificationsTheme", "notificationsCache"]);
+  
   // Run an initial check
   checkForNewNotifications();
 
@@ -274,7 +274,6 @@ function timeSince(date: Date): string {
 
 // Creates an HTML parsable string from a Notification object
 function createNotificationString(notification: Notification): string {
-  console.log(notification as unknown);
   const { __typename, brandNew, date, url } = notification;
   switch(__typename) {
     case "ResponseFeedbackNotification": {
