@@ -135,6 +135,7 @@ const AVATAR_REQUIREMENTS = {
 
 // Retrieve items from local storage
 const STORAGE: { [key:string]: any } = await chrome.storage.local.get(["notificationsTheme", "notificationsCache"]);
+chrome.storage.local.remove("notificationsCache");
 const THEME: string = STORAGE?.notificationsTheme;
 const CACHED_DATA = STORAGE?.notificationsCache;
 

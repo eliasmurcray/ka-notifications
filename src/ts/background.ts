@@ -24,6 +24,7 @@ chrome.alarms.onAlarm.addListener(({ name }) => {
   if(name === ALARM_NAME) checkForNewNotifications();
 });
 
+// This listener runs only once when the extension is installed
 chrome.runtime.onInstalled.addListener(() => {
   // Remove old storage elements to start fresh
   chrome.storage.local.remove(["notificationsTheme", "notificationsCache"]);
@@ -41,7 +42,7 @@ function checkForNewNotifications(): void {
   getChromeFkey()
     .then((fkey) => {
       graphQLFetch("getFullUserProfile", fkey)
-      .then(({ data: { user } }) => {
+      .then(async ({ data: { user } }) => {
         // If user is not logged in show an error
         if(user === null)
           return chrome.action.setBadgeText({ text: "!" });
@@ -49,20 +50,19 @@ function checkForNewNotifications(): void {
         // Or else, update notification count
         const { newNotificationCount } = user;
 
-        // If there are new notifications, preload the data (since the client will likely open the popup soon)
+
         if(newNotificationCount > 0) {
-          graphQLFetch("getNotificationsForUser", fkey)
+          // Preload data
+          await graphQLFetch("getNotificationsForUser", fkey)
             .then(({ data: { user: { notifications } } }) => {
               const cursor = notifications.pageInfo.nextCursor;
               const preloadString = notifications.notifications.map(createNotificationString).join("");
               chrome.storage.local.set({ notificationsCache: { cursor, preloadString } });
+              chrome.action.setBadgeText({ text: newNotificationCount > 99 ? "99+" : String(newNotificationCount) });
             });
+        } else {
+          chrome.action.setBadgeText({ text: "" });
         }
-
-        // Display notification count
-        chrome.action.setBadgeText({
-          text: newNotificationCount === 0 ? "" : newNotificationCount > 99 ? "99+" : String(newNotificationCount)
-        });
       })
       .catch((error) => {
         chrome.action.setBadgeText({ text: "!" });
