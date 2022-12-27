@@ -11,6 +11,34 @@ module.exports = {
     "background": "/src/ts/background.ts",
     "popup": "/src/ts/popup.ts"
   },
+  externals: {
+    "/src/notification.d.ts": true
+  },
+  experiments: {
+    topLevelAwait: true
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader"
+        ],
+      },
+      {
+        test: /\.ts$/,
+        use: "ts-loader",
+        exclude: /node_modules/
+      }
+    ],
+  },
+  output: {
+    publicPath: "",
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].[contenthash].js",
+    clean: true
+  },
   plugins: [
     new MiniCssExtractPlugin({
       filename: "[name].[contenthash].css"
@@ -36,30 +64,5 @@ module.exports = {
       fileName: "manifest.json",
       basePath: ""
     })
-  ],
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          "css-loader"
-        ],
-      },
-      {
-        test: /\.ts$/,
-        use: "ts-loader",
-        exclude: /node_modules/
-      }
-    ],
-  },
-  experiments: {
-    topLevelAwait: true
-  },
-  output: {
-    publicPath: "",
-    path: path.resolve(__dirname, "dist"),
-    filename: "[name].[contenthash].js",
-    clean: true
-  }
+  ]
 };

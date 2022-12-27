@@ -9,7 +9,13 @@ async function updateManifest() {
     const extensionManifest = await fs.readJson('src/manifest.json');
 
     // Update the extension's manifest.json file with the compiled file names that include the hash
+
+    // Chrome
     extensionManifest.background.service_worker = manifest['background.js'];
+
+    // Firefox
+    // extensionManifest.background.scripts[0] = manifest['background.js'];
+    
     extensionManifest.web_accessible_resources[0].resources[0] = manifest['content.js'];
     extensionManifest.web_accessible_resources[0].resources[1] = manifest['popup.js'];
     extensionManifest.content_scripts[0].js[0] = manifest['content.js'];

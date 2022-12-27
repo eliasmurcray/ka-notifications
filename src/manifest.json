@@ -3,7 +3,7 @@
 	"name": "Khan Academy Notifications",
 	"short_name": "KA Notifications",
 	"author": "Elias Murcray",
-	"version": "0.8.2",
+	"version": "0.8.3",
 	"homepage_url": "https://github.com/eliasmurcray/ka-notifications",
 	"description": "Get Khan Academy Notifications in real time!",
 	"minimum_chrome_version": "65.0.3299",
@@ -39,7 +39,7 @@
 		"alarms"
 	],
 	"host_permissions": [
-		"https://www.khanacademy.org/*"
+		"https://www.khanacademy.org/"
 	],
 	"web_accessible_resources": [
 			{

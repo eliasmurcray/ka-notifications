@@ -1,18 +1,29 @@
 import QUERIES from "../graphql-queries.json";
 
+// Set background color of badge to teal
+chrome.action.setBadgeBackgroundColor({
+  color: "#00BFA5"
+});
+
 // Remove old storage elements to start fresh
-chrome.storage.local.remove(["notificationsHtml", "notificationsCursor", "newNotifications", "notificationsTheme"]);
+chrome.storage.local.remove(["newNotifications", "notificationsTheme"]);
+
+// Add event listener to user logout sessions
+chrome.cookies.onChanged.addListener(({ cookie, removed }) => {
+  if(cookie.name === "KAAS")
+    if(removed === true) {
+      chrome.action.setBadgeText({ text: "!" });
+    } else {
+      chrome.action.setBadgeText({ text: "" });
+      checkForNewNotifications();
+    }
+});
 
 const ALARM_NAME: string = "khanAcademyNotifications";
 
 // When alarm "khanAcademyNotifications" goes off, check for new notifications
 chrome.alarms.onAlarm.addListener(({ name }) => {
   if(name === ALARM_NAME) checkForNewNotifications();
-});
-
-// Set background color of badge to teal
-chrome.action.setBadgeBackgroundColor({
-  color: "#00BFA5"
 });
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -28,32 +39,27 @@ chrome.runtime.onInstalled.addListener(() => {
 function checkForNewNotifications(): void {
   getChromeFkey()
     .then((fkey) => graphQLFetch("getFullUserProfile", fkey))
-    .then(({ data: { user }}) => {
-      // If user is not logged in
-      if(user === null) {
-        chrome.action.setBadgeText({
-          text: "!"
-        });
-        return;
-      }
-
+    .then(({ data: { user } }) => {
+      // If user is not logged in show an error
+      if(user === null)
+        return chrome.action.setBadgeText({ text: "!" });
+      
+      // Or else, update notification count
       const { newNotificationCount } = user;
       chrome.storage.local.set({ "newNotifications": newNotificationCount > 0 });
       chrome.action.setBadgeText({
-        text: newNotificationCount === 0 ? "" : newNotificationCount > 9 ? "9+" : String(newNotificationCount)
+        text: newNotificationCount === 0 ? "" : newNotificationCount > 99 ? "99+" : String(newNotificationCount)
       });
     })
     .catch((error) => {
-      chrome.action.setBadgeText({
-        text: "!"
-      });
+      chrome.action.setBadgeText({ text: "!" });
       console.error(error);
     });
 }
 
-function graphQLFetch(query: string, fkey: string): Promise<{ [key:string]: any }> {
+function graphQLFetch(query: string, fkey: string, variables: { [key:string]: any } = {}): Promise<{ [key: string]: any }> {
   return new Promise((resolve, reject) => {
-    fetch("https://www.khanacademy.org/api/internal/graphql/_mt/" + query, {
+    fetch("https://www.khanacademy.org/api/internal/graphql/" + query + "?/math/", {
       method: "POST",
       headers: {
         "X-KA-fkey": fkey,
@@ -61,7 +67,8 @@ function graphQLFetch(query: string, fkey: string): Promise<{ [key:string]: any 
       },
       body: JSON.stringify({
         operationName: query,
-        query: QUERIES[query]
+        query: QUERIES[query],
+        variables
       }),
       credentials: "same-origin"
     })
