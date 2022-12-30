@@ -6,22 +6,22 @@ body {
 body {
   --header-background: #08b27c;
   --notification-default-background-color: #ffffff;
-  --notification-hover-background-color: #f6f9fa;
-  --notification-content-text-color: #424242;
-  --notification-author-text-color: #bdbdbd;
-  --notification-border-color: #eeeeee;
-  --unread-color: #d9f5ec;
+  --notification-hover-background-color: #f7f7f8;
+  --notification-content-text-color: #343541;
+  --notification-author-text-color: #828790;
+  --unread-color: #bef1f0;
+  --hyperlink-color: #1890ff;
   background: #ffffff;
 }
 body.dark {
-  --header-background: #121212;
-  --notification-default-background-color: #222222;
-  --notification-hover-background-color: #242525;
-  --notification-content-text-color: #e8eaed;
-  --notification-author-text-color: #d3dbe6;
-  --notification-border-color: #333333;
-  --unread-color: #343939;
-  background: #222222;
+  --header-background: #141515;
+  --notification-default-background-color: #202123;
+  --notification-hover-background-color: #2a2b32;
+  --notification-content-text-color: #ececf1;
+  --notification-author-text-color: #dddde3;
+  --hyperlink-color: #00bfff;
+  --unread-color: #2a2b32;
+  background: #202123;
 }
 ::-webkit-scrollbar {
   width: 14px;
@@ -42,22 +42,22 @@ body.light ::-webkit-scrollbar-thumb:active {
   background: #838383;
 }
 body.dark ::-webkit-scrollbar {
-  background: #272727;
+  background: #202123;
 }
 body.dark ::-webkit-scrollbar-thumb {
-  border: 4px solid #272727;
-  background: #505050;
+  border: 4px solid #202123;
+  background: #44474a;
 }
 body.dark ::-webkit-scrollbar-thumb:active {
-  background: #808080;
+  background: #5a5e62;
 }
 .hyperlink {
   text-decoration-color: #0000;
-  color: #1890ff;
+  color: var(--hyperlink-color);
   transition: text-decoration-color .1s ease-in-out;
 }
 .hyperlink:hover {
-  text-decoration-color: #1890ff;
+  text-decoration-color: var(--hyperlink-color);
 }
 #notifications-section {
   width: 100%;
@@ -110,9 +110,8 @@ body.dark ::-webkit-scrollbar-thumb:active {
   flex-flow: column;
   align-items: flex-start;
   box-sizing: border-box;
-  border-bottom: solid 1px var(--notification-border-color);
   background-color: var(--notification-default-background-color);
-  transition: background-color .1s ease-in-out, border-color .1s ease-in-out;
+  transition: background-color .1s ease-in-out;
 }
 .unread {
   animation: unread-transition 1s ease-in-out;
@@ -167,6 +166,17 @@ body.dark ::-webkit-scrollbar-thumb:active {
   color: var(--notification-content-text-color);
   white-space: pre-wrap;
   word-break: break-word;
+}
+.notification strong {
+  font-weight: 600;
+}
+.discussion-code-block {
+  font: Söhne Mono,Monaco,Andale Mono,Ubuntu Mono,monospace;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.discussion-code-inline {
+  font: Söhne Mono,Monaco,Andale Mono,Ubuntu Mono,monospace;
 }
 #loading-container {
   display: flex;

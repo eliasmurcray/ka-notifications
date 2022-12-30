@@ -30,7 +30,8 @@
 			],
 			"matches": [
 				"https://www.khanacademy.org/*"
-			]
+			],
+			"run_at": "document_end"
 		}
 	],
 	"permissions": [
