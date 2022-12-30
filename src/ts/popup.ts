@@ -195,6 +195,9 @@ markAllRead.onclick = () => {
 // Whether or not we are currently loading data, used by the scroll listener
 let notLoading: boolean = true;
 
+// A document fragment for speed
+const fragment = document.createDocumentFragment();
+
 // Retrieve the next page of notifications
 async function loadNotifications(): Promise<void> {
   console.time("load-notifications");
@@ -215,7 +218,9 @@ async function loadNotifications(): Promise<void> {
     // Log notifications for development purposes
     console.log(notifications);
     // Add notifications to DOM
-    notificationsContainer.innerHTML += notifications.map(createNotificationString).join("");
+    notifications.forEach((notification) => fragment.appendChild(createNotificationString(notification)));
+
+    notificationsContainer.append(fragment);
 
     // Allow notification loading now that task is complete
     notLoading = true;
@@ -255,10 +260,20 @@ async function* createNotificationsGenerator(cursor: string = ""):  AsyncGenerat
   return;
 }
 
+// 4667187347374080?qa_expand_key=ag5zfmtoYW4tYWNhZGVteXJACxIIVXNlckRhdGEiHWthaWRfNzA2OTM2NDY4MjA4MTQzOTYzNTE5MjY3DAsSCEZlZWRiYWNrGICA44-q98QKDA
+// addFeedback("COMMENT", "REPLY", "4667187347374080", "ag5zfmtoYW4tYWNhZGVteXJACxIIVXNlckRhdGEiHWthaWRfNzA2OTM2NDY4MjA4MTQzOTYzNTE5MjY3DAsSCEZlZWRiYWNrGICA44-q98QKDA", "test");
+
+// 5807692576243712?qa_expand_key=ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfOTc2Njg1MTYzNzIyOTcyODk4ODk1NzU5NQwLEghGZWVkYmFjaxiAgOOX8cLBCgw
+// addFeedback("QUESTION", "REPLY", "");
+
+// we want to respond to first answer if that is the focus kind
+// or else, we respond to the actual question
+// that is only if we are on feedbackType === "QUESTION"
+
 // Send a message given a valid program ID and qakey
 type RequestType = "QUESTION" | "COMMENT";
 type ResponseType = "REPLY" | "ANSWER";
-async function addFeedback(feedbackType: RequestType, responseType: ResponseType, topicId: string, qaExpandKey: string, textContent: string): Promise<any> {
+async function addFeedback(feedbackType: RequestType, responseType: ResponseType, topicId: string, qaExpandKey: string, textContent: string, expandType: string): Promise<any> {
   return await getChromeFkey()
     .then((fkey) => 
       graphQLFetch("feedbackQuery", fkey, {
@@ -269,12 +284,15 @@ async function addFeedback(feedbackType: RequestType, responseType: ResponseType
         focusKind: "scratchpad"
       })
       .then((response) => {
-        const key: string = response.data.feedback.feedback[0].key;
+        const sub: any = response.data.feedback.feedback[0];
+        const key: string = feedbackType === "QUESTION" && expandType === "answer" ? sub.answers[0].key : sub.key;
+        console.log(key, sub, feedbackType === "QUESTION" && expandType === "answer", feedbackType, expandType);
         return graphQLFetch("AddFeedbackToDiscussion", fkey, { parentKey: key, textContent, feedbackType: responseType });
       }))
-      .catch(() => {
+      .catch((error) => {
         loadingContainer.remove();
         notificationsContainer.innerHTML += `<li class="notification unread"><div class="notification-header"><img class="notification-author--avatar" src="32.png"><h3 class="notification-author--nickname">KA Notifications</h3><span class="notification-date">${timeSince(new Date())} ago</span></div><p class="notification-content">You must be <a class="hyperlink" href="https://www.khanacademy.org/login/" target="_blank">logged in</a> to use this extension.</p></li>`;
+        console.error(error);
       });
 }
 
@@ -363,18 +381,93 @@ function timeSince(date: Date): string {
   return `${years} year${years === 1 ? '' : 's'}`;
 }
 
+function addFeedbackTextarea(button: HTMLButtonElement, requestType: RequestType, responseType: ResponseType, id: string, qaExpandKey: string, qaExpandType: string) {
+  const originalOnClick = button.onclick;
+  const textarea = _element("textarea", "notification-reply-textarea") as HTMLTextAreaElement;
+  button.parentElement.insertAdjacentElement("beforebegin", textarea);
+  textarea.focus();
+  textarea.style.height = "0";
+  textarea.style.height = textarea.scrollHeight+"px";
+  textarea.oninput = () => {
+    textarea.style.height = "0";
+    textarea.style.height = textarea.scrollHeight+"px";
+  };
+  button.innerText = "Send";
+  button.onclick = async () => {
+    if(textarea.value === "") {
+      button.innerText = "Reply";
+      button.onclick = originalOnClick;
+      textarea.remove();
+      return;
+    } else {
+      button.innerText = "Sending";
+      let spinner = _element("div", "mini-loading-spinner");
+      spinner.innerHTML = "<div></div><div></div><div></div>";
+      spinner.style.display = "inline-block";
+      button.insertAdjacentElement("afterend", spinner);
+      console.log(requestType);
+      addFeedback(requestType, responseType, id, qaExpandKey, textarea.value, qaExpandType)
+      .then(() => {
+        button.innerText = "Sent";
+        spinner.remove();
+        textarea.remove();
+      })
+      .catch(console.error);
+    }
+  };
+}
+
+function _element(type: string, className: string): HTMLElement {
+  let element = document.createElement(type);
+  element.className = className;
+  return element;
+}
+
+const idRegex =  /\/(\d+)\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/;
+
 // Creates an HTML parsable string from a Notification object
-function createNotificationString(notification: Notification): string {
+function createNotificationString(notification: Notification): HTMLDivElement {
   const { __typename, brandNew, date, url } = notification;
+
+  // This base element is the same no matter what type
+  const notificationElement = _element("li", "notification" + (brandNew ? " unread" : ""));
+  
   switch(__typename) {
     case "ResponseFeedbackNotification": {
       const { authorAvatarUrl, authorNickname, content, feedbackType, focusTranslatedTitle } = notification as ResponseFeedbackNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p></li>`;
+      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p>`;
+
+      // Extract the id and qa_expand_key from the url
+      let idMatch = idRegex.exec(url);
+      let id = idMatch[1];
+      let qaExpandKey = idMatch[2];
+      let qaExpandType = idMatch[3];
+
+      const wrapper = _element("div", "feedback-button-wrapper");
+      const addFeedbackButton = _element("button", "feedback-button");
+      addFeedbackButton.innerText = "Reply";
+      addFeedbackButton.onclick = () => addFeedbackTextarea(addFeedbackButton as HTMLButtonElement, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType);
+      wrapper.appendChild(addFeedbackButton);
+      notificationElement.appendChild(wrapper);
     }
+    break;
     case "ProgramFeedbackNotification": {
       const { authorAvatarSrc, authorNickname, content, feedbackType, translatedScratchpadTitle } = notification as ProgramFeedbackNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p></li>`;
+      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p>`;
+
+      // Extract the id and qa_expand_key from the url
+      let idMatch = idRegex.exec(url);
+      let id = idMatch[1];
+      let qaExpandKey = idMatch[2];
+
+      const wrapper = _element("div", "feedback-button-wrapper");
+      const addFeedbackButton = _element("button", "feedback-button");
+      addFeedbackButton.innerText = "Reply";
+      addFeedbackButton.onclick = () => addFeedbackTextarea(addFeedbackButton as HTMLButtonElement, feedbackType as RequestType, feedbackType === "QUESTION" ? "ANSWER" : "REPLY", id, qaExpandKey, "");
+      wrapper.appendChild(addFeedbackButton);
+      notificationElement.appendChild(wrapper);
     }
+    break;
     case "GroupedBadgeNotification": {
       let badgeString = "";
       const { badgeNotifications } = notification as GroupedBadgeNotification & BasicNotification;
@@ -382,23 +475,28 @@ function createNotificationString(notification: Notification): string {
         badgeString = badgeNotifications[0].badge.description + " and " + badgeNotifications[1].badge.description;
       else
         badgeString = badgeNotifications.map((badge) => badge.badge.description).slice(0, -1).join(", ") + ", and " + badgeNotifications[badgeNotifications.length - 1].badge.description;
-      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${badgeNotifications[0].badge.icons.compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${badgeString}! Congratulations!</p></li>`;
+      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${badgeNotifications[0].badge.icons.compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${badgeString}! Congratulations!</p>`;
     }
+    break;
     case "BadgeNotification": {
       const { badge: { description, icons: { compactUrl }, relativeUrl } } = notification as BadgeNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${relativeUrl}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${description}! Congratulations!</p></li>`;
+      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${relativeUrl}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${description}! Congratulations!</p>`;
     }
+    break;
     case "ModeratorNotification": {
       const { text } = notification as ModeratorNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="guardian-icon.png"><h3 class="notification-author--nickname">KA Badges</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${text}</p></li>`;
+      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="guardian-icon.png"><h3 class="notification-author--nickname">KA Badges</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${text}</p>`;
     }
+    break;
     case "AvatarNotification": {
-      const { name, thumbnailSrc } = notification as AvatarNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? " unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? thumbnailSrc : "https://cdn.kastatic.org" + thumbnailSrc}"><h3 class="notification-author--nickname">KA Avatars</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You unlocked <b>${AVATAR_SHORTNAMES[name]}</b>! <i>${AVATAR_REQUIREMENTS[name]}</i></p></li>`;
+      const { name, thumbnailSrc, url } = notification as AvatarNotification & BasicNotification;
+      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? thumbnailSrc : "https://cdn.kastatic.org" + thumbnailSrc}"><h3 class="notification-author--nickname">KA Avatars</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">use avatar</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You unlocked <b>${AVATAR_SHORTNAMES[name]}</b>! <i>${AVATAR_REQUIREMENTS[name]}</i></p>`;
     }
+    break;
     default:
-      return `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
+      notificationElement.outerHTML = `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
     }
+  return notificationElement as HTMLDivElement;
 }
 
 // Updates the UI based on current theme

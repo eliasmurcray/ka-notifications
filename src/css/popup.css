@@ -116,7 +116,8 @@ body.dark ::-webkit-scrollbar-thumb:active {
 .unread {
   animation: unread-transition 1s ease-in-out;
 }
-.notification:hover {
+.notification:hover,
+.notification:focus-within {
   background-color: var(--notification-hover-background-color);
 }
 .notification-header {
@@ -178,6 +179,36 @@ body.dark ::-webkit-scrollbar-thumb:active {
 .discussion-code-inline {
   font: Söhne Mono,Monaco,Andale Mono,Ubuntu Mono,monospace;
 }
+.notification-reply-textarea {
+  resize: none;
+  border: none;
+  outline: none;
+  width: 100%;
+  margin: 7px 0 0 0;
+  padding: 10px;
+  box-sizing: border-box;
+  font: inherit;
+}
+.feedback-button-wrapper {
+  display: flex;
+  align-items: center;
+  column-gap: 7px;
+  margin: 7px 0 0 0;
+}
+.feedback-button {
+  font: inherit;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  background: #00000000;
+  color: var(--hyperlink-color);
+  text-decoration: underline 1px #00000000;
+  cursor: pointer;
+}
+.feedback-button:hover {
+  text-decoration-color: var(--hyperlink-color);
+}
 #loading-container {
   display: flex;
   flex-flow: column;
@@ -200,13 +231,13 @@ body.dark ::-webkit-scrollbar-thumb:active {
   border-left-color: #1890ff;
   animation: spin .6s ease-in-out infinite;
 }
-#mark-read-loading {
+.mini-loading-spinner {
   width: 18px;
   height: 18px;
   position: relative;
   display: none;
 }
-#mark-read-loading div {
+.mini-loading-spinner div {
   box-sizing: border-box;
   display: block;
   position: absolute;
@@ -217,13 +248,16 @@ body.dark ::-webkit-scrollbar-thumb:active {
   height: 18px;
   animation: spin 1.2s cubic-bezier(.5, 0, .5, 1) infinite
 }
-#mark-read-loading div:nth-child(1) {
+.feedback-button-wrapper .mini-loading-spinner div {
+  border-color: var(--hyperlink-color) #00000000 #00000000 #00000000;
+}
+.mini-loading-spinner div:nth-child(1) {
   animation-delay: -.45s
 }
-#mark-read-loading div:nth-child(2) {
+.mini-loading-spinner div:nth-child(2) {
   animation-delay: -.3s
 }
-#mark-read-loading div:nth-child(3) {
+.mini-loading-spinner div:nth-child(3) {
   animation-delay: -.15s
 }
 @keyframes spin {
