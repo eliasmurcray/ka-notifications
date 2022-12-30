@@ -133,6 +133,9 @@ const AVATAR_REQUIREMENTS = {
   "hopper_cool_style": "Complete a coding challenge"
 };
 
+// This regex is used to extract keys from url
+const idRegex =  /\/(\d+)\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/;
+
 // Retrieve items from local storage
 const STORAGE: { [key:string]: any } = await chrome.storage.local.get(["notificationsTheme", "notificationsCache"]);
 chrome.storage.local.remove("notificationsCache");
@@ -152,6 +155,23 @@ const markReadLoading = document.getElementById("mark-read-loading") as HTMLDivE
 
 if(CACHED_DATA) {
   notificationsContainer.innerHTML += CACHED_DATA.preloadString;
+  document.querySelectorAll(".feedback-button").forEach((button: HTMLButtonElement) => {
+    const { typename, url, feedbackType } = button.dataset;
+    if(typename === "ResponseFeedbackNotification") {
+      // Extract the id and qa_expand_key from the url
+      let idMatch = idRegex.exec(url);
+      let id = idMatch[1];
+      let qaExpandKey = idMatch[2];
+      let qaExpandType = idMatch[3];
+
+      button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType);
+    } else {
+      let idMatch = idRegex.exec(url);
+      let id = idMatch[1];
+      let qaExpandKey = idMatch[2];
+      button.onclick = () => addFeedbackTextarea(button, feedbackType as RequestType, feedbackType === "QUESTION" ? "ANSWER" : "REPLY", id, qaExpandKey, "");
+    }
+  });
 } else {
   loadNotifications();
 }
@@ -259,16 +279,6 @@ async function* createNotificationsGenerator(cursor: string = ""):  AsyncGenerat
   }
   return;
 }
-
-// 4667187347374080?qa_expand_key=ag5zfmtoYW4tYWNhZGVteXJACxIIVXNlckRhdGEiHWthaWRfNzA2OTM2NDY4MjA4MTQzOTYzNTE5MjY3DAsSCEZlZWRiYWNrGICA44-q98QKDA
-// addFeedback("COMMENT", "REPLY", "4667187347374080", "ag5zfmtoYW4tYWNhZGVteXJACxIIVXNlckRhdGEiHWthaWRfNzA2OTM2NDY4MjA4MTQzOTYzNTE5MjY3DAsSCEZlZWRiYWNrGICA44-q98QKDA", "test");
-
-// 5807692576243712?qa_expand_key=ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfOTc2Njg1MTYzNzIyOTcyODk4ODk1NzU5NQwLEghGZWVkYmFjaxiAgOOX8cLBCgw
-// addFeedback("QUESTION", "REPLY", "");
-
-// we want to respond to first answer if that is the focus kind
-// or else, we respond to the actual question
-// that is only if we are on feedbackType === "QUESTION"
 
 // Send a message given a valid program ID and qakey
 type RequestType = "QUESTION" | "COMMENT";
@@ -422,8 +432,6 @@ function _element(type: string, className: string): HTMLElement {
   element.className = className;
   return element;
 }
-
-const idRegex =  /\/(\d+)\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/;
 
 // Creates an HTML parsable string from a Notification object
 function createNotificationString(notification: Notification): HTMLDivElement {
