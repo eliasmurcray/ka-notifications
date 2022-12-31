@@ -155,16 +155,24 @@ const markReadLoading = document.getElementById("mark-read-loading") as HTMLDivE
 
 if(CACHED_DATA) {
   notificationsContainer.innerHTML += CACHED_DATA.preloadString;
-  document.querySelectorAll(".feedback-button").forEach((button: HTMLButtonElement) => {
+  document.querySelectorAll(".feedback-button").forEach(async (button: HTMLButtonElement) => {
     const { typename, url, feedbackType } = button.dataset;
     if(typename === "ResponseFeedbackNotification") {
       // Extract the id and qa_expand_key from the url
       let idMatch = idRegex.exec(url);
-      let id = idMatch[1];
-      let qaExpandKey = idMatch[2];
-      let qaExpandType = idMatch[3];
-
-      button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType);
+      if(idMatch) {
+        let id = idMatch[1];
+        let qaExpandKey = idMatch[2];
+        let qaExpandType = idMatch[3];
+        button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType);
+      } else {
+        let id = (await(await fetch(`https://www.khanacademy.org/api/internal/graphql/ContentForPath?fastly_cacheable=persist_until_publish&pcv=d6d47957dd47ef94066c3adef0c9aa40922342e1&hash=3314043276&variables=%7B%22path%22%3A%22${encodeURIComponent(/\/.*(?=\?)/g.exec(url)[0])}%22%2C%22countryCode%22%3A%22NL%22%2C%22kaLocale%22%3A%22en%22%2C%22clientPublishedContentVersion%22%3A%22d6d47957dd47ef94066c3adef0c9aa40922342e1%22%7D&lang=en&curriculum=`)).json()).data.contentRoute.listedPathData.content.id;
+        let match = /\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/g.exec(url);
+        let qaExpandKey = match[1];
+        let qaExpandType = match[2];
+        console.log(feedbackType)
+        button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType.toUpperCase(), "project");
+      }
     } else {
       let idMatch = idRegex.exec(url);
       let id = idMatch[1];
@@ -216,7 +224,7 @@ markAllRead.onclick = () => {
 let notLoading: boolean = true;
 
 // A document fragment for speed
-const fragment = document.createDocumentFragment();
+const fragment = new DocumentFragment();
 
 // Retrieve the next page of notifications
 async function loadNotifications(): Promise<void> {
@@ -224,7 +232,7 @@ async function loadNotifications(): Promise<void> {
   notificationsGenerator.next().then(async ({ value: notifications, done }) => {
     console.timeEnd("load-notifications");
     // If user is not logged in
-    if(notifications === undefined)
+    if(!notifications)
       if(done) {
         loadingContainer.remove();
         notificationsSection.removeEventListener("scroll", checkScroll);
@@ -237,10 +245,13 @@ async function loadNotifications(): Promise<void> {
 
     // Log notifications for development purposes
     console.log(notifications);
-    // Add notifications to DOM
-    notifications.forEach((notification) => fragment.appendChild(createNotificationString(notification)));
 
-    notificationsContainer.append(fragment);
+    for await (const notification of notifications)
+      fragment.appendChild(await createNotificationString(notification));
+
+    notificationsContainer.appendChild(fragment);
+
+    console.log(notificationsContainer);
 
     // Allow notification loading now that task is complete
     notLoading = true;
@@ -283,7 +294,7 @@ async function* createNotificationsGenerator(cursor: string = ""):  AsyncGenerat
 // Send a message given a valid program ID and qakey
 type RequestType = "QUESTION" | "COMMENT";
 type ResponseType = "REPLY" | "ANSWER";
-async function addFeedback(feedbackType: RequestType, responseType: ResponseType, topicId: string, qaExpandKey: string, textContent: string, expandType: string): Promise<any> {
+async function addFeedback(feedbackType: RequestType, responseType: ResponseType, topicId: string, qaExpandKey: string, textContent: string, expandType: string, focusKind: string = "scratchpad"): Promise<any> {
   return await getChromeFkey()
     .then((fkey) => 
       graphQLFetch("feedbackQuery", fkey, {
@@ -291,7 +302,7 @@ async function addFeedback(feedbackType: RequestType, responseType: ResponseType
         feedbackType,
         currentSort: 1,
         qaExpandKey,
-        focusKind: "scratchpad"
+        focusKind
       })
       .then((response) => {
         const sub: any = response.data.feedback.feedback[0];
@@ -340,6 +351,11 @@ function graphQLFetch(query: string, fkey: string, variables: { [key:string]: an
     .then(async (response: Response) => {
       if (response.status === 200) return resolve(await response.json());
       reject(`Error in GraphQL ${query} call: Server responded  with status ${response.status} and body ${JSON.stringify(await response.text())}`);
+    })
+    .catch((error) => {
+      loadingContainer.remove();
+        notificationsContainer.innerHTML += `<li class="notification unread"><div class="notification-header"><img class="notification-author--avatar" src="32.png"><h3 class="notification-author--nickname">KA Notifications</h3><span class="notification-date">${timeSince(new Date())} ago</span></div><p class="notification-content">You must be <a class="hyperlink" href="https://www.khanacademy.org/login/" target="_blank">logged in</a> to use this extension.</p></li>`;
+        console.error(error);
     });
   });
 }
@@ -391,7 +407,7 @@ function timeSince(date: Date): string {
   return `${years} year${years === 1 ? '' : 's'}`;
 }
 
-function addFeedbackTextarea(button: HTMLButtonElement, requestType: RequestType, responseType: ResponseType, id: string, qaExpandKey: string, qaExpandType: string) {
+function addFeedbackTextarea(button: HTMLButtonElement, requestType: RequestType, responseType: ResponseType, id: string, qaExpandKey: string, qaExpandType: string, focusKind: string = "scratchpad") {
   const originalOnClick = button.onclick;
   const textarea = _element("textarea", "notification-reply-textarea") as HTMLTextAreaElement;
   button.parentElement.insertAdjacentElement("beforebegin", textarea);
@@ -416,7 +432,7 @@ function addFeedbackTextarea(button: HTMLButtonElement, requestType: RequestType
       spinner.style.display = "inline-block";
       button.insertAdjacentElement("afterend", spinner);
       console.log(requestType);
-      addFeedback(requestType, responseType, id, qaExpandKey, textarea.value, qaExpandType)
+      addFeedback(requestType, responseType, id, qaExpandKey, textarea.value, qaExpandType, focusKind)
       .then(() => {
         button.innerText = "Sent";
         spinner.remove();
@@ -432,9 +448,11 @@ function _element(type: string, className: string): HTMLElement {
   element.className = className;
   return element;
 }
+// ag5zfmtoYW4tYWNhZGVteXJACxIIVXNlckRhdGEiHWthaWRfMTgyMDg5NjA3NzQ0NDYyMzkxMzQ4NDk0DAsSCEZlZWRiYWNrGICA48-HoocIDA
+// addFeedback("QUESTION", "REPLY", "x59955fef56f8aa27", "ag5zfmtoYW4tYWNhZGVteXJACxIIVXNlckRhdGEiHWthaWRfMTgyMDg5NjA3NzQ0NDYyMzkxMzQ4NDk0DAsSCEZlZWRiYWNrGICA48-HoocIDA", "testing direct function", "QUESTION");
 
 // Creates an HTML parsable string from a Notification object
-function createNotificationString(notification: Notification): HTMLDivElement {
+async function createNotificationString(notification: Notification): Promise<HTMLDivElement> {
   const { __typename, brandNew, date, url } = notification;
 
   // This base element is the same no matter what type
@@ -445,17 +463,26 @@ function createNotificationString(notification: Notification): HTMLDivElement {
       const { authorAvatarUrl, authorNickname, content, feedbackType, focusTranslatedTitle } = notification as ResponseFeedbackNotification & BasicNotification;
       notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p>`;
 
+      const wrapper = _element("div", "feedback-button-wrapper");
+      const button = _element("button", "feedback-button") as HTMLButtonElement;
+      button.innerText = "Reply";
+
       // Extract the id and qa_expand_key from the url
       let idMatch = idRegex.exec(url);
-      let id = idMatch[1];
-      let qaExpandKey = idMatch[2];
-      let qaExpandType = idMatch[3];
 
-      const wrapper = _element("div", "feedback-button-wrapper");
-      const addFeedbackButton = _element("button", "feedback-button");
-      addFeedbackButton.innerText = "Reply";
-      addFeedbackButton.onclick = () => addFeedbackTextarea(addFeedbackButton as HTMLButtonElement, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType);
-      wrapper.appendChild(addFeedbackButton);
+      if(idMatch) {
+        let id = idMatch[1];
+        let qaExpandKey = idMatch[2];
+        let qaExpandType = idMatch[3];
+        button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType);
+      } else {
+        let id = (await(await fetch(`https://www.khanacademy.org/api/internal/graphql/ContentForPath?fastly_cacheable=persist_until_publish&pcv=d6d47957dd47ef94066c3adef0c9aa40922342e1&hash=3314043276&variables=%7B%22path%22%3A%22${encodeURIComponent(/\/.*(?=\?)/g.exec(url)[0])}%22%2C%22countryCode%22%3A%22NL%22%2C%22kaLocale%22%3A%22en%22%2C%22clientPublishedContentVersion%22%3A%22d6d47957dd47ef94066c3adef0c9aa40922342e1%22%7D&lang=en&curriculum=`)).json()).data.contentRoute.listedPathData.content.id;
+        let match = /\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/g.exec(url);
+        let qaExpandKey = match[1];
+        let qaExpandType = match[2];
+        button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType.toUpperCase(), "project");
+      }
+      wrapper.appendChild(button);
       notificationElement.appendChild(wrapper);
     }
     break;

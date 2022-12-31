@@ -89,6 +89,9 @@ function graphQLFetch(query: string, fkey: string, variables: { [key:string]: an
     .then(async (response: Response) => {
       if (response.status === 200) return resolve(await response.json());
       reject(`Error in GraphQL ${query} call: Server responded  with status ${response.status} and body ${JSON.stringify(await response.text())}`);
+    })
+    .catch((error) => {
+      chrome.action.setBadgeText({ text: "!" });
     });
   });
 }
