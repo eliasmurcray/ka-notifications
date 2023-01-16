@@ -9,5 +9,5 @@
     "target": "esnext",
     "typeRoots": ["node_modules/@types", "node_modules/web-ext-types"],
   },
-  "types": ["chrome", "browser"]
+  "types": ["chrome"]
 }
