@@ -1,5 +1,5 @@
 # ka-notifications
-The official extension only for Khan Academy notifications.
+The unofficial extension only for Khan Academy notifications.
 
 [![Install](https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/iNEddTyWiMfLSwFD6qGq.png)](https://chrome.google.com/webstore/detail/khan-academy-notification/gdlfnahbohjggjhpcmabnfikiigncjbd)
 

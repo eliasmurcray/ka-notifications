@@ -22,7 +22,9 @@ const ALARM_NAME: string = "khanAcademyNotifications";
 // When alarm "khanAcademyNotifications" goes off, check for new notifications
 chrome.alarms.onAlarm.addListener(({ name }) => {
   if(name === ALARM_NAME) checkForNewNotifications();
+  console.log("Alarm " + name + " fired.");
 });
+
 
 // This listener runs only once when the extension is installed
 chrome.runtime.onInstalled.addListener(() => {
@@ -50,23 +52,26 @@ function checkForNewNotifications(): void {
         // Or else, update notification count
         const { newNotificationCount } = user;
 
-
         if(newNotificationCount > 0) {
           // Preload data
-          await graphQLFetch("getNotificationsForUser", fkey)
-            .then(({ data: { user: { notifications } } }) => {
-              const cursor = notifications.pageInfo.nextCursor;
-              const preloadString = notifications.notifications.map(createNotificationString).join("");
-              chrome.storage.local.set({ notificationsCache: { cursor, preloadString } });
-              chrome.action.setBadgeText({ text: newNotificationCount > 99 ? "99+" : String(newNotificationCount) });
-            });
+          graphQLFetch("getNotificationsForUser", fkey)
+          .then(({ data: { user: { notifications } } }) => {
+            const cursor = notifications.pageInfo.nextCursor;
+            const preloadString = notifications.notifications.map(createNotificationString).join("");
+            chrome.storage.local.set({ notificationsCache: { cursor, preloadString } });
+            chrome.action.setBadgeText({ text: newNotificationCount > 99 ? "99+" : String(newNotificationCount) });
+          })
+          .catch((error) => {
+            console.error("Error code 2: " + error);
+            chrome.action.setBadgeText({ text: "!" });
+          });
         } else {
           chrome.action.setBadgeText({ text: "" });
         }
       })
       .catch((error) => {
         chrome.action.setBadgeText({ text: "!" });
-        console.error(error);
+        console.error("Error code 3: " + error);
       });
   })
 }
@@ -91,7 +96,7 @@ function graphQLFetch(query: string, fkey: string, variables: { [key:string]: an
       reject(`Error in GraphQL ${query} call: Server responded  with status ${response.status} and body ${JSON.stringify(await response.text())}`);
     })
     .catch((error) => {
-      chrome.action.setBadgeText({ text: "!" });
+      console.error("Error code 4: " + error);
     });
   });
 }
@@ -274,14 +279,6 @@ function timeSince(date: Date): string {
   const years = ~~(seconds / 31536000);
   return `${years} year${years === 1 ? '' : 's'}`;
 }
-
-function _element(type: string, className: string): HTMLElement {
-  let element = document.createElement(type);
-  element.className = className;
-  return element;
-}
-
-// const idRegex =  /\/(\d+)\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/;
 
 // Creates an HTML parsable string from a Notification object
 function createNotificationString(notification: Notification): string {
