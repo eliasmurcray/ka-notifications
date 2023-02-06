@@ -25,19 +25,15 @@ chrome.alarms.onAlarm.addListener(({ name }) => {
   console.log("Alarm " + name + " fired.");
 });
 
-
-// This listener runs only once when the extension is installed
-chrome.runtime.onInstalled.addListener(() => {
-  // Remove old storage elements to start fresh
-  chrome.storage.local.remove(["notificationsTheme", "notificationsCache"]);
+// Remove old storage elements to start fresh
+chrome.storage.local.remove(["notificationsTheme", "notificationsCache"]);
   
-  // Run an initial check
-  checkForNewNotifications();
+// Run an initial check
+checkForNewNotifications();
 
-  // Set delay between checks to 1 minute
-  chrome.alarms.create(ALARM_NAME, {
-    periodInMinutes: 1
-  });
+// Set delay between checks to 1 minute
+chrome.alarms.create(ALARM_NAME, {
+  periodInMinutes: 1
 });
 
 function checkForNewNotifications(): void {
