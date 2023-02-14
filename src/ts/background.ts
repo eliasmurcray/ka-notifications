@@ -24,9 +24,6 @@ chrome.alarms.onAlarm.addListener(({ name }) => {
   if(name === ALARM_NAME) checkForNewNotifications();
   console.log("Alarm " + name + " fired.");
 });
-
-// Remove old storage elements to start fresh
-chrome.storage.local.remove(["notificationsTheme", "notificationsCache"]);
   
 // Run an initial check
 checkForNewNotifications();
