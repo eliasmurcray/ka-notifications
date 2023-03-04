@@ -2,14 +2,14 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 
 module.exports = {
   mode: "production",
   entry: {
     "content": "/src/ts/content.ts",
     "background": "/src/ts/background.ts",
-    "popup": "/src/ts/popup.ts"
+    "popup": "/src/ts/popup.ts",
+    "reply": "/src/ts/reply.ts"
   },
   externals: {
     "/src/notification.d.ts": true
@@ -36,7 +36,7 @@ module.exports = {
   output: {
     publicPath: "",
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].[contenthash].js",
+    filename: "[name].js",
     clean: true
   },
   plugins: [
@@ -52,6 +52,10 @@ module.exports = {
         {
           from: "src/LICENSE",
           to: ""
+        },
+        {
+          from: "src/manifest.json",
+          to: ""
         }
       ]
     }),
@@ -59,10 +63,6 @@ module.exports = {
       template: "./src/html/popup.html",
       filename: "popup.html",
       chunks: ["popup"]
-    }),
-    new WebpackManifestPlugin({
-      fileName: "manifest.json",
-      basePath: ""
     })
   ]
 };

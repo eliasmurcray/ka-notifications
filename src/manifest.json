@@ -45,7 +45,7 @@
 	"web_accessible_resources": [
 			{
 			"resources": [
-				"popup.js"
+				"reply.js"
 			],
 			"matches": [
 				"https://www.khanacademy.org/*"

@@ -4,8 +4,7 @@
   "description": "Get Khan Academy Notifications in real time!",
   "main": "index.js",
   "scripts": {
-    "build": "webpack && node build.js",
-    "push": "git add . && git commit -m "
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
