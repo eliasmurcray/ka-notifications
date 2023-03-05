@@ -8,7 +8,7 @@ window.fetch = function(request: Request) {
       request.blob()
       .then((blob) => {
         let reader = new FileReader();
-        reader.onloadend = async () => {
+        reader.onloadend = () => {
           let result = reader.result as string;
           let json = atob(result.split(',')[1]);
           let obj = JSON.parse(json);
