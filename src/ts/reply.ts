@@ -4,25 +4,24 @@ const originalFetch = fetch;
 window.fetch = function(request: Request) {
   return new Promise((resolve) => {
     let url = request.url;
-    console.log(url);
     if (url?.startsWith("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
       request.blob()
       .then((blob) => {
         let reader = new FileReader();
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
           let result = reader.result as string;
           let json = atob(result.split(',')[1]);
           let obj = JSON.parse(json);
           let { postKey } = obj.variables;
           let fkey = getCookie("fkey");
-          console.log("\n\n---\n\n");
-          resolve(graphQLFetch("getFeedbackRepliesPage", fkey, { postKey, limit: 10 }));
+          let newFetch = graphQLFetch("getFeedbackRepliesPage", fkey, { postKey, limit: 100 });
+          resolve(newFetch);
         };
         reader.readAsDataURL(blob);
       });
+    } else {
+      resolve(originalFetch(request));
     }
-  
-    resolve(originalFetch(request));
   });
 };
 
