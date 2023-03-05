@@ -1,10 +1,10 @@
 import QUERIES from "../graphql-queries.json";
 
 const originalFetch = fetch;
-window.fetch = function(request: Request) {
+window.fetch = function(request: Request, requestInit: RequestInit): Promise<Response> {
   return new Promise((resolve) => {
     let url = request.url;
-    if (url?.startsWith("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
+    if (url?.includes("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
       request.blob()
       .then((blob) => {
         let reader = new FileReader();
@@ -20,11 +20,10 @@ window.fetch = function(request: Request) {
         reader.readAsDataURL(blob);
       });
     } else {
-      resolve(originalFetch(request));
+      resolve(originalFetch(request, requestInit ? requestInit : null));
     }
   });
 };
-
 
 function graphQLFetch(query: string, fkey: string, variables = {}): Promise<Response> {
   return originalFetch("https://www.khanacademy.org/api/internal/graphql/" + query + "?/math/", {
