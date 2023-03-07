@@ -1,7 +1,7 @@
 import QUERIES from "../graphql-queries.json";
 
 const originalFetch = fetch;
-window.fetch = function(request: Request): Promise<Response> {
+window.fetch = function(request: Request, requestInit: RequestInit): Promise<Response> {
   return new Promise((resolve) => {
     let url = request.url;
     if (url?.startsWith("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
@@ -12,15 +12,15 @@ window.fetch = function(request: Request): Promise<Response> {
           let result = reader.result as string;
           let json = atob(result.split(',')[1]);
           let obj = JSON.parse(json);
-          let { postKey, cursor } = obj.variables;
+          obj.variables.limit = 100;
           let fkey = getCookie("fkey");
-          let newFetch = graphQLFetch("getFeedbackRepliesPage", fkey, { postKey, limit: 100, ...{ cursor } });
+          let newFetch = graphQLFetch("getFeedbackRepliesPage", fkey, obj.variables);
           resolve(newFetch);
         };
         reader.readAsDataURL(blob);
       });
     } else {
-      resolve(originalFetch.apply(this, arguments));
+      resolve(originalFetch(request, requestInit));
     }
   });
 };
