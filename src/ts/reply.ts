@@ -1,10 +1,10 @@
 import QUERIES from "../graphql-queries.json";
 
 const originalFetch = fetch;
-window.fetch = function(request: Request, requestInit: RequestInit): Promise<Response> {
+window.fetch = function(request: Request): Promise<Response> {
   return new Promise((resolve) => {
     let url = request.url;
-    if (url?.includes("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
+    if (url?.startsWith("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
       request.blob()
       .then((blob) => {
         let reader = new FileReader();
@@ -12,15 +12,15 @@ window.fetch = function(request: Request, requestInit: RequestInit): Promise<Res
           let result = reader.result as string;
           let json = atob(result.split(',')[1]);
           let obj = JSON.parse(json);
-          let { postKey } = obj.variables;
+          let { postKey, cursor } = obj.variables;
           let fkey = getCookie("fkey");
-          let newFetch = graphQLFetch("getFeedbackRepliesPage", fkey, { postKey, limit: 100 });
+          let newFetch = graphQLFetch("getFeedbackRepliesPage", fkey, { postKey, limit: 100, ...{ cursor } });
           resolve(newFetch);
         };
         reader.readAsDataURL(blob);
       });
     } else {
-      resolve(originalFetch(request, requestInit ? requestInit : null));
+      resolve(originalFetch.apply(this, arguments));
     }
   });
 };
