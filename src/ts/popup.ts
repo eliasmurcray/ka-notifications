@@ -1,6 +1,7 @@
 import QUERIES from "../graphql-queries.json";
 import { AssignmentCreatedNotification, AssignmentDueDateNotification, AvatarNotification, BadgeNotification, BasicNotification, CoachRequestAcceptedNotification, CoachRequestNotification, CourseMasteryGoalCreatedNotification, GroupedBadgeNotification, InfoNotification, ModeratorNotification, Notification, NotificationsResponse, ProgramFeedbackNotification, ResponseFeedbackNotification } from "../notification";
 import "../css/popup.css";
+import { escapeHTML, parseAndRender } from "./markdown";
 
 // Fomat a number based on current location format
 function energyPointRequirement(points: number) {
@@ -372,10 +373,6 @@ function getChromeFkey(): Promise<string> {
   });
 }
 
-function escapeHTML(text: string): string {
-  return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
 function timeSince(date: Date): string {
   const seconds = ~~((new Date().getTime() - date.getTime()) / 1000);
 
@@ -461,7 +458,7 @@ async function createNotificationString(notification: Notification): Promise<HTM
   switch(__typename) {
     case "ResponseFeedbackNotification": {
       const { authorAvatarUrl, authorNickname, content, feedbackType, focusTranslatedTitle } = notification as ResponseFeedbackNotification & BasicNotification;
-      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p>`;
+      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${parseAndRender(content)}</p>`;
 
       const wrapper = _element("div", "feedback-button-wrapper");
       const button = _element("button", "feedback-button") as HTMLButtonElement;
@@ -488,7 +485,7 @@ async function createNotificationString(notification: Notification): Promise<HTM
     break;
     case "ProgramFeedbackNotification": {
       const { authorAvatarSrc, authorNickname, content, feedbackType, translatedScratchpadTitle } = notification as ProgramFeedbackNotification & BasicNotification;
-      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p>`;
+      notificationElement.innerHTML = `<div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${parseAndRender(content)}</p>`;
 
       // Extract the id and qa_expand_key from the url
       let idMatch = idRegex.exec(url);
@@ -543,33 +540,4 @@ function updateFromTheme(): void {
     themeButton.innerHTML = '<svg stroke="#ffffff" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="18px" width="18px" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
     document.body.className = "dark";
   }
-}
-
-// Formatting functions copied and edited from https://www.khanacademy.org/
-const ESCAPE_MAP = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#x27;",
-  "`": "&#x60;",
-  "=": "&#x3D;"
-};
-function formatContent (content: string) {
-  let n = content.replace(/[&<>"'`=]/g, (e) => ESCAPE_MAP[e]);
-  return n.replace(/[\n]/g, "<br>")
-  .replace(/(\W|^)_(\S.*?\S)_(\W|$)/g, (function(e, t, n, o) {
-      return t + "<em>" + n + "</em>" + o
-  })),
-  n = n.replace(/(\W|^)\*(\b.*?\b)\*(\W|$)/g, (function(e, t, n, o) {
-      return t + "<strong>" + n + "</strong>" + o
-  }
-  )),
-  n = n.replace(/&#x60;&#x60;&#x60;(.*?)&#x60;&#x60;&#x60;/gm, (function(e, t) {
-      return "<pre><code class='discussion-code-block'>" + (t = (t = t.replace(/^\s*(<br>)+/, "")).replace(/(<br>)+\s*$/, "")) + "</code></pre>"
-  }
-  )),
-  n = n.replace(/&#x60;(.*?)&#x60;/g, "<code class='discussion-code-inline'>$1</code>"),
-  n = n.replace(/(https?:\/\/[^<\s]+)/g,'<a class="hyperlink" href="$1" target="_blank">$1</a>'),
-  n
 }
