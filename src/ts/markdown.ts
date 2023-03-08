@@ -23,12 +23,12 @@ const patterns: MarkdownPattern[] = [
     {
         reg: /(?:\n|^)`{3}\n?((.|\n)+?)`{3}/m,
         hasNestedParsing: false,
-        string: '<div class="block-code">$</div>',
+        string: '<div class="discussion-code-block">$</div>',
     },
     {
         reg: /`([^\n]+?)`/,
         hasNestedParsing: false,
-        string: '<span class="inline-code">$</span>',
+        string: '<span class="discussion-code-inline">$</span>',
     },
     {
         reg: /\*([^\n]+?)\*/,

@@ -1,5 +1,6 @@
 import { AssignmentCreatedNotification, AssignmentDueDateNotification, AvatarNotification, BadgeNotification, BasicNotification, CoachRequestAcceptedNotification, CoachRequestNotification, CourseMasteryGoalCreatedNotification, GroupedBadgeNotification, InfoNotification, ModeratorNotification, Notification, NotificationsResponse, ProgramFeedbackNotification, ResponseFeedbackNotification } from "../notification";
 import QUERIES from "../graphql-queries.json";
+import { escapeHTML, parseAndRender } from "./markdown";
 
 // Set background color of badge to teal
 chrome.action.setBadgeBackgroundColor({
@@ -238,10 +239,6 @@ const AVATAR_REQUIREMENTS = {
   "hopper_cool_style": "Complete a coding challenge"
 };
 
-function escapeHTML(text: string): string {
-  return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
 function timeSince(date: Date): string {
   const seconds = ~~((new Date().getTime() - date.getTime()) / 1000);
 
@@ -279,11 +276,11 @@ function createNotificationString(notification: Notification): string {
   switch(__typename) {
     case "ResponseFeedbackNotification": {
       const { authorAvatarUrl, authorNickname, content, feedbackType, focusTranslatedTitle } = notification as ResponseFeedbackNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ResponseFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
+      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${parseAndRender(content)}</p><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ResponseFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
     }
     case "ProgramFeedbackNotification": {
       const { authorAvatarSrc, authorNickname, content, feedbackType, translatedScratchpadTitle } = notification as ProgramFeedbackNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${formatContent(content)}</p><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ProgramFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
+      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${parseAndRender(content)}</p><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ProgramFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
     }
     case "GroupedBadgeNotification": {
       let badgeString = "";
@@ -309,33 +306,4 @@ function createNotificationString(notification: Notification): string {
     default:
       return `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
     }
-}
-
-// Formatting functions copied and edited from https://www.khanacademy.org/
-const ESCAPE_MAP = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#x27;",
-  "`": "&#x60;",
-  "=": "&#x3D;"
-};
-function formatContent (content: string) {
-  let n = content.replace(/[&<>"'`=]/g, (e) => ESCAPE_MAP[e]);
-  return n.replace(/[\n]/g, "<br>")
-  .replace(/(\W|^)_(\S.*?\S)_(\W|$)/g, (function(e, t, n, o) {
-      return t + "<em>" + n + "</em>" + o
-  })),
-  n = n.replace(/(\W|^)\*(\b.*?\b)\*(\W|$)/g, (function(e, t, n, o) {
-      return t + "<strong>" + n + "</strong>" + o
-  }
-  )),
-  n = n.replace(/&#x60;&#x60;&#x60;(.*?)&#x60;&#x60;&#x60;/gm, (function(e, t) {
-      return "<pre><code class='discussion-code-block'>" + (t = (t = t.replace(/^\s*(<br>)+/, "")).replace(/(<br>)+\s*$/, "")) + "</code></pre>"
-  }
-  )),
-  n = n.replace(/&#x60;(.*?)&#x60;/g, "<code class='discussion-code-inline'>$1</code>"),
-  n = n.replace(/(https?:\/\/[^<\s]+)/g,'<a class="hyperlink" href="$1" target="_blank">$1</a>'),
-  n
 }
