@@ -297,7 +297,7 @@ function createNotificationString(notification: Notification): string {
     }
     case "ModeratorNotification": {
       const { text } = notification as ModeratorNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="guardian-icon.png"><h3 class="notification-author--nickname">KA Badges</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${text}</p></li>`;
+      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="guardian-icon.png"><h3 class="notification-author--nickname">KA Guardian</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">${text}</p></li>`;
     }
     case "AvatarNotification": {
       const { name, thumbnailSrc, url } = notification as AvatarNotification & BasicNotification;
