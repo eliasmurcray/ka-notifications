@@ -101,9 +101,6 @@ function parse(source: string, isNested: boolean = false): MarkdownAST[] {
                     length: match[0].length,
                     match: match.slice(1)
                 };
-                if (i === 0) {
-                    console.log(best)
-                }
             }
 
             i++;

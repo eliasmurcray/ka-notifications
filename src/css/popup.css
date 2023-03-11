@@ -193,6 +193,7 @@ body.dark ::-webkit-scrollbar-thumb:active {
   margin: 0;
   font-size: 12px;
   line-height: 18px;
+  width: 100%;
   color: var(--notification-content-text-color);
   white-space: pre-wrap;
   word-break: break-word;
@@ -212,7 +213,8 @@ body.dark ::-webkit-scrollbar-thumb:active {
   border-radius: 2px;
   white-space: pre-wrap;
   width: 100%;
-  margin-top: 2px;
+  margin-top: 8px;
+  margin-bottom: -8px;
 }
 
 .discussion-code-inline {
