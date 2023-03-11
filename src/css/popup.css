@@ -10,6 +10,8 @@ body {
   --notification-hover-background-color: #f7f7f8;
   --notification-content-text-color: #343541;
   --notification-author-text-color: #828790;
+  --notification-code-background-color: #F6F6F6;
+  --notification-code-text-color: #2F3337;
   --unread-color: #bef1f0;
   --hyperlink-color: #1890ff;
   background: #ffffff;
@@ -21,6 +23,8 @@ body.dark {
   --notification-hover-background-color: #2a2c2e;
   --notification-content-text-color: #ececf1;
   --notification-author-text-color: #c9d4ea;
+  --notification-code-background-color: #1e1e1e;
+  --notification-code-text-color: #dcdcdc;
   --hyperlink-color: #00bfff;
   --unread-color: #2a2b32;
   background: #222325;
@@ -207,21 +211,22 @@ body.dark ::-webkit-scrollbar-thumb:active {
   font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace;
   font-size: 10px;
   padding: 6px;
-  background-color: #1E1E1E;
-  color: #DCDCDC;
+  background-color: var(--notification-code-background-color);
+  color: var(--notification-code-text-color);
   box-sizing: border-box;
   border-radius: 2px;
   white-space: pre-wrap;
   width: 100%;
-  margin-top: 8px;
-  margin-bottom: -8px;
+  margin-block: 8px;
+  box-shadow: 0 0 1px #000a;
 }
 
 .discussion-code-inline {
   font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace;
-  background-color: #1E1E1E;
-  color: #DCDCDC;
+  background-color: var(--notification-code-background-color);
+  color: var(--notification-code-text-color);
   padding: 2px 6px;
+  box-shadow: 0 0 1px #000a;
 }
 
 .notification-reply-textarea {
