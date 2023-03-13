@@ -48,7 +48,7 @@ themeButton.onclick = () => {
 notificationsSection.addEventListener('scroll', checkScroll, { passive: true });
 
 // Mark all items as read
-markAllRead.onclick = () => {
+markAllReadButton.onclick = () => {
   markReadLoading.style.display = 'inline-block';
   markAllReadButton.disabled = true;
   markAllRead().then(() => {
