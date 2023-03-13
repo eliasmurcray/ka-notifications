@@ -1,4 +1,4 @@
-import QUERIES from "../graphql-queries.json";
+import QUERIES from "../json/graphql-queries.json";
 
 const originalFetch = fetch;
 window.fetch = function(request: Request, requestInit: RequestInit): Promise<Response> {
