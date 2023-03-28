@@ -14,3 +14,4 @@ Be sure to also check out the awesome [The Khan Academy Extension](https://githu
 ## Contributors
 * [Reginald Gillespie](https://github.com/Reginald-Gillespie)
 * [NathanTi](https://github.com/ntillier)
+* [Bhavjit Chauhan](https://github.com/bhavjitChauhan)
