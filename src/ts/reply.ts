@@ -1,4 +1,4 @@
-import QUERIES from '../json/graphql-queries.json';
+import {requestToRequestInit} from '../util/request';
 
 const originalFetch = fetch;
 window.fetch = function(request: Request, requestInit: RequestInit): Promise<Response> {
@@ -13,8 +13,11 @@ window.fetch = function(request: Request, requestInit: RequestInit): Promise<Res
           let json = atob(result.split(',')[1]);
           let obj = JSON.parse(json);
           obj.variables.limit = 100;
-          let fkey = getCookie('fkey');
-          let newFetch = graphQLFetch('getFeedbackRepliesPage', fkey, obj.variables);
+          let newRequest = new Request(request.url, {
+            ...requestToRequestInit(request),
+            body: JSON.stringify(obj)
+          });
+          let newFetch = originalFetch(newRequest)
           resolve(newFetch);
         };
         reader.readAsDataURL(blob);
@@ -24,25 +27,3 @@ window.fetch = function(request: Request, requestInit: RequestInit): Promise<Res
     }
   });
 };
-
-function graphQLFetch(query: string, fkey: string, variables = {}): Promise<Response> {
-  return originalFetch('https://www.khanacademy.org/api/internal/graphql/' + query + '?/math/', {
-    method: 'POST',
-    headers: {
-      'X-KA-fkey': fkey,
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      operationName: query,
-      query: QUERIES[query],
-      variables
-    }),
-    credentials: 'same-origin'
-  });
-}
-
-function getCookie(name: string) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-}
