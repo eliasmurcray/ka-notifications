@@ -1,51 +1,83 @@
 {
-		"env": {
-				"browser": true,
-				"es2021": true,
-				"webextensions": true
-		},
-		"parser": "@typescript-eslint/parser",
-		"plugins": [
+	"env": {
+			"browser": true,
+			"es2021": true,
+			"webextensions": true
+	},
+	"parser": "@typescript-eslint/parser",
+	"plugins": [
 			"@typescript-eslint/eslint-plugin"
-		],
-		"parserOptions": {
-				"ecmaVersion": "es2021",
-				"sourceType": "module",
-				"project": "./tsconfig.json"
-		},
-		"rules": {
-			"curly": ["error"],
+	],
+	"parserOptions": {
+			"ecmaVersion": "es2021",
+			"sourceType": "module",
+			"project": "./tsconfig.json"
+	},
+	"rules": {
+			"curly": [
+					"error"
+			],
 			"@typescript-eslint/no-explicit-any": "error",
-			"@typescript-eslint/dot-notation": ["error",
-				{
-					"allowKeywords": true
-				}
+			"@typescript-eslint/dot-notation": [
+					"error",
+					{
+							"allowKeywords": true
+					}
 			],
 			"@typescript-eslint/no-unused-vars": "error",
 			"no-unused-vars": "off",
 			"no-eval": "error",
 			"no-var": "error",
-			"eqeqeq": ["error", "always"],
+			"eqeqeq": [
+					"error",
+					"always"
+			],
 			"eol-last": "error",
-			"indent": ["error", "tab",
-				{
-					"SwitchCase": 1
-				}
+			"indent": [
+					"error",
+					"tab",
+					{
+							"SwitchCase": 1
+					}
 			],
 			"prefer-const": "error",
-			"arrow-body-style": ["error", "as-needed"],
-			"no-multiple-empty-lines": ["error",
-				{
-					"max": 2,
-					"maxEOF": 0
-				}
+			"arrow-body-style": [
+					"error",
+					"as-needed"
+			],
+			"no-multiple-empty-lines": [
+					"error",
+					{
+							"max": 2,
+							"maxEOF": 0
+					}
 			],
 			"no-trailing-spaces": "error",
-			"semi": ["error", "always"],
-			"space-before-function-paren": ["error", "always"],
+			"semi": [
+					"error",
+					"always"
+			],
+			"space-before-function-paren": [
+					"error",
+					"always"
+			],
 			"space-in-parens": "error",
-			"camelcase": ["error", { "properties": "never" }],
-			"quotes": ["error", "double"],
-			"brace-style": ["error", "1tbs", { "allowSingleLine": false}]
-		}
+			"camelcase": [
+					"error",
+					{
+							"properties": "never"
+					}
+			],
+			"quotes": [
+					"error",
+					"double"
+			],
+			"brace-style": [
+					"error",
+					"1tbs",
+					{
+							"allowSingleLine": false
+					}
+			]
+	}
 }
