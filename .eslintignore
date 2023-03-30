@@ -1,0 +1,10 @@
+dist/
+node_modules/
+src/css
+src/html
+src/images
+src/json
+src/LICENSE.txt
+src/manifest.json
+src/notification.d.ts
+webpack.config.js

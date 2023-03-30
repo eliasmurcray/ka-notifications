@@ -13,6 +13,23 @@
 			"sourceType": "module",
 			"project": "./tsconfig.json"
 	},
+	"overrides": [
+			{
+					"files": [
+							"*.ts",
+							"*.tsx"
+					],
+					"extends": [
+							"plugin:@typescript-eslint/recommended",
+							"plugin:@typescript-eslint/recommended-requiring-type-checking"
+					],
+					"parserOptions": {
+							"project": [
+									"./tsconfig.json"
+							]
+					}
+			}
+	],
 	"rules": {
 			"curly": [
 					"error"
@@ -35,7 +52,7 @@
 			"eol-last": "error",
 			"indent": [
 					"error",
-					"tab",
+					2,
 					{
 							"SwitchCase": 1
 					}

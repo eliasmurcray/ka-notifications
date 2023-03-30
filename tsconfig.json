@@ -1,13 +1,11 @@
 {
-  "include": ["**/*.ts"],
   "exclude": ["./dist/"],
   "compilerOptions": {
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "module": "esnext",
-    "target": "esnext",
-    "typeRoots": ["node_modules/@types", "node_modules/web-ext-types"],
+    "target": "esnext"
   },
   "types": ["chrome"]
 }
