@@ -10,6 +10,7 @@ chrome.action.setBadgeBackgroundColor({
 chrome.cookies.onChanged.addListener(({ cookie, removed }) => {
   if(cookie.name === "KAAS") {
     chrome.action.setBadgeText({ text: "" });
+    chrome.storage.local.remove("notificationsCache");
     if(removed === false) {
       checkForNewNotifications();
     }
@@ -44,7 +45,8 @@ function checkForNewNotifications (): void {
 
           // If user is not logged in show an error
           if(user === null) {
-            return chrome.action.setBadgeText({ text: "!" });
+            chrome.storage.local.remove("notificationsCache");
+            return chrome.action.setBadgeText({ text: "" });
           }
 
           // Or else, update notification count
@@ -63,7 +65,7 @@ function checkForNewNotifications (): void {
                 chrome.action.setBadgeText({ text: newNotificationCount > 99 ? "99+" : String(newNotificationCount) });
               })
               .catch((error) => {
-                console.error("Error code 2: " + error);
+                console.error("ERROR [2]: " + error);
                 chrome.action.setBadgeText({ text: "!" });
               });
           } else {
@@ -71,8 +73,7 @@ function checkForNewNotifications (): void {
           }
         })
         .catch((error) => {
-          chrome.action.setBadgeText({ text: "!" });
-          console.error("Error code 3: " + error);
+          console.error("ERROR [3]: " + error);
         });
     });
 }

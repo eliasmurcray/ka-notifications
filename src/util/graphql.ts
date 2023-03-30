@@ -2,7 +2,7 @@ import gqlQueries from "../json/graphql-queries.json";
 
 export function graphQLFetch (queryName: string, fkey: string, variables: {} = {}): Promise<Response> {
   return new Promise((resolve, reject) => {
-    fetch("https://www.khanacademy.org/api/internal/graphql/" + queryName + "?/math/", {
+    fetch("https://www.khanacademy.org/api/internal/graphql/" + queryName, {
       method: "POST",
       headers: {
         "X-KA-fkey": fkey,

@@ -2,6 +2,7 @@ import { Notification } from "../notification";
 import { graphQLFetch, getChromeFkey } from "../util/graphql";
 import { createNotificationsGenerator, createNotificationHTMLDivElement, renderFromCache } from "../util/notifications";
 import "../css/popup.css";
+import loggedOutNotice from "../util/logged-out-notice";
 
 // Retrieve items from local storage
 const STORAGE: { [key:string]: any } = await chrome.storage.local.get(["notificationsTheme", "notificationsCache"]);
@@ -80,6 +81,8 @@ async function loadNotifications (): Promise<void> {
         loadingContainer.remove();
         notificationsSection.removeEventListener("scroll", checkScroll);
       }
+      const notice = loggedOutNotice();
+      notificationsContainer.appendChild(notice);
       return;
     }
 
