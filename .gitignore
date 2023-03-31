@@ -1,5 +1,6 @@
-node_modules/
-dist
+node_modules
+chrome
+firefox
 package-lock.json
 src/LICENSE
 .DS_Store
