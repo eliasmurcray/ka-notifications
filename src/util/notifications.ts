@@ -234,6 +234,17 @@ export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerat
           resolve(json?.data?.user?.notifications);
         })
         .catch(() => resolve(null));
+    }).then(async (j: NotificationsResponse) => {
+        let fkey = await getChromeFkey();
+        j.notifications = (await Promise.all(j.notifications.map(async (notif, index) => {
+            let notifParent = await getNotifParent(fkey, notif);
+            console.log("[dev] [looper]", {notif, notifParent, index});
+            return {
+                value: (notifParent !== "ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfNDM5MTEwMDUzODMwNzU4MDY1MDIyMDIxMgwLEghGZWVkYmFjaxiAgNPE4Z2eCAw"),
+                index: index,
+            }
+        }))).filter(x => x.value).map(x => j.notifications[x.index]);
+        return j;
     });
 
     if(json) {
@@ -289,4 +300,16 @@ export function createNotificationString (notification: Notification): string {
     default:
       return `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
   }
+}
+
+export async function getNotifParent(fkey, notif): Promise<String> {
+    let parentProgramFetch = await (await graphQLFetch("feedbackQuery", fkey, {
+        topicId: notif.url.split("?")[0].split("/").slice(-1)[0],
+        feedbackType: "QUESTION",
+        currentSort: 1,
+        qaExpandKey: notif.url.split("?qa_expand_key=")[1].split("&qa_expand_type=reply")[0],
+        focusKind: "scratchpad"
+    })).json();
+    // console.log("[dev] [getNotifParent]", parentProgramFetch);
+    return parentProgramFetch.data.feedback.feedback[0].expandKey;
 }
