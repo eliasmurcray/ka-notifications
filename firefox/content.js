@@ -1,0 +1,1 @@
+(()=>{const{search:e,pathname:o}=window.location,t=o.split("/"),n=("computer-programming"===t[1]||"cs"===t[1])&&/^\d{16}$/.test(t[3].split("?")[0]);new URLSearchParams(e),n&&function(){console.clear(),console.log("Hello from KA Notifications Extension!");const e=document.createElement("script");e.src=chrome.runtime.getURL("reply.js"),document.head.append(e)}()})();
