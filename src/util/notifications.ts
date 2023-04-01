@@ -220,9 +220,9 @@ export async function renderFromCache (parentElement: HTMLDivElement, cache: { p
     });
 }
 
-async function filterAsync(arr: any[], callback: Function) {
-  const fail = Symbol()
-  return (await Promise.all(arr.map(async item => (await callback(item)) ? item : fail))).filter(i=>i!==fail)
+async function filterAsync (arr: any[], callback: Function) {
+  const fail = Symbol();
+  return (await Promise.all(arr.map(async item => (await callback(item)) ? item : fail))).filter(i=>i!==fail);
 }
 
 // Creates a generator to load notifications
@@ -234,24 +234,26 @@ export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerat
       getChromeFkey()
         .then((fkey) => {
           graphQLFetch("getNotificationsForUser", fkey, { after: cursor })
-          .then(async (response) => {
-            const json = await response.json();
-            const notificationsResponse: NotificationsResponse = json?.data?.user?.notifications;
-            if(!notificationsResponse) return resolve(null);
+            .then(async (response) => {
+              const json = await response.json();
+              const notificationsResponse: NotificationsResponse = json?.data?.user?.notifications;
+              if(!notificationsResponse) {
+                return resolve(null);
+              }
 
-            // Filter out the unwanted threads
-            notificationsResponse.notifications = await filterAsync(notificationsResponse.notifications, async (notification: Notification) => {
+              // Filter out the unwanted threads
+              notificationsResponse.notifications = await filterAsync(notificationsResponse.notifications, async (notification: Notification) =>
               // const parent = await getFeedbackParent(fkey, notification);
               // return parent !== "ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfNDM5MTEwMDUzODMwNzU4MDY1MDIyMDIxMgwLEghGZWVkYmFjaxiAgNPYpti5CQw";
 
-              return true; // #TODO Implement storage fetched array here!
-              
-            });
+                true // #TODO Implement storage fetched array here!
 
-            resolve(notificationsResponse);
-          })
-          .catch(() => resolve(null));
-      });
+              );
+
+              resolve(notificationsResponse);
+            })
+            .catch(() => resolve(null));
+        });
     });
 
     if(json) {
@@ -309,7 +311,7 @@ export function createNotificationString (notification: Notification): string {
   }
 }
 
-export async function getFeedbackParent(fkey: string, notification: Notification): Promise<String> {
+export async function getFeedbackParent (fkey: string, notification: Notification): Promise<string> {
   const params = new URL("https://www.khanacademy.org/" + notification.url).searchParams;
   return new Promise((resolve) => {
     graphQLFetch("feedbackQuery", fkey, {
@@ -319,9 +321,7 @@ export async function getFeedbackParent(fkey: string, notification: Notification
       qaExpandKey: params.get("qa_expand_key"),
       focusKind: "scratchpad"
     })
-      .then(async (response) => {
-        return response.json();
-      })
+      .then(async (response) => response.json())
       .then((json) => {
         if(json.data.errors === undefined) {
           console.log(json);

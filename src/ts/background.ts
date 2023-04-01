@@ -41,6 +41,7 @@ function checkForNewNotifications (): void {
       graphQLFetch("getFullUserProfile", fkey)
         .then(async (response) => {
           const json = await response.json();
+          console.log(json);
           const { data: { user } } = json;
 
           // If user is not logged in show an error
@@ -51,12 +52,13 @@ function checkForNewNotifications (): void {
 
           // Or else, update notification count
           const { newNotificationCount } = user;
-        //   if(newNotificationCount > 0) { console.log("[dev] new notifs") };
+
+          if(newNotificationCount > 0) {
             // Preload data
             graphQLFetch("getNotificationsForUser", fkey)
               .then(async (response) => {
                 const json = await response.json();
-                let { data: { user: { notifications } } } = json;
+                const { data: { user: { notifications } } } = json;
                 console.log("Notifications (background): ", notifications);
 
                 // Duplicate the notifications object, then filter for messages
@@ -75,7 +77,7 @@ function checkForNewNotifications (): void {
                 //     })
                 // )).filter(x => x.val).map(x => notifications.notifications[x.index]);
                 // console.log("[dev] after removing ignored:", notifications);
-                
+
                 const cursor = notifications.pageInfo.nextCursor;
                 const preloadString = notifications.notifications.map(createNotificationString).join("");
                 chrome.storage.local.set({ notificationsCache: { cursor, preloadString } });
@@ -85,9 +87,9 @@ function checkForNewNotifications (): void {
                 console.error("ERROR [2]: " + error);
                 chrome.action.setBadgeText({ text: "!" });
               });
-        //   } else {
-        //     chrome.action.setBadgeText({ text: "" });
-        //   }
+          } else {
+            chrome.action.setBadgeText({ text: "" });
+          }
         })
         .catch((error) => {
           console.error("ERROR [3]: " + error);

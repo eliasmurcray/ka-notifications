@@ -66,6 +66,10 @@ body.dark ::-webkit-scrollbar-thumb:active {
   background: #4c4f55;
 }
 
+.hidden {
+  display: none;
+}
+
 .hyperlink {
   text-decoration-color: #0000;
   color: var(--hyperlink-color);
@@ -76,10 +80,22 @@ body.dark ::-webkit-scrollbar-thumb:active {
   text-decoration-color: var(--hyperlink-color);
 }
 
-#notifications-section {
+#notifications-section,
+#settings-section {
   width: 100%;
   height: 444px;
   overflow: hidden auto;
+}
+
+#settings-section {
+  padding: 15px;
+  color: var(--notification-content-text-color);
+  box-sizing: border-box;
+}
+
+#settings-section h1 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
 }
 
 .notifications-header {
@@ -224,6 +240,7 @@ body.dark ::-webkit-scrollbar-thumb:active {
   width: 100%;
   margin-block: 8px;
   box-shadow: 0 0 1px #000a;
+  transition: .1s ease-in-out;
 }
 
 .discussion-code-inline {
@@ -232,6 +249,7 @@ body.dark ::-webkit-scrollbar-thumb:active {
   color: var(--notification-code-text-color);
   padding: 2px 6px;
   box-shadow: 0 0 1px #000a;
+  transition: .1s ease-in-out;
 }
 
 .notification-reply-textarea {

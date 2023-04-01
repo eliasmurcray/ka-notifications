@@ -33,3 +33,28 @@ window.fetch = function (request: Request, requestInit: RequestInit): Promise<Re
     }
   }).catch(() => Promise.reject(new Response(null)));
 };
+
+const params = new URLSearchParams(window.location.search);
+const qa_expand_type = params.get("qa_expand_type");
+console.log(qa_expand_type);
+
+requestAnimationFrame(goToFeedback);
+function goToFeedback() {
+  let button: HTMLButtonElement;
+  switch(qa_expand_type) {
+    case "question":
+    case "answer":
+      button = document.getElementById("ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-0") as HTMLButtonElement;
+      break;
+    case "comment":
+    case "reply":
+      button = document.getElementById("ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-1") as HTMLButtonElement;
+      break;
+    case "project_help_question":
+      button = document.getElementById("ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-2") as HTMLButtonElement;
+      break;
+  }
+
+  if(button === null) return requestAnimationFrame(goToFeedback);
+  button.click();
+}

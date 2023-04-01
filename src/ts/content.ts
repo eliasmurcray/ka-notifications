@@ -8,7 +8,6 @@ if(isProject) {
 }
 
 function main () {
-  console.clear();
   console.log("Hello from KA Notifications Extension!");
 
   const replyScript = document.createElement("script");
