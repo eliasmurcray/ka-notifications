@@ -1,4 +1,4 @@
-import { createNotificationString, getNotifParent } from "../util/notifications";
+import { createNotificationString, getFeedbackParent } from "../util/notifications";
 import { graphQLFetch, getChromeFkey } from "../util/graphql";
 
 // Set background color of badge to teal

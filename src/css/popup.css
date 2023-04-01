@@ -186,6 +186,7 @@ body.dark ::-webkit-scrollbar-thumb:active {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  font-size: 12px;
 }
 
 .notification-date {
@@ -261,6 +262,7 @@ body.dark ::-webkit-scrollbar-thumb:active {
   color: var(--hyperlink-color);
   text-decoration: underline 1px #00000000;
   cursor: pointer;
+  font-size: 12px;
 }
 
 .feedback-button:hover {

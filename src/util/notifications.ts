@@ -220,31 +220,38 @@ export async function renderFromCache (parentElement: HTMLDivElement, cache: { p
     });
 }
 
+async function filterAsync(arr: any[], callback: Function) {
+  const fail = Symbol()
+  return (await Promise.all(arr.map(async item => (await callback(item)) ? item : fail))).filter(i=>i!==fail)
+}
+
 // Creates a generator to load notifications
 export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerator<Notification[], Notification[]>{
   let complete = false;
   for(;!complete;) {
     // Retrieve user notifications as JSON
-
     const json: NotificationsResponse = await new Promise((resolve) => {
       getChromeFkey()
-        .then((fkey) => graphQLFetch("getNotificationsForUser", fkey, { after: cursor }))
-        .then(async (response) => {
-          const json = await response.json();
-          resolve(json?.data?.user?.notifications);
-        })
-        .catch(() => resolve(null));
-    }).then(async (j: NotificationsResponse) => {
-        let fkey = await getChromeFkey();
-        j.notifications = (await Promise.all(j.notifications.map(async (notif, index) => {
-            let notifParent = await getNotifParent(fkey, notif);
-            console.log("[dev] [looper]", {notif, notifParent, index});
-            return {
-                value: (notifParent !== "ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfNDM5MTEwMDUzODMwNzU4MDY1MDIyMDIxMgwLEghGZWVkYmFjaxiAgNPE4Z2eCAw"),
-                index: index,
-            }
-        }))).filter(x => x.value).map(x => j.notifications[x.index]);
-        return j;
+        .then((fkey) => {
+          graphQLFetch("getNotificationsForUser", fkey, { after: cursor })
+          .then(async (response) => {
+            const json = await response.json();
+            const notificationsResponse: NotificationsResponse = json?.data?.user?.notifications;
+            if(!notificationsResponse) return resolve(null);
+
+            // Filter out the unwanted threads
+            notificationsResponse.notifications = await filterAsync(notificationsResponse.notifications, async (notification: Notification) => {
+              // const parent = await getFeedbackParent(fkey, notification);
+              // return parent !== "ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfNDM5MTEwMDUzODMwNzU4MDY1MDIyMDIxMgwLEghGZWVkYmFjaxiAgNPYpti5CQw";
+
+              return true; // #TODO Implement storage fetched array here!
+              
+            });
+
+            resolve(notificationsResponse);
+          })
+          .catch(() => resolve(null));
+      });
     });
 
     if(json) {
@@ -302,14 +309,31 @@ export function createNotificationString (notification: Notification): string {
   }
 }
 
-export async function getNotifParent(fkey, notif): Promise<String> {
-    let parentProgramFetch = await (await graphQLFetch("feedbackQuery", fkey, {
-        topicId: notif.url.split("?")[0].split("/").slice(-1)[0],
-        feedbackType: "QUESTION",
-        currentSort: 1,
-        qaExpandKey: notif.url.split("?qa_expand_key=")[1].split("&qa_expand_type=reply")[0],
-        focusKind: "scratchpad"
-    })).json();
-    // console.log("[dev] [getNotifParent]", parentProgramFetch);
-    return parentProgramFetch.data.feedback.feedback[0].expandKey;
+export async function getFeedbackParent(fkey: string, notification: Notification): Promise<String> {
+  const params = new URL("https://www.khanacademy.org/" + notification.url).searchParams;
+  return new Promise((resolve) => {
+    graphQLFetch("feedbackQuery", fkey, {
+      topicId: notification.url.split("?")[0].split("/").slice(-1)[0],
+      feedbackType: params.get("qa_expand_type") === "reply" ? "QUESTION" : "COMMENT",
+      currentSort: 1,
+      qaExpandKey: params.get("qa_expand_key"),
+      focusKind: "scratchpad"
+    })
+      .then(async (response) => {
+        return response.json();
+      })
+      .then((json) => {
+        if(json.data.errors === undefined) {
+          console.log(json);
+          resolve(json.data.feedback.feedback[0].expandKey);
+        } else {
+          console.log("ERROR: ", notification.url, json.data.errors);
+          resolve(null);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        resolve(error);
+      });
+  });
 }
