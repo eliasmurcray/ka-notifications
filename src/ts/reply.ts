@@ -1,8 +1,8 @@
-import {requestToRequestInit} from "../util/request";
+import { requestToRequestInit } from "../util/request";
 
 const originalFetch = fetch;
 window.fetch = function (request: Request, requestInit: RequestInit): Promise<Response> {
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve, reject) => {
     const url = request.url;
     if (url?.startsWith("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
       request.blob()
@@ -23,7 +23,13 @@ window.fetch = function (request: Request, requestInit: RequestInit): Promise<Re
           reader.readAsDataURL(blob);
         });
     } else {
-      resolve(originalFetch(request, requestInit));
+      originalFetch(request, requestInit)
+        .then((response) => {
+          resolve(response);
+        })
+        .catch((error) => {
+          reject(error);
+        });
     }
-  });
+  }).catch(() => Promise.reject(new Response(null)));
 };
