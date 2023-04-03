@@ -1,8 +1,9 @@
-import { NotificationsResponse, Notification, AvatarNotification, BadgeNotification, BasicNotification, GroupedBadgeNotification, ModeratorNotification, ProgramFeedbackNotification, ResponseFeedbackNotification } from "../notification";
+import { Notification, AvatarNotification, BadgeNotification, BasicNotification, GroupedBadgeNotification, ModeratorNotification, ProgramFeedbackNotification, ResponseFeedbackNotification } from "../@types/notification";
 import { graphQLFetch, getChromeFkey } from "./graphql";
 import { escapeHTML, parseAndRender } from "./markdown";
 import AVATAR_SHORTNAMES from "../json/avatar-shortnames.json";
 import AVATAR_REQUIREMENTS from "../json/avatar-requirements.json";
+import { NotificationsResponse, GetNotificationsForUserResponse, FeedbackQueryResponse } from "../@types/responses";
 
 // Shorthand to create element
 function _element (type: string, className: string): HTMLElement {
@@ -49,13 +50,13 @@ function addFeedbackTextarea (button: HTMLButtonElement, requestType: RequestTyp
   button.parentElement.insertAdjacentElement("beforebegin", textarea);
   textarea.focus();
   textarea.style.height = "0";
-  textarea.style.height = textarea.scrollHeight+"px";
+  textarea.style.height = `${textarea.scrollHeight}px`;
   textarea.oninput = () => {
     textarea.style.height = "0";
-    textarea.style.height = textarea.scrollHeight+"px";
+    textarea.style.height = `${textarea.scrollHeight}px`;
   };
   button.innerText = "Send";
-  button.onclick = async () => {
+  button.onclick = () => {
     if(textarea.value === "") {
       button.innerText = "Reply";
       button.onclick = originalOnClick;
@@ -67,7 +68,6 @@ function addFeedbackTextarea (button: HTMLButtonElement, requestType: RequestTyp
       spinner.innerHTML = "<div></div><div></div><div></div>";
       spinner.style.display = "inline-block";
       button.insertAdjacentElement("afterend", spinner);
-      console.log(requestType);
       addFeedback(requestType, responseType, id, qaExpandKey, textarea.value, qaExpandType, focusKind)
         .then(() => {
           button.innerText = "Sent";
@@ -93,10 +93,9 @@ async function addFeedback (feedbackType: RequestType, responseType: ResponseTyp
         focusKind
       })
         .then(async (response) => {
-          const json = await response.json();
+          const json = await response.json() as FeedbackQueryResponse;
           const sub = json.data.feedback.feedback[0];
           const key: string = feedbackType === "QUESTION" && expandType === "answer" ? sub.answers[0].key : sub.key;
-          console.log(key, sub, feedbackType === "QUESTION" && expandType === "answer", feedbackType, expandType);
           return graphQLFetch("AddFeedbackToDiscussion", fkey, { parentKey: key, textContent, feedbackType: responseType });
         }))
     .catch((error) => {
@@ -208,7 +207,6 @@ export async function renderFromCache (parentElement: HTMLDivElement, cache: { p
           const match = /\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/g.exec(url);
           let qaExpandKey = match[1];
           let qaExpandType = match[2];
-          console.log(feedbackType);
           button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType.toUpperCase(), "project");
         }
       } else {
@@ -220,35 +218,61 @@ export async function renderFromCache (parentElement: HTMLDivElement, cache: { p
     });
 }
 
-async function filterAsync (arr: any[], callback: Function) {
-  const fail = Symbol();
-  return (await Promise.all(arr.map(async item => (await callback(item)) ? item : fail))).filter(i=>i!==fail);
+async function getFeedbackParent (fkey: string, notification: Notification): Promise<string> {
+  const params = new URL("https://www.khanacademy.org/" + notification.url).searchParams;
+  return new Promise((resolve) => {
+    graphQLFetch("feedbackQuery", fkey, {
+      topicId: notification.url.split("?")[0].split("/").slice(-1)[0],
+      feedbackType: params.get("qa_expand_type") === "reply" ? "QUESTION" : "COMMENT",
+      currentSort: 1,
+      qaExpandKey: params.get("qa_expand_key"),
+      focusKind: "scratchpad"
+    })
+      .then(async (response) => response.json())
+      .then((json) => {
+        if(json.data.errors === undefined) {
+          resolve(json.data.feedback.feedback[0].expandKey);
+        } else {
+          console.error("ERROR: ", notification.url, json.data.errors);
+          resolve(null);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        resolve(error);
+      });
+  });
+}
+
+export async function filterNotifications (fkey: string, notifications: Notification[]): Promise<Notification[]> {
+  const promises = notifications.map(async (notification) => {
+    const parent = await getFeedbackParent(fkey, notification);
+    // return parent === "" ? false : notification;
+    return notification;
+  });
+
+  const array = (await Promise.all(promises)).filter((allowed: Notification | boolean) => allowed !== false);
+
+  return array as Notification[];
 }
 
 // Creates a generator to load notifications
 export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerator<Notification[], Notification[]>{
   let complete = false;
-  for(;!complete;) {
-    // Retrieve user notifications as JSON
-    const json: NotificationsResponse = await new Promise((resolve) => {
+  while(complete === false) {
+    const json = await new Promise<NotificationsResponse>((resolve) => {
       getChromeFkey()
         .then((fkey) => {
           graphQLFetch("getNotificationsForUser", fkey, { after: cursor })
             .then(async (response) => {
-              const json = await response.json();
-              const notificationsResponse: NotificationsResponse = json?.data?.user?.notifications;
+              const json = await response.json() as GetNotificationsForUserResponse;
+              const notificationsResponse = json?.data?.user?.notifications;
               if(!notificationsResponse) {
                 return resolve(null);
               }
 
               // Filter out the unwanted threads
-              notificationsResponse.notifications = await filterAsync(notificationsResponse.notifications, async (notification: Notification) =>
-              // const parent = await getFeedbackParent(fkey, notification);
-              // return parent !== "ag5zfmtoYW4tYWNhZGVteXJBCxIIVXNlckRhdGEiHmthaWRfNDM5MTEwMDUzODMwNzU4MDY1MDIyMDIxMgwLEghGZWVkYmFjaxiAgNPYpti5CQw";
-
-                true // #TODO Implement storage fetched array here!
-
-              );
+              notificationsResponse.notifications = await filterNotifications(fkey, notificationsResponse.notifications);
 
               resolve(notificationsResponse);
             })
@@ -309,31 +333,4 @@ export function createNotificationString (notification: Notification): string {
     default:
       return `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
   }
-}
-
-export async function getFeedbackParent (fkey: string, notification: Notification): Promise<string> {
-  const params = new URL("https://www.khanacademy.org/" + notification.url).searchParams;
-  return new Promise((resolve) => {
-    graphQLFetch("feedbackQuery", fkey, {
-      topicId: notification.url.split("?")[0].split("/").slice(-1)[0],
-      feedbackType: params.get("qa_expand_type") === "reply" ? "QUESTION" : "COMMENT",
-      currentSort: 1,
-      qaExpandKey: params.get("qa_expand_key"),
-      focusKind: "scratchpad"
-    })
-      .then(async (response) => response.json())
-      .then((json) => {
-        if(json.data.errors === undefined) {
-          console.log(json);
-          resolve(json.data.feedback.feedback[0].expandKey);
-        } else {
-          console.log("ERROR: ", notification.url, json.data.errors);
-          resolve(null);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        resolve(error);
-      });
-  });
 }

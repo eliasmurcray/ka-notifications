@@ -1,12 +1,13 @@
-import { Notification } from "../notification";
+import { Notification } from "../@types/notification";
 import { graphQLFetch, getChromeFkey } from "../util/graphql";
 import { createNotificationsGenerator, createNotificationHTMLDivElement, renderFromCache } from "../util/notifications";
 import "../css/popup.css";
-import loggedOutNotice from "../util/logged-out-notice";
+import { ExtensionLocalStorage } from "../@types/extension";
+import { ClearBrandNewNotificationsResponse } from "../@types/responses";
 
 // Retrieve items from local storage
-const STORAGE: { [key:string]: any } = await chrome.storage.local.get(["notificationsTheme", "notificationsCache"]);
-chrome.storage.local.remove("notificationsCache");
+const STORAGE = await chrome.storage.local.get(["notificationsTheme", "notificationsCache"]) as ExtensionLocalStorage;
+void chrome.storage.local.remove("notificationsCache");
 const THEME: string = STORAGE?.notificationsTheme;
 const CACHED_DATA = STORAGE?.notificationsCache;
 
@@ -34,18 +35,18 @@ switchPageIcon.onclick = () => {
 };
 
 if(CACHED_DATA) {
-  renderFromCache(notificationsContainer, CACHED_DATA);
+  void renderFromCache(notificationsContainer, CACHED_DATA);
   if(CACHED_DATA.cursor === null) {
     loadingContainer.style.display = "none";
   }
 } else {
-  loadNotifications();
+  void loadNotifications();
 }
 
 function checkScroll (): void {
   if(notLoading && Math.abs(notificationsSection.scrollHeight - notificationsSection.scrollTop - notificationsSection.clientHeight) <= 76) {
     notLoading = false;
-    loadNotifications();
+    void loadNotifications();
   }
 }
 
@@ -54,7 +55,7 @@ updateFromTheme();
 themeButton.onclick = () => {
   notificationsTheme = notificationsTheme === "light" ? "dark" : "light";
   updateFromTheme();
-  chrome.storage.local.set({ "notificationsTheme": notificationsTheme });
+  void chrome.storage.local.set({ "notificationsTheme": notificationsTheme });
 };
 
 // Load notifications on scroll
@@ -67,7 +68,7 @@ markAllReadButton.onclick = () => {
   markAllRead().then(() => {
     markReadLoading.style.display = "none";
     markAllReadButton.disabled = false;
-    chrome.action.setBadgeText({
+    void chrome.action.setBadgeText({
       text: ""
     });
   })
@@ -83,41 +84,44 @@ let notLoading = true;
 const fragment = new DocumentFragment();
 
 // Retrieve the next page of notifications
-async function loadNotifications (): Promise<void> {
+function loadNotifications (): void {
   console.time("load-notifications");
-  notificationsGenerator.next().then(async ({ value: notifications, done }) => {
-    console.timeEnd("load-notifications");
-    // If user is not logged in
-    if(!notifications) {
-      if(done) {
-        loadingContainer.remove();
-        notificationsSection.removeEventListener("scroll", checkScroll);
+  void notificationsGenerator
+    .next()
+    .then(async ({ value: notifications, done }) => {
+      console.timeEnd("load-notifications");
+      // If user is not logged in
+      if(!notifications) {
+        if(done) {
+          loadingContainer.remove();
+          notificationsSection.removeEventListener("scroll", checkScroll);
+        }
+        const notice = loggedOutNotice();
+        notificationsContainer.appendChild(notice);
+        return;
       }
-      const notice = loggedOutNotice();
-      notificationsContainer.appendChild(notice);
-      return;
-    }
 
-    console.log("Notifications (popup): ", notifications);
+      console.log("Notifications (popup): ", notifications);
 
-    for await (const notification of notifications) {
-      fragment.appendChild(await createNotificationHTMLDivElement(notification));
-    }
+      for await (const notification of notifications) {
+        fragment.appendChild(await createNotificationHTMLDivElement(notification));
+      }
 
-    notificationsContainer.appendChild(fragment);
+      notificationsContainer.appendChild(fragment);
 
-    // Allow notification loading now that task is complete
-    notLoading = true;
-  });
+      // Allow notification loading now that task is complete
+      notLoading = true;
+    });
 }
 
 // Clears all unread notifications
-function markAllRead (): Promise<{ [key: string]: string }> {
+function markAllRead (): Promise<ClearBrandNewNotificationsResponse> {
   return new Promise((resolve, reject) => {
     getChromeFkey()
       .then((fkey) => graphQLFetch("clearBrandNewNotifications", fkey))
       .then(async (response) => {
-        const json = await response.json();
+        const json = await response.json() as ClearBrandNewNotificationsResponse;
+        console.log(json);
         if(json.data.clearBrandNewNotifications.error?.code === "UNAUTHORIZED") {
           reject();
         } else {
@@ -137,4 +141,11 @@ function updateFromTheme (): void {
     themeButton.innerHTML = "<svg stroke=\"#ffffff\" fill=\"none\" stroke-width=\"2\" viewBox=\"0 0 24 24\" stroke-linecap=\"round\" stroke-linejoin=\"round\" height=\"18px\" width=\"18px\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"12\" cy=\"12\" r=\"5\"></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"></line><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"></line><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"></line></svg>";
     document.body.className = "dark";
   }
+}
+
+function loggedOutNotice (): HTMLLIElement {
+  const notice = document.createElement("li");
+  notice.className = "notification unread";
+  notice.innerHTML = "<div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">You must be <a class=\"hyperlink\" href=\"https://www.khanacademy.org/login/\" target=\"_blank\">logged in</a> to use this extension.</p>";
+  return notice;
 }

@@ -1,6 +1,7 @@
-import gqlQueries from "../json/graphql-queries.json";
+import { graphQLVariables } from "../@types/extension";
+import graphQLQueries from "../json/graphql-queries.json";
 
-export function graphQLFetch (queryName: string, fkey: string, variables: {} = {}): Promise<Response> {
+export function graphQLFetch (queryName: string, fkey: string, variables: graphQLVariables = {}): Promise<Response> {
   return new Promise((resolve, reject) => {
     fetch("https://www.khanacademy.org/api/internal/graphql/" + queryName, {
       method: "POST",
@@ -10,7 +11,7 @@ export function graphQLFetch (queryName: string, fkey: string, variables: {} = {
       },
       body: JSON.stringify({
         operationName: queryName,
-        query: gqlQueries[queryName],
+        query: graphQLQueries[queryName] as string,
         variables
       }),
       credentials: "same-origin"
@@ -32,7 +33,7 @@ export function getChromeFkey (): Promise<string> {
       name: "fkey"
     }, (cookie) => {
       if (cookie === null) {
-        reject("Error: No fkey cookie found.");
+        reject("No fkey cookie found.");
       }
       resolve(cookie.value);
     });

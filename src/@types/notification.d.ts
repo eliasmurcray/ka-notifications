@@ -1,4 +1,4 @@
-export type AssignmentCreatedNotification = {
+export interface AssignmentCreatedNotification {
   numAssignments: string;
   contentTitle: string;
   coachAvatarURL: string;
@@ -7,19 +7,19 @@ export type AssignmentCreatedNotification = {
   className: string;
 }
 
-export type AssignmentDueDateNotification = {
+export interface AssignmentDueDateNotification {
   numAssignments: string;
   dueDate: string;
   contentTitle: string;
   curationNodeIconURL: string;
 }
 
-export type AvatarNotification = {
+export interface AvatarNotification {
   name: string;
   thumbnailSrc: string;
 }
 
-export type Badge = {
+export interface Badge {
   __typename: "Badge";
   badgeCategory?: number;
   description: string;
@@ -32,12 +32,12 @@ export type Badge = {
   name: string;
 }
 
-export type BadgeNotification = {
+export interface BadgeNotification {
   badge: Badge;
   badgeName: string;
 }
 
-export type BasicNotification = {
+export interface BasicNotification {
   __typename: string;
   brandNew: boolean;
   class_: Array<string>;
@@ -48,7 +48,7 @@ export type BasicNotification = {
   urlsafeKey: string;
 }
 
-export type CoachRequestAcceptedNotification = {
+export interface CoachRequestAcceptedNotification {
   isMultipleClassrooms: boolean;
   student: {
     id: string;
@@ -69,7 +69,7 @@ export type CoachRequestAcceptedNotification = {
   };
 }
 
-export type CoachRequestNotification = {
+export interface CoachRequestNotification {
   coachIsParent: boolean;
   coach: {
     id: string;
@@ -78,28 +78,28 @@ export type CoachRequestNotification = {
   };
 }
 
-export type CourseMasteryGoalCreatedNotification = {
+export interface CourseMasteryGoalCreatedNotification {
   curationNodeIconURL: string;
   curationNodeTranslatedTitle: string;
   masteryPercentage: string;
 }
 
-export type GroupedBadgeNotification = {
+export interface GroupedBadgeNotification {
   badgeNotifications: {
     __typename: "BadgeNotification";
     badge: Badge;
   }[];
 }
 
-export type InfoNotification = {
-  notificationType: string
+export interface InfoNotification {
+  notificationinterface: string
 }
 
-export type ModeratorNotification = {
+export interface ModeratorNotification {
   text: string;
 }
 
-export type ResponseFeedbackNotification = {
+export interface ResponseFeedbackNotification {
   authorAvatarUrl: string;
   authorNickname: string;
   content: string;
@@ -108,7 +108,7 @@ export type ResponseFeedbackNotification = {
   sumVotesIncremented: number;
 }
 
-export type ProgramFeedbackNotification = {
+export interface ProgramFeedbackNotification {
   authorAvatarSrc: string;
   authorNickname: string;
   content: string;
@@ -116,11 +116,6 @@ export type ProgramFeedbackNotification = {
   translatedScratchpadTitle: string;
 }
 
-export type Notification = AssignmentCreatedNotification & AssignmentDueDateNotification & AvatarNotification & BadgeNotification & CoachRequestAcceptedNotification & CoachRequestNotification & CourseMasteryGoalCreatedNotification & GroupedBadgeNotification & InfoNotification & ModeratorNotification & ProgramFeedbackNotification & ResponseFeedbackNotification & BasicNotification;
-
-export type NotificationsResponse = {
-  notifications: Notification[];
-  pageInfo: {
-    nextCursor: string;
-  }
+export interface Notification extends AssignmentCreatedNotification, AssignmentDueDateNotification, AvatarNotification, BadgeNotification, CoachRequestAcceptedNotification, CoachRequestNotification, CourseMasteryGoalCreatedNotification, GroupedBadgeNotification, InfoNotification, ModeratorNotification, ProgramFeedbackNotification, ResponseFeedbackNotification, BasicNotification {
+  __typename: string;
 }

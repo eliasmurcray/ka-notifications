@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack && node firefox-build.js",
     "lint": "eslint .",
-    "fix": "eslint . --fix"
+    "fix": "eslint 'src/**/*.ts' --fix"
   },
   "repository": {
     "type": "git",

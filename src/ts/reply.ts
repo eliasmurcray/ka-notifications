@@ -1,3 +1,4 @@
+import { graphQLBody } from "../@types/extension";
 import { requestToRequestInit } from "../util/request";
 
 const originalFetch = fetch;
@@ -11,7 +12,7 @@ window.fetch = function (request: Request, requestInit: RequestInit): Promise<Re
           reader.onloadend = () => {
             const result = reader.result as string;
             const json = atob(result.split(",")[1]);
-            const obj = JSON.parse(json);
+            const obj = JSON.parse(json) as graphQLBody;
             obj.variables.limit = 100;
             const newRequest = new Request(request.url, {
               ...requestToRequestInit(request),
@@ -21,7 +22,8 @@ window.fetch = function (request: Request, requestInit: RequestInit): Promise<Re
             resolve(newFetch);
           };
           reader.readAsDataURL(blob);
-        });
+        })
+        .catch(reject);
     } else {
       originalFetch(request, requestInit)
         .then((response) => {
@@ -35,19 +37,19 @@ window.fetch = function (request: Request, requestInit: RequestInit): Promise<Re
 };
 
 const params = new URLSearchParams(window.location.search);
-const qa_expand_type = params.get("qa_expand_type");
-console.log(qa_expand_type);
+const qaExpandType = params.get("qa_expand_type");
 
 requestAnimationFrame(goToFeedback);
-function goToFeedback() {
+function goToFeedback () {
   let button: HTMLButtonElement;
-  switch(qa_expand_type) {
+  switch(qaExpandType) {
     case "question":
     case "answer":
       button = document.getElementById("ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-0") as HTMLButtonElement;
       break;
     case "comment":
     case "reply":
+    default:
       button = document.getElementById("ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-1") as HTMLButtonElement;
       break;
     case "project_help_question":
@@ -55,6 +57,8 @@ function goToFeedback() {
       break;
   }
 
-  if(button === null) return requestAnimationFrame(goToFeedback);
+  if(button === null) {
+    return requestAnimationFrame(goToFeedback);
+  }
   button.click();
 }
