@@ -68,7 +68,7 @@ function checkForNewNotifications (): void {
                 const cursor = notificationsResponse.pageInfo.nextCursor;
                 const preloadString = notificationsResponse.notifications.map(createNotificationString).join("");
                 void chrome.storage.local.set({ notificationsCache: { cursor, preloadString } });
-                void chrome.action.setBadgeText({ text: notificationsResponse.notifications.length > 99 ? "99+" : String(notificationsResponse.notifications.length) });
+                void chrome.action.setBadgeText({ text: notificationsResponse.notifications.length > 99 ? "99+" : String(newNotificationCount) });
               })
               .catch((error) => {
                 console.error("ERROR [2]: ", error);
