@@ -194,26 +194,22 @@ export async function renderFromCache (parentElement: HTMLDivElement, cache: { p
     .querySelectorAll(".feedback-button")
     .forEach(async (button: HTMLButtonElement) => {
       const { typename, url, feedbackType } = button.dataset;
+      console.log(typename, url);
       if(typename === "ResponseFeedbackNotification") {
         // Extract the id and qa_expand_key from the url
-        let idMatch = /\/(\d+)\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/.exec(url);
-        if(idMatch) {
-          let id = idMatch[1];
-          let qaExpandKey = idMatch[2];
-          let qaExpandType = idMatch[3];
-          button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType);
-        } else {
-          let id = (await(await fetch(`https://www.khanacademy.org/api/internal/graphql/ContentForPath?fastly_cacheable=persist_until_publish&pcv=d6d47957dd47ef94066c3adef0c9aa40922342e1&hash=3314043276&variables=%7B%22path%22%3A%22${encodeURIComponent(/\/.*(?=\?)/g.exec(url)[0])}%22%2C%22countryCode%22%3A%22NL%22%2C%22kaLocale%22%3A%22en%22%2C%22clientPublishedContentVersion%22%3A%22d6d47957dd47ef94066c3adef0c9aa40922342e1%22%7D&lang=en&curriculum=`)).json()).data.contentRoute.listedPathData.content.id;
-          const match = /\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/g.exec(url);
-          let qaExpandKey = match[1];
-          let qaExpandType = match[2];
-          button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType.toUpperCase(), "project");
-        }
+        const split = url.split("/");
+        const responseID = split[split.length - 1].split("?")[0];
+        const params = new URLSearchParams(url.split("?")[1]);
+        const qaExpandKey = params.get("qa_expand_key");
+        const qaExpandType = params.get("qa_expand_type");
+
+        button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", responseID, qaExpandKey, qaExpandType);
       } else {
-        let idMatch = /\/(\d+)\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/.exec(url);
-        let id = idMatch[1];
-        let qaExpandKey = idMatch[2];
-        button.onclick = () => addFeedbackTextarea(button, feedbackType as RequestType, feedbackType === "QUESTION" ? "ANSWER" : "REPLY", id, qaExpandKey, "");
+        const split = url.split("/");
+        const responseID = split[split.length - 1].split("?")[0];
+        const params = new URLSearchParams(url.split("?")[1]);
+        const qaExpandKey = params.get("qa_expand_key");
+        button.onclick = () => addFeedbackTextarea(button, feedbackType as RequestType, feedbackType === "QUESTION" ? "ANSWER" : "REPLY", responseID, qaExpandKey, "");
       }
     });
 }
