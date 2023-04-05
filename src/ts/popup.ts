@@ -90,14 +90,18 @@ function loadNotifications (): void {
     .next()
     .then(async ({ value: notifications, done }) => {
       console.timeEnd("load-notifications");
+      console.log(notifications, done, notificationsContainer.innerHTML);
       // If user is not logged in
-      if(!notifications) {
-        if(done) {
-          loadingContainer.remove();
-          notificationsSection.removeEventListener("scroll", checkScroll);
-        }
+      if(notifications === undefined && done === true) {
+        loadingContainer.remove();
+        notificationsSection.removeEventListener("scroll", checkScroll);
         const notice = loggedOutNotice();
         notificationsContainer.appendChild(notice);
+        return;
+      } else if(notifications.length === 0 && done === false && notificationsContainer.innerHTML === "") {
+        loadingContainer.remove();
+        notificationsSection.removeEventListener("scroll", checkScroll);
+        notificationsContainer.innerHTML += "<div class=\"notification\"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">You have no notifications.</p></div>";
         return;
       }
 
