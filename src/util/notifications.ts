@@ -119,21 +119,13 @@ export async function createNotificationHTMLDivElement (notification: Notificati
       const button = _element("button", "feedback-button") as HTMLButtonElement;
       button.innerText = "Reply";
 
-      // Extract the id and qa_expand_key from the url
-      let idMatch = /\/(\d+)\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/.exec(url);
+      const split = url.split("/");
+      const responseID = split[split.length - 1].split("?")[0];
+      const params = new URLSearchParams(url.split("?")[1]);
+      const qaExpandKey = params.get("qa_expand_key");
+      const qaExpandType = params.get("qa_expand_type");
 
-      if(idMatch) {
-        let id = idMatch[1];
-        let qaExpandKey = idMatch[2];
-        let qaExpandType = idMatch[3];
-        button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType);
-      } else {
-        let id = (await(await fetch(`https://www.khanacademy.org/api/internal/graphql/ContentForPath?fastly_cacheable=persist_until_publish&pcv=d6d47957dd47ef94066c3adef0c9aa40922342e1&hash=3314043276&variables=%7B%22path%22%3A%22${encodeURIComponent(/\/.*(?=\?)/g.exec(url)[0])}%22%2C%22countryCode%22%3A%22NL%22%2C%22kaLocale%22%3A%22en%22%2C%22clientPublishedContentVersion%22%3A%22d6d47957dd47ef94066c3adef0c9aa40922342e1%22%7D&lang=en&curriculum=`)).json()).data.contentRoute.listedPathData.content.id;
-        const match = /\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/g.exec(url);
-        let qaExpandKey = match[1];
-        let qaExpandType = match[2];
-        button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", id, qaExpandKey, qaExpandType.toUpperCase(), "project");
-      }
+      button.onclick = () => addFeedbackTextarea(button, feedbackType === "ANSWER" ? "QUESTION" : "COMMENT", "REPLY", responseID, qaExpandKey, qaExpandType);
       wrapper.appendChild(button);
       notificationElement.appendChild(wrapper);
     }
@@ -143,14 +135,15 @@ export async function createNotificationHTMLDivElement (notification: Notificati
       notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='${authorAvatarSrc}'><h3 class='notification-author--nickname'>${escapeHTML(authorNickname)}</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><div class='notification-content'>${parseAndRender(content)}</div>`;
 
       // Extract the id and qa_expand_key from the url
-      let idMatch = /\/(\d+)\?qa_expand_key=([^&]+)&qa_expand_type=(\w+)/.exec(url);
-      let id = idMatch[1];
-      let qaExpandKey = idMatch[2];
+      const split = url.split("/");
+      const responseID = split[split.length - 1].split("?")[0];
+      const params = new URLSearchParams(url.split("?")[1]);
+      const qaExpandKey = params.get("qa_expand_key");
 
       const wrapper = _element("div", "feedback-button-wrapper");
       const addFeedbackButton = _element("button", "feedback-button");
       addFeedbackButton.innerText = "Reply";
-      addFeedbackButton.onclick = () => addFeedbackTextarea(addFeedbackButton as HTMLButtonElement, feedbackType as RequestType, feedbackType === "QUESTION" ? "ANSWER" : "REPLY", id, qaExpandKey, "");
+      addFeedbackButton.onclick = () => addFeedbackTextarea(addFeedbackButton as HTMLButtonElement, feedbackType as RequestType, feedbackType === "QUESTION" ? "ANSWER" : "REPLY", responseID, qaExpandKey, "");
       wrapper.appendChild(addFeedbackButton);
       notificationElement.appendChild(wrapper);
     }
@@ -182,7 +175,7 @@ export async function createNotificationHTMLDivElement (notification: Notificati
     }
       break;
     default:
-      notificationElement.outerHTML = `<li class='notification'><pre style='width:100%;overflow-x:auto'>${JSON.stringify(notification, null, 2)}</pre></li>`;
+      notificationElement.innerHTML = `<pre style='width:100%;overflow-x:auto'>${JSON.stringify(notification, null, 2)}</pre>`;
   }
   return notificationElement as HTMLDivElement;
 }
@@ -194,7 +187,6 @@ export async function renderFromCache (parentElement: HTMLDivElement, cache: { p
     .querySelectorAll(".feedback-button")
     .forEach(async (button: HTMLButtonElement) => {
       const { typename, url, feedbackType } = button.dataset;
-      console.log(typename, url);
       if(typename === "ResponseFeedbackNotification") {
         // Extract the id and qa_expand_key from the url
         const split = url.split("/");
@@ -217,6 +209,9 @@ export async function renderFromCache (parentElement: HTMLDivElement, cache: { p
 async function getFeedbackParent (fkey: string, notification: Notification): Promise<string> {
   const params = new URL("https://www.khanacademy.org/" + notification.url).searchParams;
   return new Promise((resolve) => {
+    if(!["ResponseFeedbackNotification", "ProgramFeedbackNotification"].includes(notification.__typename)) {
+      return resolve(null);
+    }
     graphQLFetch("feedbackQuery", fkey, {
       topicId: notification.url.split("?")[0].split("/").slice(-1)[0],
       feedbackType: params.get("qa_expand_type") === "reply" ? "QUESTION" : "COMMENT",
@@ -226,7 +221,7 @@ async function getFeedbackParent (fkey: string, notification: Notification): Pro
     })
       .then(async (response) => response.json())
       .then((json) => {
-        if(json.data.errors === undefined) {
+        if(json.data.errors === undefined && json.data?.feedback?.feedback[0]?.expandKey) {
           resolve(json.data.feedback.feedback[0].expandKey);
         } else {
           console.error("ERROR: ", notification.url, json.data.errors);

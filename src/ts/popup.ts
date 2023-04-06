@@ -90,7 +90,6 @@ function loadNotifications (): void {
     .next()
     .then(async ({ value: notifications, done }) => {
       console.timeEnd("load-notifications");
-      console.log(notifications, done, notificationsContainer.innerHTML);
       // If user is not logged in
       if(notifications === undefined && done === true) {
         loadingContainer.remove();
@@ -125,7 +124,6 @@ function markAllRead (): Promise<ClearBrandNewNotificationsResponse> {
       .then((fkey) => graphQLFetch("clearBrandNewNotifications", fkey))
       .then(async (response) => {
         const json = await response.json() as ClearBrandNewNotificationsResponse;
-        console.log(json);
         if(json.data.clearBrandNewNotifications.error?.code === "UNAUTHORIZED") {
           reject();
         } else {
