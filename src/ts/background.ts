@@ -2,6 +2,33 @@ import { createNotificationString, filterNotifications } from "../util/notificat
 import { graphQLFetch, getChromeFkey } from "../util/graphql";
 import { GetFullUserProfileResponse, GetNotificationsForUserResponse } from "../@types/responses";
 
+// Huge thanks
+// Create the offscreen document if it doesn't already exist
+async function createOffscreen () {
+  if (await chrome.offscreen.hasDocument?.()) {
+    return;
+  }
+  await chrome.offscreen.createDocument({
+    url: chrome.runtime.getURL("heartbeat.html"),
+    reasons: [chrome.offscreen.Reason.BLOBS],
+    justification: "keep service worker running",
+  });
+}
+
+chrome.runtime.onStartup.addListener(() => {
+  void createOffscreen();
+});
+chrome.runtime.onInstalled.addListener(() => {
+  void createOffscreen();
+});
+
+// A message from an offscreen document every 20 second resets the inactivity timer
+chrome.runtime.onMessage.addListener((message: { keepAlive?: boolean }) => {
+  if (message.keepAlive) {
+    (1 + 1);
+  }
+});
+
 // Set background color of badge to teal
 void chrome.action.setBadgeBackgroundColor({
   color: "#00BFA5"
@@ -63,7 +90,7 @@ function checkForNewNotifications (): void {
                 }
                 console.log("Notifications (background): ", notificationsResponse);
 
-                notificationsResponse.notifications = await filterNotifications(fkey, notificationsResponse.notifications);
+                // notificationsResponse.notifications = await filterNotifications(fkey, notificationsResponse.notifications);
 
                 const cursor = notificationsResponse.pageInfo.nextCursor;
                 const preloadString = notificationsResponse.notifications.map(createNotificationString).join("");

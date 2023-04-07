@@ -224,6 +224,12 @@ body.dark ::-webkit-scrollbar-thumb:active {
   word-break: break-word;
 }
 
+.notification pre {
+  width: 100%;
+  overflow-x: auto;
+  color: var(--notification-content-text-color);
+}
+
 .notification b {
   font-weight: 600;
 }

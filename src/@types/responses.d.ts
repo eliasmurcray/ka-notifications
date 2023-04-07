@@ -102,6 +102,7 @@ export interface ClearBrandNewNotificationsResponse {
 
 interface QuestionFeedback {
 	key: string;
+	expandKey?: string;
 	answers: {
 		key: string;
 	}[];
@@ -166,5 +167,6 @@ export interface FeedbackQueryResponse {
 			sortedByDate: boolean;
 			__typename: "FeedbackForFocus";
 		};
+		errors: null;
 	};
 }

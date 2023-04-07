@@ -2,8 +2,8 @@
   "exclude": ["./dist/"],
   "compilerOptions": {
     "resolveJsonModule": true,
-    "moduleResolution": "node",
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "module": "esnext",
     "target": "esnext"
   },

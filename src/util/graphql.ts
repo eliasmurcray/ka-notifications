@@ -33,7 +33,7 @@ export function getChromeFkey (): Promise<string> {
       name: "fkey"
     }, (cookie) => {
       if (cookie === null) {
-        reject("No fkey cookie found.");
+        return reject("No fkey cookie found.");
       }
       resolve(cookie.value);
     });

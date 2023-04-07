@@ -104,7 +104,7 @@ async function addFeedback (feedbackType: RequestType, responseType: ResponseTyp
 }
 
 // Creates an HTMLDivElement from a Notification object
-export async function createNotificationHTMLDivElement (notification: Notification): Promise<HTMLDivElement> {
+export function createNotificationHTMLDivElement (notification: Notification): HTMLDivElement {
   const { __typename, brandNew, date, url } = notification;
 
   // This base element is the same no matter what type
@@ -171,21 +171,21 @@ export async function createNotificationHTMLDivElement (notification: Notificati
       break;
     case "AvatarNotification": {
       const { name, thumbnailSrc, url } = notification as AvatarNotification & BasicNotification;
-      notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='${thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? thumbnailSrc : "https://cdn.kastatic.org" + thumbnailSrc}'><h3 class='notification-author--nickname'>KA Avatars</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>use avatar</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>You unlocked <b>${AVATAR_SHORTNAMES[name]}</b>! <i>${AVATAR_REQUIREMENTS[name]}</i></p>`;
+      notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='${thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? thumbnailSrc : "https://cdn.kastatic.org" + thumbnailSrc}'><h3 class='notification-author--nickname'>KA Avatars</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>use avatar</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>You unlocked <b>${AVATAR_SHORTNAMES[name] as string}</b>! <i>${AVATAR_REQUIREMENTS[name] as string}</i></p>`;
     }
       break;
     default:
-      notificationElement.innerHTML = `<pre style='width:100%;overflow-x:auto'>${JSON.stringify(notification, null, 2)}</pre>`;
+      notificationElement.innerHTML = `<div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3></div><div class="notification-content">This is an unhandled notification type. You can report this in our <a class="hyperlink" href="https://github.com/eliasmurcray/ka-notifications/issues" target="_blank">official Github repository</a>.</div><pre>${JSON.stringify(notification, null, 2)}</pre>`;
   }
   return notificationElement as HTMLDivElement;
 }
 
 // Creates HTMLDivElement
-export async function renderFromCache (parentElement: HTMLDivElement, cache: { preloadString: string, cursor: string }) {
+export function renderFromCache (parentElement: HTMLDivElement, cache: { preloadString: string, cursor: string }): void {
   parentElement.innerHTML += cache.preloadString;
   parentElement
     .querySelectorAll(".feedback-button")
-    .forEach(async (button: HTMLButtonElement) => {
+    .forEach((button: HTMLButtonElement) => {
       const { typename, url, feedbackType } = button.dataset;
       if(typename === "ResponseFeedbackNotification") {
         // Extract the id and qa_expand_key from the url
@@ -220,7 +220,7 @@ async function getFeedbackParent (fkey: string, notification: Notification): Pro
       focusKind: "scratchpad"
     })
       .then(async (response) => response.json())
-      .then((json) => {
+      .then((json: FeedbackQueryResponse) => {
         if(json.data.errors === undefined && json.data?.feedback?.feedback[0]?.expandKey) {
           resolve(json.data.feedback.feedback[0].expandKey);
         } else {
@@ -228,7 +228,7 @@ async function getFeedbackParent (fkey: string, notification: Notification): Pro
           resolve(null);
         }
       })
-      .catch((error) => {
+      .catch((error: string) => {
         console.error(error);
         resolve(error);
       });
@@ -236,15 +236,15 @@ async function getFeedbackParent (fkey: string, notification: Notification): Pro
 }
 
 export async function filterNotifications (fkey: string, notifications: Notification[]): Promise<Notification[]> {
+  fkey;
   const promises = notifications.map(async (notification) => {
     const parent = await getFeedbackParent(fkey, notification);
-    // return parent === "" ? false : notification;
-    return notification;
+    return parent === "" ? false : notification;
   });
 
-  const array = (await Promise.all(promises)).filter((allowed: Notification | boolean) => allowed !== false);
+  const array = (await Promise.all(promises)).filter((allowed: Notification | boolean) => allowed !== false) as Notification[];
 
-  return array as Notification[];
+  return array;
 }
 
 // Creates a generator to load notifications
@@ -263,12 +263,13 @@ export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerat
               }
 
               // Filter out the unwanted threads
-              notificationsResponse.notifications = await filterNotifications(fkey, notificationsResponse.notifications);
+              // notificationsResponse.notifications = await filterNotifications(fkey, notificationsResponse.notifications);
 
               resolve(notificationsResponse);
             })
             .catch(() => resolve(null));
-        });
+        })
+        .catch(console.error);
     });
 
     if(json) {
@@ -319,9 +320,9 @@ export function createNotificationString (notification: Notification): string {
     }
     case "AvatarNotification": {
       const { name, thumbnailSrc, url } = notification as AvatarNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? thumbnailSrc : "https://cdn.kastatic.org" + thumbnailSrc}"><h3 class="notification-author--nickname">KA Avatars</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">use avatar</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You unlocked <b>${AVATAR_SHORTNAMES[name]}</b>! <i>${AVATAR_REQUIREMENTS[name]}</i></p></li>`;
+      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? thumbnailSrc : "https://cdn.kastatic.org" + thumbnailSrc}"><h3 class="notification-author--nickname">KA Avatars</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">use avatar</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You unlocked <b>${AVATAR_SHORTNAMES[name] as string}</b>! <i>${AVATAR_REQUIREMENTS[name] as string}</i></p></li>`;
     }
     default:
-      return `<li class="notification"><pre style="width:100%;overflow-x:auto">${JSON.stringify(notification, null, 2)}</pre></li>`;
+      return `<li class="notification"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3></div><div class="notification-content">This is an unhandled notification type. You can report this in our <a class="hyperlink" href="https://github.com/eliasmurcray/ka-notifications/issues" target="_blank">official Github repository</a>.</div><pre>${JSON.stringify(notification, null, 2)}</pre></li>`;
   }
 }

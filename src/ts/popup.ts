@@ -88,7 +88,7 @@ function loadNotifications (): void {
   console.time("load-notifications");
   void notificationsGenerator
     .next()
-    .then(async ({ value: notifications, done }) => {
+    .then(({ value: notifications, done }) => {
       console.timeEnd("load-notifications");
       // If user is not logged in
       if(notifications === undefined && done === true) {
@@ -106,8 +106,8 @@ function loadNotifications (): void {
 
       console.log("Notifications (popup): ", notifications);
 
-      for await (const notification of notifications) {
-        fragment.appendChild(await createNotificationHTMLDivElement(notification));
+      for (const notification of notifications) {
+        fragment.appendChild(createNotificationHTMLDivElement(notification));
       }
 
       notificationsContainer.appendChild(fragment);

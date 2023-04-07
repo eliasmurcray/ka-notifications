@@ -9,7 +9,8 @@ module.exports = {
     "content": "/src/ts/content.ts",
     "background": "/src/ts/background.ts",
     "popup": "/src/ts/popup.ts",
-    "reply": "/src/ts/reply.ts"
+    "reply": "/src/ts/reply.ts",
+    "heartbeat": "/src/ts/heartbeat.ts"
   },
   externals: {
     "/src/notification.d.ts": true
@@ -18,7 +19,7 @@ module.exports = {
     topLevelAwait: true
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js"]
+    extensions: [".ts"]
   },
   module: {
     rules: [
@@ -66,6 +67,11 @@ module.exports = {
       template: "./src/html/popup.html",
       filename: "popup.html",
       chunks: ["popup"]
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/html/heartbeat.html",
+      filename: "heartbeat.html",
+      chunks: ["heartbeat"]
     })
   ]
 };
