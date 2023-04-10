@@ -98,7 +98,7 @@ function checkForNewNotifications (): void {
                 void chrome.action.setBadgeText({ text: notificationsResponse.notifications.length > 99 ? "99+" : String(newNotificationCount) });
               })
               .catch((error) => {
-                console.error("ERROR [2]: ", error);
+                console.error("ERROR [getNotificationsForUser]: ", error);
                 void chrome.action.setBadgeText({ text: "!" });
               });
           } else {
@@ -106,10 +106,10 @@ function checkForNewNotifications (): void {
           }
         })
         .catch((error) => {
-          console.error("ERROR [3]: ", error);
+          console.error("ERROR [getFullUserProfile]: ", error);
         });
     })
-    .catch((error) => {
-      console.error("ERROR [fkey]: ", error);
+    .catch(() => {
+      void chrome.action.setBadgeText({ text: "!" });
     });
 }

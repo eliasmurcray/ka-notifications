@@ -39,7 +39,9 @@ window.fetch = function (request: Request, requestInit: RequestInit): Promise<Re
 const params = new URLSearchParams(window.location.search);
 const qaExpandType = params.get("qa_expand_type");
 
-requestAnimationFrame(goToFeedback);
+if(qaExpandType !== null) {
+  requestAnimationFrame(goToFeedback);
+}
 function goToFeedback () {
   let button: HTMLButtonElement;
   switch(qaExpandType) {
@@ -49,7 +51,6 @@ function goToFeedback () {
       break;
     case "comment":
     case "reply":
-    default:
       button = document.getElementById("ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-1") as HTMLButtonElement;
       break;
     case "project_help_question":
@@ -60,5 +61,6 @@ function goToFeedback () {
   if(button === null) {
     return requestAnimationFrame(goToFeedback);
   }
+
   button.click();
 }

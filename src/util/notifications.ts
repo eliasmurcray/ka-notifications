@@ -247,41 +247,83 @@ export async function filterNotifications (fkey: string, notifications: Notifica
   return array;
 }
 
+interface LoopOptions {
+  response: NotificationsResponse | null;
+  error: string;
+  break: boolean;
+};
+
+interface IteratorResponse {
+  value: Notification[];
+  error: string;
+}
+
 // Creates a generator to load notifications
-export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerator<Notification[], Notification[]>{
+export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerator<IteratorResponse>{
   let complete = false;
   while(complete === false) {
-    const json = await new Promise<NotificationsResponse>((resolve) => {
+    const options: LoopOptions = {
+      response: null,
+      break: false,
+      error: ""
+    };
+
+    await new Promise((resolve) => {
       getChromeFkey()
         .then((fkey) => {
           graphQLFetch("getNotificationsForUser", fkey, { after: cursor })
             .then(async (response) => {
               const json = await response.json() as GetNotificationsForUserResponse;
               const notificationsResponse = json?.data?.user?.notifications;
+
               if(!notificationsResponse) {
-                return resolve(null);
+                options.break = true;
+                resolve(null);
               }
 
               // Filter out the unwanted threads
               // notificationsResponse.notifications = await filterNotifications(fkey, notificationsResponse.notifications);
 
-              resolve(notificationsResponse);
+              options.response = notificationsResponse;
+              resolve(null);
             })
-            .catch(() => resolve(null));
+            .catch(() => {
+              options.break = true;
+              resolve(null);
+            });
         })
-        .catch(console.error);
-    });
+        .catch((error) => {
+          options.error = error;
+          resolve(null);
+        });
+      });
 
-    if(json) {
-      // Retrieve a cursor from the JSON
-      const nextCursor = json.pageInfo.nextCursor;
+    if(options.break === true) {
+      break;
+    }
 
-      // Update loop control variables
+    if(options.error !== "") {
+      return yield { value: null, error: options.error };
+    }
+
+    console.log(options.response);
+
+    if(options.response) {
+      const nextCursor = options.response.pageInfo.nextCursor;
       complete = !nextCursor;
       cursor = nextCursor;
 
-      // Return this set of notifications as JSON
-      yield json.notifications;
+      if(complete === true) {
+        yield {
+          value: options.response.notifications,
+          error: "complete"
+        };
+      }
+
+      yield {
+        value: options.response.notifications,
+        error: ""
+      };
     } else {
       break;
     }
@@ -312,7 +354,7 @@ export function createNotificationString (notification: Notification): string {
     }
     case "BadgeNotification": {
       const { badge: { description, icons: { compactUrl }, relativeUrl } } = notification as BadgeNotification & BasicNotification;
-      `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${relativeUrl}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${description}! Congratulations!</p></li>`;
+      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${relativeUrl}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${description}! Congratulations!</p></li>`;
     }
     case "ModeratorNotification": {
       const { text } = notification as ModeratorNotification & BasicNotification;

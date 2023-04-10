@@ -12,7 +12,7 @@ const THEME: string = STORAGE?.notificationsTheme;
 const CACHED_DATA = STORAGE?.notificationsCache;
 
 let notificationsTheme = THEME ?? "light";
-const notificationsGenerator: AsyncGenerator<Notification[], Notification[]> = createNotificationsGenerator(CACHED_DATA?.cursor ?? "");
+const notificationsGenerator = createNotificationsGenerator(CACHED_DATA?.cursor ?? "");
 
 // Retrieve DOM elements
 const notificationsSection = document.getElementById("notifications-section") as HTMLDivElement;
@@ -84,37 +84,50 @@ let notLoading = true;
 const fragment = new DocumentFragment();
 
 // Retrieve the next page of notifications
-function loadNotifications (): void {
+async function loadNotifications (): Promise<void> {
   console.time("load-notifications");
-  void notificationsGenerator
-    .next()
-    .then(({ value: notifications, done }) => {
-      console.timeEnd("load-notifications");
-      // If user is not logged in
-      if(notifications === undefined && done === true) {
-        loadingContainer.remove();
-        notificationsSection.removeEventListener("scroll", checkScroll);
-        const notice = loggedOutNotice();
-        notificationsContainer.appendChild(notice);
-        return;
-      } else if(notifications.length === 0 && done === false && notificationsContainer.innerHTML === "") {
-        loadingContainer.remove();
-        notificationsSection.removeEventListener("scroll", checkScroll);
-        notificationsContainer.innerHTML += "<div class=\"notification\"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">You have no notifications.</p></div>";
-        return;
-      }
+  const result = await notificationsGenerator.next();
+  console.timeEnd("load-notifications");
 
-      console.log("Notifications (popup): ", notifications);
+  console.log(result);
 
-      for (const notification of notifications) {
-        fragment.appendChild(createNotificationHTMLDivElement(notification));
-      }
+  if(result.value.error === "No fkey cookie found.") {
+    loadingContainer.remove();
+    notificationsSection.removeEventListener("scroll", checkScroll);
+    notificationsContainer.innerHTML += "<div class=\"notification\"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">Your fkey cookie has expired. You need to <a class=\"hyperlink\" href=\"https://www.khanacademy.org/\" target=\"_blank\">navigate to Khan Academy</a> to refresh it automatically.</p></div>";
+    return;
+  }
 
-      notificationsContainer.appendChild(fragment);
+  const notifications: Notification[] = result.value.value;
 
-      // Allow notification loading now that task is complete
-      notLoading = true;
-    });
+  if(notifications === undefined) {
+    loadingContainer.remove();
+    notificationsSection.removeEventListener("scroll", checkScroll);
+    const notice = loggedOutNotice();
+    notificationsContainer.appendChild(notice);
+    return;
+  } else if (notifications.length === 0 && result.done === false && notificationsContainer.innerHTML === "") {
+    loadingContainer.remove();
+    notificationsSection.removeEventListener("scroll", checkScroll);
+    notificationsContainer.innerHTML += "<div class=\"notification\"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">You have no notifications.</p></div>";
+    return;
+  }
+
+  console.log("Notifications (popup): ", notifications);
+
+  for (const notification of notifications) {
+    fragment.appendChild(createNotificationHTMLDivElement(notification));
+  }
+
+  notificationsContainer.appendChild(fragment);
+
+  if(result.value.error === "complete") {
+    loadingContainer.remove();
+    notificationsSection.removeEventListener("scroll", checkScroll);
+  }
+
+  // Allow notification loading now that task is complete
+  notLoading = true;
 }
 
 // Clears all unread notifications
