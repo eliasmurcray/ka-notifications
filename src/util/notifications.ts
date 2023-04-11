@@ -313,6 +313,8 @@ export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerat
       complete = !nextCursor;
       cursor = nextCursor;
 
+      console.log(nextCursor);
+
       if(complete === true) {
         yield {
           value: options.response.notifications,

@@ -36,7 +36,7 @@ void chrome.action.setBadgeBackgroundColor({
 
 // Add event listener to user logout sessions
 void chrome.cookies.onChanged.addListener(({ cookie, removed }) => {
-  if(cookie.name === "KAAS") {
+  if(cookie.name === "KAAS" || cookie.name === "fkey") {
     void chrome.action.setBadgeText({ text: "" });
     void chrome.storage.local.remove("notificationsCache");
     if(removed === false) {
