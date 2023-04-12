@@ -26,4 +26,4 @@ Check out our [Discord server](https://discord.com/invite/peexFK5dz6) to get in 
 If you would like to report a bug, please [create an issue](https://github.com/eliasmurcray/ka-notifications/issues).
 
 ## Build
-If you want to build, first run `npm install` to install necessary dependencies. Then, you can make your changes and run `npm run build` to run the extension.
+If you want to build, first run `npm install` to install necessary dependencies. Then, you can make your changes and run `npm run build` to build the extension.
