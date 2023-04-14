@@ -79,31 +79,31 @@ function checkForNewNotifications (): void {
           // Or else, update notification count
           const { newNotificationCount } = user;
 
-          if(newNotificationCount > 0) {
-            // Preload data
-            graphQLFetch("getNotificationsForUser", fkey)
-              .then(async (response) => {
-                const json = await response.json() as GetNotificationsForUserResponse;
-                const notificationsResponse = json?.data?.user?.notifications;
-                if(!notificationsResponse) {
-                  return void chrome.action.setBadgeText({ text: "" });
-                }
-                console.log("Notifications (background): ", notificationsResponse);
+          // Preload data
+          graphQLFetch("getNotificationsForUser", fkey)
+            .then(async (response) => {
+              const json = await response.json() as GetNotificationsForUserResponse;
+              const notificationsResponse = json?.data?.user?.notifications;
+              if(!notificationsResponse) {
+                return void chrome.action.setBadgeText({ text: "" });
+              }
+              console.log("Notifications (background): ", notificationsResponse);
 
-                // notificationsResponse.notifications = await filterNotifications(fkey, notificationsResponse.notifications);
+              // notificationsResponse.notifications = await filterNotifications(fkey, notificationsResponse.notifications);
 
-                const cursor = notificationsResponse.pageInfo.nextCursor;
-                const preloadString = notificationsResponse.notifications.map(createNotificationString).join("");
-                void chrome.storage.local.set({ notificationsCache: { cursor, preloadString } });
+              const cursor = notificationsResponse.pageInfo.nextCursor;
+              const preloadString = notificationsResponse.notifications.map(createNotificationString).join("");
+              void chrome.storage.local.set({ notificationsCache: { cursor, preloadString } });
+              if(newNotificationCount > 0) {
                 void chrome.action.setBadgeText({ text: notificationsResponse.notifications.length > 99 ? "99+" : String(newNotificationCount) });
-              })
-              .catch((error) => {
-                console.error("ERROR [getNotificationsForUser]: ", error);
-                void chrome.action.setBadgeText({ text: "!" });
-              });
-          } else {
-            void chrome.action.setBadgeText({ text: "" });
-          }
+              } else {
+                void chrome.action.setBadgeText({ text: "" });
+              }
+            })
+            .catch((error) => {
+              console.error("ERROR [getNotificationsForUser]: ", error);
+              void chrome.action.setBadgeText({ text: "!" });
+            });
         })
         .catch((error) => {
           console.error("ERROR [getFullUserProfile]: ", error);
