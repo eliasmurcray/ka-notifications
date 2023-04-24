@@ -1,4 +1,4 @@
-import { createNotificationString, filterNotifications } from "../util/notifications";
+import { createNotificationString } from "../util/notifications";
 import { graphQLFetch, getChromeFkey } from "../util/graphql";
 import { GetFullUserProfileResponse, GetNotificationsForUserResponse } from "../@types/responses";
 
