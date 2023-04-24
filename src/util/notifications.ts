@@ -292,11 +292,11 @@ export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerat
               resolve(null);
             });
         })
-        .catch((error) => {
+        .catch((error: string) => {
           options.error = error;
           resolve(null);
         });
-      });
+    });
 
     if(options.break === true) {
       break;
@@ -359,17 +359,17 @@ export function createNotificationString (notification: Notification): string {
   }
 }
 
-function createResponseFeedbackNotificationString(notification: ResponseFeedbackNotification, brandNew: boolean, date: string, url: string): string {
+function createResponseFeedbackNotificationString (notification: ResponseFeedbackNotification, brandNew: boolean, date: string, url: string): string {
   const { authorAvatarUrl, authorNickname, content, feedbackType, focusTranslatedTitle } = notification as ResponseFeedbackNotification & BasicNotification;
   return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${parseAndRender(content)}</div><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ResponseFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
 }
 
-function createProgramFeedbackNotificationString(notification: ProgramFeedbackNotification, brandNew: boolean, date: string, url: string): string {
+function createProgramFeedbackNotificationString (notification: ProgramFeedbackNotification, brandNew: boolean, date: string, url: string): string {
   const { authorAvatarSrc, authorNickname, content, feedbackType, translatedScratchpadTitle } = notification as ProgramFeedbackNotification & BasicNotification;
   return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${parseAndRender(content)}</div><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ProgramFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
 }
 
-function createGroupedBadgeNotificationString(notification: GroupedBadgeNotification, brandNew: boolean, date: string, url: string): string {
+function createGroupedBadgeNotificationString (notification: GroupedBadgeNotification, brandNew: boolean, date: string, url: string): string {
   let badgeString = "";
   const { badgeNotifications } = notification as GroupedBadgeNotification & BasicNotification;
   if(badgeNotifications.length === 2) {
