@@ -2,7 +2,7 @@
 The unofficial extension only for Khan Academy notifications.
 
 [![CodeFactor](https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications/badge)](https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications)
-![Version Number](https://img.shields.io/chrome-web-store/v/gdlfnahbohjggjhpcmabnfikiigncjbd.svg)
+![Rating](https://img.shields.io/chrome-web-store/rating/gdlfnahbohjggjhpcmabnfikiigncjbd.svg)
 ![User Count](https://img.shields.io/chrome-web-store/users/gdlfnahbohjggjhpcmabnfikiigncjbd.svg)
 
 [![Install](https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/iNEddTyWiMfLSwFD6qGq.png)](https://chrome.google.com/webstore/detail/khan-academy-notification/gdlfnahbohjggjhpcmabnfikiigncjbd)
