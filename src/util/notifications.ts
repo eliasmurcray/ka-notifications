@@ -251,7 +251,7 @@ interface LoopOptions {
   response: NotificationsResponse | null;
   error: string;
   break: boolean;
-};
+}
 
 interface IteratorResponse {
   value: Notification[];
