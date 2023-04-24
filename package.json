@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack && node firefox-build.js",
     "commit": "sh -c 'git add . && git commit -m \"$0\" && git push -u origin main'",
+    "clearcache": "git rm -r --cached .",
     "fix": "eslint 'src/**/*.ts' --fix",
     "lint": "eslint ."
   },

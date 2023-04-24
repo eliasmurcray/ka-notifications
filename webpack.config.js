@@ -54,10 +54,6 @@ module.exports = {
           to: ""
         },
         {
-          from: "src/LICENSE",
-          to: ""
-        },
-        {
           from: "src/manifest.json",
           to: ""
         }
