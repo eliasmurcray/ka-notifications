@@ -1,6 +1,8 @@
 # Khan Academy Notifications
 The unofficial extension only for Khan Academy notifications.
 
+[![CodeFactor](https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications/badge)](https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications)
+
 [![Install](https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/iNEddTyWiMfLSwFD6qGq.png)](https://chrome.google.com/webstore/detail/khan-academy-notification/gdlfnahbohjggjhpcmabnfikiigncjbd)
 
 If you have Firefox, you can install the addon from [Mozilla Addons](https://addons.mozilla.org/en-US/firefox/addon/khan-academy-notifications/).
