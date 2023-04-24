@@ -336,24 +336,12 @@ export async function* createNotificationsGenerator (cursor = ""):  AsyncGenerat
 export function createNotificationString (notification: Notification): string {
   const { __typename, brandNew, date, url } = notification;
   switch(__typename) {
-    case "ResponseFeedbackNotification": {
-      const { authorAvatarUrl, authorNickname, content, feedbackType, focusTranslatedTitle } = notification as ResponseFeedbackNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${parseAndRender(content)}</div><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ResponseFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
-    }
-    case "ProgramFeedbackNotification": {
-      const { authorAvatarSrc, authorNickname, content, feedbackType, translatedScratchpadTitle } = notification as ProgramFeedbackNotification & BasicNotification;
-      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${parseAndRender(content)}</div><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ProgramFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
-    }
-    case "GroupedBadgeNotification": {
-      let badgeString = "";
-      const { badgeNotifications } = notification as GroupedBadgeNotification & BasicNotification;
-      if(badgeNotifications.length === 2) {
-        badgeString = badgeNotifications[0].badge.description + " and " + badgeNotifications[1].badge.description;
-      } else {
-        badgeString = badgeNotifications.map((badge) => badge.badge.description).slice(0, -1).join(", ") + ", and " + badgeNotifications[badgeNotifications.length - 1].badge.description;
-      }
-      return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${badgeNotifications[0].badge.icons.compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${badgeString}! Congratulations!</p></li>`;
-    }
+    case "ResponseFeedbackNotification":
+      return createResponseFeedbackNotificationString(notification, brandNew, date, url);
+    case "ProgramFeedbackNotification":
+      return createProgramFeedbackNotificationString(notification, brandNew, date, url);
+    case "GroupedBadgeNotification":
+      return createGroupedBadgeNotificationString(notification, brandNew, date, url);
     case "BadgeNotification": {
       const { badge: { description, icons: { compactUrl }, relativeUrl } } = notification as BadgeNotification & BasicNotification;
       return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${relativeUrl}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${description}! Congratulations!</p></li>`;
@@ -369,4 +357,25 @@ export function createNotificationString (notification: Notification): string {
     default:
       return `<li class="notification"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3></div><div class="notification-content">This is an unhandled notification type. You can report this in our <a class="hyperlink" href="https://github.com/eliasmurcray/ka-notifications/issues" target="_blank">official Github repository</a>.</div><pre>${JSON.stringify(notification, null, 2)}</pre></li>`;
   }
+}
+
+function createResponseFeedbackNotificationString(notification: ResponseFeedbackNotification, brandNew: boolean, date: string, url: string): string {
+  const { authorAvatarUrl, authorNickname, content, feedbackType, focusTranslatedTitle } = notification as ResponseFeedbackNotification & BasicNotification;
+  return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarUrl}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${parseAndRender(content)}</div><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ResponseFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
+}
+
+function createProgramFeedbackNotificationString(notification: ProgramFeedbackNotification, brandNew: boolean, date: string, url: string): string {
+  const { authorAvatarSrc, authorNickname, content, feedbackType, translatedScratchpadTitle } = notification as ProgramFeedbackNotification & BasicNotification;
+  return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${authorAvatarSrc}"><h3 class="notification-author--nickname">${escapeHTML(authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${parseAndRender(content)}</div><div class="feedback-button-wrapper"><button class="feedback-button" data-url="${url}" data-typename="ProgramFeedbackNotification" data-feedbackType="${feedbackType}">Reply</button></div></li>`;
+}
+
+function createGroupedBadgeNotificationString(notification: GroupedBadgeNotification, brandNew: boolean, date: string, url: string): string {
+  let badgeString = "";
+  const { badgeNotifications } = notification as GroupedBadgeNotification & BasicNotification;
+  if(badgeNotifications.length === 2) {
+    badgeString = badgeNotifications[0].badge.description + " and " + badgeNotifications[1].badge.description;
+  } else {
+    badgeString = badgeNotifications.map((badge) => badge.badge.description).slice(0, -1).join(", ") + ", and " + badgeNotifications[badgeNotifications.length - 1].badge.description;
+  }
+  return `<li class="notification ${brandNew ? "unread" : ""}"><div class="notification-header"><img class="notification-author--avatar" src="${badgeNotifications[0].badge.icons.compactUrl}"><h3 class="notification-author--nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned ${badgeString}! Congratulations!</p></li>`;
 }
