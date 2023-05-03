@@ -6,7 +6,7 @@ import { ExtensionLocalStorage } from "../@types/extension";
 import { ClearBrandNewNotificationsResponse } from "../@types/responses";
 
 // Retrieve items from local storage
-const STORAGE = await chrome.storage.local.get(["notificationsTheme", "notificationsCache"]) as ExtensionLocalStorage;
+const STORAGE = await chrome.storage.local.get(["notificationsTheme", "notificationsCache", "commentSort"]) as ExtensionLocalStorage;
 void chrome.storage.local.remove("notificationsCache");
 const THEME: string = STORAGE?.notificationsTheme;
 const CACHED_DATA = STORAGE?.notificationsCache;
@@ -23,6 +23,7 @@ const notificationsContainer = document.getElementById("notifications-container"
 const themeButton = document.getElementById("theme-button") as HTMLButtonElement;
 const markAllReadButton = document.getElementById("mark-all-read") as HTMLButtonElement;
 const markReadLoading = document.getElementById("mark-read-loading") as HTMLDivElement;
+const sortCommentsSelect = document.getElementById("sort-comments") as HTMLSelectElement;
 
 switchPageIcon.onclick = () => {
   notificationsSection.classList.toggle("hidden");
@@ -33,6 +34,12 @@ switchPageIcon.onclick = () => {
     switchPageIcon.innerHTML = "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"18\" viewBox=\"0 96 960 960\" width=\"18\"><path fill=\"#fff\" d=\"M480 896 160 576l320-320 42 42-248 248h526v60H274l248 248-42 42Z\"/></svg>";
   }
 };
+
+if(STORAGE?.commentSort) {
+  const optionsArray = Array.from(sortCommentsSelect.options);
+  const optionIndex = optionsArray.findIndex(a => a.value === STORAGE.commentSort);
+  sortCommentsSelect.selectedIndex = optionIndex;
+}
 
 if(CACHED_DATA) {
   void renderFromCache(notificationsContainer, CACHED_DATA);
@@ -164,3 +171,12 @@ function loggedOutNotice (): HTMLLIElement {
   notice.innerHTML = "<div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">You must be <a class=\"hyperlink\" href=\"https://www.khanacademy.org/login/\" target=\"_blank\">logged in</a> to use this extension.</p>";
   return notice;
 }
+
+sortCommentsSelect.addEventListener("change", (event: Event) => {
+  const element = event.target as HTMLSelectElement;
+  const { value } = element;
+
+  chrome.storage.local.set({
+    "commentSort": value
+  });
+});

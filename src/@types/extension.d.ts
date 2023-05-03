@@ -21,5 +21,6 @@ export interface ExtensionLocalStorage {
 	notificationsCache: {
 		cursor: string;
 		preloadString: string;
-	}
+	};
+	commentSort: string;
 }

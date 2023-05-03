@@ -87,17 +87,6 @@ body.dark ::-webkit-scrollbar-thumb:active {
   overflow: hidden auto;
 }
 
-#settings-section {
-  padding: 15px;
-  color: var(--notification-content-text-color);
-  box-sizing: border-box;
-}
-
-#settings-section h1 {
-  margin: 0 0 10px;
-  font-size: 18px;
-}
-
 .notifications-header {
   display: flex;
   align-items: center;
@@ -373,4 +362,30 @@ body.dark ::-webkit-scrollbar-thumb:active {
   100% {
     background-color: var(--notification-default-background-color);
   }
+}
+
+#settings-section {
+  padding: 15px;
+  color: var(--notification-content-text-color);
+  box-sizing: border-box;
+}
+
+#settings-section h1 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+#settings-section h2 {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+select {
+  background-color: var(--notification-code-background-color);
+  color: var(--notification-code-text-color);
+  padding: .2rem .5rem;
+  font: inherit;
+  border: 0;
+  outline: 0;
+  box-shadow: 0 0 1px #000a;
 }

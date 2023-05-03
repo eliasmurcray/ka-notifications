@@ -23,10 +23,22 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // A message from an offscreen document every 20 second resets the inactivity timer
-chrome.runtime.onMessage.addListener((message: { keepAlive?: boolean }) => {
+chrome.runtime.onMessage.addListener((message: { keepAlive?: boolean; method?: string; key?: string; }, _sender, sendResponse) => {
   if (message.keepAlive) {
     (1 + 1);
+  } else if(message.method === "getLocalStorage") {
+    chrome.storage.local.get(message.key)
+      .then((data) => {
+        sendResponse({ data });
+      });
   }
+});
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.method == "getLocalStorage")
+    sendResponse({data: localStorage[request.key]});
+  else
+    sendResponse({}); // snub them.
 });
 
 // Set background color of badge to teal
