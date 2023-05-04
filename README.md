@@ -9,6 +9,7 @@ If you have Firefox, you can install the addon from [Mozilla Addons](https://add
 * Checks for notifications every minute
 * Reply directly from extension popup
 * Load more replies at a time on Khan Academy discussions (100 instead of 10)
+* Set default comment sorting in Khan Academy discussions
 
 ## Related
 Be sure to also check out the awesome [The Khan Academy Extension](https://github.com/ka-extension/ka-extension-ts) which adds even more features to the site!
@@ -26,4 +27,4 @@ Check out our [Discord server](https://discord.com/invite/peexFK5dz6) to get in 
 If you would like to report a bug, please [create an issue](https://github.com/eliasmurcray/ka-notifications/issues).
 
 ## Build
-If you want to build, first run `npm install` to install necessary dependencies. Then, you can make your changes and run `npm run build` to build the extension.
+If you want to build, first run `npm install` to install necessary dependencies. Then, you can make your changes and run `npm run build` to build the extension. Finally, if you are exporting the extension as a .zip file, run `npm run zip`. The output files are in the zip/ directory.

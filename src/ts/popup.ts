@@ -176,7 +176,7 @@ sortCommentsSelect.addEventListener("change", (event: Event) => {
   const element = event.target as HTMLSelectElement;
   const { value } = element;
 
-  chrome.storage.local.set({
+  void chrome.storage.local.set({
     "commentSort": value
   });
 });

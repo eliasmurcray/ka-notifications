@@ -8,7 +8,8 @@
     "commit": "sh -c 'git add . && git commit -m \"$0\" && git push -u origin main'",
     "clearcache": "git rm -r --cached .",
     "fix": "eslint 'src/**/*.ts' --fix",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "zip": "webpack && node firefox-build.js && node zip-extensions.js"
   },
   "repository": {
     "type": "git",
@@ -35,5 +36,8 @@
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-manifest-plugin": "^5.0.0"
+  },
+  "dependencies": {
+    "archiver": "^5.3.1"
   }
 }
