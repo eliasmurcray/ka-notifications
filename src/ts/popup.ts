@@ -67,6 +67,11 @@ themeButton.onclick = () => {
 
 // Load notifications on scroll
 notificationsSection.addEventListener("scroll", checkScroll, { passive: true });
+function _element (type: string, className: string): HTMLElement {
+  const element = document.createElement(type);
+  element.className = className;
+  return element;
+}
 
 // Mark all items as read
 markAllReadButton.onclick = () => {
@@ -101,7 +106,23 @@ async function loadNotifications (): Promise<void> {
   if(result.value.error === "No fkey cookie found.") {
     loadingContainer.remove();
     notificationsSection.removeEventListener("scroll", checkScroll);
-    notificationsContainer.innerHTML += "<div class=\"notification\"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">Your fkey cookie has expired. You need to <a class=\"hyperlink\" href=\"https://www.khanacademy.org/\" target=\"_blank\">navigate to Khan Academy</a> to refresh it automatically.</p></div>";
+
+    const notificationHeader = _element("div", "notification-header");
+    const notificationContent = _element("div", "notification-content");
+    const notificationAuthorAvatar = _element("img", "notification-author--avatar") as HTMLImageElement;
+    const notificationAuthorNickname = _element("h3", "notification-author--nickname");
+    const hyperlink = _element("a", "hyperlink") as HTMLAnchorElement;
+    hyperlink.href = "https://www.khanacademy.org";
+    hyperlink.target = "_blank";
+    hyperlink.textContent = "navigate to Khan Academy";
+    const notificationDate = _element("span", "notification-date");
+    notificationAuthorAvatar.src = "guardian-icon.png";
+    notificationAuthorNickname.textContent = "KA Guardian";
+    notificationDate.textContent = "0s ago";
+    notificationHeader.append(notificationAuthorAvatar, notificationAuthorNickname, notificationDate);
+    notificationContent.append("Your fkey cookie has expired. You need to ", hyperlink, " to refresh it automatically.");
+
+    notificationsContainer.append(notificationHeader, notificationContent);
     return;
   }
 
