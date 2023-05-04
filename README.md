@@ -13,7 +13,7 @@
 
 <h2 align="center">Khan Academy Notifications</h2>
 
-<p align="center">Inspired by <a href="https://github.com/ka-extension/ka-extension-ts">The Khan Academy Extension</a>, Khan Academy Notifications is an extension designed to deliver user notifications in a timely manner.</p>
+<p align="center">Inspired by <a href="https://github.com/ka-extension/ka-extension-ts">The Khan Academy Extension</a>, Khan Academy Notifications is an extension designed to deliver user notifications in a timely manner. The extension also offers features such as direct reply from the popup, loading more replies at once in Khan Academy discussions, and setting default comment sorting.</p>
 <br />
 
 ## Feedback
