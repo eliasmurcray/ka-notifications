@@ -116,7 +116,7 @@ async function loadNotifications (): Promise<void> {
   } else if (notifications.length === 0 && result.done === false && notificationsContainer.innerHTML === "") {
     loadingContainer.remove();
     notificationsSection.removeEventListener("scroll", checkScroll);
-    notificationsContainer.innerHTML += "<div class=\"notification\"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">You have no notifications.</p></div>";
+    notificationsContainer.append("<div class=\"notification\"><div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3><span class=\"notification-date\">0s ago</span></div><p class=\"notification-content\">You have no notifications.</p></div>");
     return;
   }
 

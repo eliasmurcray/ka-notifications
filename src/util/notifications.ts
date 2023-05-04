@@ -113,7 +113,7 @@ export function createNotificationHTMLDivElement (notification: Notification): H
   switch(__typename) {
     case "ResponseFeedbackNotification": {
       const { authorAvatarUrl, authorNickname, content, feedbackType, focusTranslatedTitle } = notification as ResponseFeedbackNotification & BasicNotification;
-      notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='${authorAvatarUrl}'><h3 class='notification-author--nickname'>${escapeHTML(authorNickname)}</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><div class='notification-content'>${parseAndRender(content)}</div>`;
+      notificationElement.insertAdjacentHTML('beforeend', `<div class='notification-header'><img class='notification-author--avatar' src='${authorAvatarUrl}'><h3 class='notification-author--nickname'>${escapeHTML(authorNickname)}</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>${feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${focusTranslatedTitle}</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><div class='notification-content'>${parseAndRender(content)}</div>`);
 
       const wrapper = _element("div", "feedback-button-wrapper");
       const button = _element("button", "feedback-button") as HTMLButtonElement;
@@ -132,7 +132,7 @@ export function createNotificationHTMLDivElement (notification: Notification): H
       break;
     case "ProgramFeedbackNotification": {
       const { authorAvatarSrc, authorNickname, content, feedbackType, translatedScratchpadTitle } = notification as ProgramFeedbackNotification & BasicNotification;
-      notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='${authorAvatarSrc}'><h3 class='notification-author--nickname'>${escapeHTML(authorNickname)}</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><div class='notification-content'>${parseAndRender(content)}</div>`;
+      notificationElement.insertAdjacentHTML('beforeend', `<div class='notification-header'><img class='notification-author--avatar' src='${authorAvatarSrc}'><h3 class='notification-author--nickname'>${escapeHTML(authorNickname)}</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>${feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${translatedScratchpadTitle}</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><div class='notification-content'>${parseAndRender(content)}</div>`);
 
       // Extract the id and qa_expand_key from the url
       const split = url.split("/");
@@ -156,33 +156,33 @@ export function createNotificationHTMLDivElement (notification: Notification): H
       } else {
         badgeString = badgeNotifications.map((badge) => badge.badge.description).slice(0, -1).join(", ") + ", and " + badgeNotifications[badgeNotifications.length - 1].badge.description;
       }
-      notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='${badgeNotifications[0].badge.icons.compactUrl}'><h3 class='notification-author--nickname'>KA Badges</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>view badges</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>You earned ${badgeString}! Congratulations!</p>`;
+      notificationElement.insertAdjacentHTML('beforeend', `<div class='notification-header'><img class='notification-author--avatar' src='${badgeNotifications[0].badge.icons.compactUrl}'><h3 class='notification-author--nickname'>KA Badges</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>view badges</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>You earned ${badgeString}! Congratulations!</p>`);
     }
       break;
     case "BadgeNotification": {
       const { badge: { description, icons: { compactUrl }, relativeUrl } } = notification as BadgeNotification & BasicNotification;
-      notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='${compactUrl}'><h3 class='notification-author--nickname'>KA Badges</h3><a class='hyperlink' href='https://www.khanacademy.org${relativeUrl}' target='_blank'>view badges</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>You earned ${description}! Congratulations!</p>`;
+      notificationElement.insertAdjacentHTML('beforeend', `<div class='notification-header'><img class='notification-author--avatar' src='${compactUrl}'><h3 class='notification-author--nickname'>KA Badges</h3><a class='hyperlink' href='https://www.khanacademy.org${relativeUrl}' target='_blank'>view badges</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>You earned ${description}! Congratulations!</p>`);
     }
       break;
     case "ModeratorNotification": {
       const { text } = notification as ModeratorNotification & BasicNotification;
-      notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='guardian-icon.png'><h3 class='notification-author--nickname'>KA Guardian</h3><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>${text}</p>`;
+      notificationElement.insertAdjacentHTML('beforeend', `<div class='notification-header'><img class='notification-author--avatar' src='guardian-icon.png'><h3 class='notification-author--nickname'>KA Guardian</h3><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>${text}</p>`);
     }
       break;
     case "AvatarNotification": {
       const { name, thumbnailSrc, url } = notification as AvatarNotification & BasicNotification;
-      notificationElement.innerHTML = `<div class='notification-header'><img class='notification-author--avatar' src='${thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? thumbnailSrc : "https://cdn.kastatic.org" + thumbnailSrc}'><h3 class='notification-author--nickname'>KA Avatars</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>use avatar</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>You unlocked <b>${AVATAR_SHORTNAMES[name] as string}</b>! <i>${AVATAR_REQUIREMENTS[name] as string}</i></p>`;
+      notificationElement.insertAdjacentHTML('beforeend', `<div class='notification-header'><img class='notification-author--avatar' src='${thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? thumbnailSrc : "https://cdn.kastatic.org" + thumbnailSrc}'><h3 class='notification-author--nickname'>KA Avatars</h3><a class='hyperlink' href='https://www.khanacademy.org${url}' target='_blank'>use avatar</a><span class='notification-date'>${timeSince(new Date(date))} ago</span></div><p class='notification-content'>You unlocked <b>${AVATAR_SHORTNAMES[name] as string}</b>! <i>${AVATAR_REQUIREMENTS[name] as string}</i></p>`);
     }
       break;
     default:
-      notificationElement.innerHTML = `<div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3></div><div class="notification-content">This is an unhandled notification type. You can report this in our <a class="hyperlink" href="https://github.com/eliasmurcray/ka-notifications/issues" target="_blank">official Github repository</a>.</div><pre>${JSON.stringify(notification, null, 2)}</pre>`;
+      notificationElement.insertAdjacentHTML('beforeend', `<div class=\"notification-header\"><img class=\"notification-author--avatar\" src=\"32.png\"><h3 class=\"notification-author--nickname\">KA Notifications</h3></div><div class="notification-content">This is an unhandled notification type. You can report this in our <a class="hyperlink" href="https://github.com/eliasmurcray/ka-notifications/issues" target="_blank">official Github repository</a>.</div><pre>${JSON.stringify(notification, null, 2)}</pre>`);
   }
   return notificationElement as HTMLDivElement;
 }
 
 // Creates HTMLDivElement
 export function renderFromCache (parentElement: HTMLDivElement, cache: { preloadString: string, cursor: string }): void {
-  parentElement.innerHTML += cache.preloadString;
+  parentElement.insertAdjacentHTML('beforeend', cache.preloadString);
   parentElement
     .querySelectorAll(".feedback-button")
     .forEach((button: HTMLButtonElement) => {
