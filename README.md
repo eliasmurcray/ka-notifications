@@ -1,3 +1,4 @@
+<br />
 <p align="center"><img width="128" alt="Khan Academy Notifications Logo" src="https://raw.githubusercontent.com/eliasmurcray/ka-notifications/main/src/images/128.png"></p>
 <br />
 <p align="center">The unofficial extension for Khan Academy notifications.</p>
