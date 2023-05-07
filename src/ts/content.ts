@@ -35,6 +35,12 @@ function updateSortBy (sortBy: string, iteration: number) {
   const children = Array.from(listBox.children);
   const userPreference = children[["Trending", "Top Voted", "Recent"].indexOf(sortBy)] as HTMLDivElement;
   userPreference.click();
-  const newButton = document.querySelector<HTMLButtonElement>("button#sortBy") ;
-  newButton?.click();
+
+  const interval = setInterval(() => {
+    button.click();
+
+    if(button.getAttribute('aria-expanded') === 'false') {
+      clearInterval(interval);
+    }
+  }, 1);
 }

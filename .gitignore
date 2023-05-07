@@ -1,5 +1,6 @@
 node_modules
 chrome
 firefox
+zip
 package-lock.json
 .DS_Store
