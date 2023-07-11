@@ -1,0 +1,1 @@
+window.setInterval((()=>chrome.runtime.sendMessage({keepAlive:!0})),2e4);

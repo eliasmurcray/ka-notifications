@@ -1,0 +1,1 @@
+(()=>{"use strict";document.getElementById("notifications-container"),chrome.storage.local.get(["prefetch_data","prefetch_cursor"]).then((({prefetch_data:e,prefetch_cursor:t})=>{e&&t&&console.log(e,t)})).catch((e=>{console.log(e)}))})();

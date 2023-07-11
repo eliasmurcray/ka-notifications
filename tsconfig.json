@@ -1,0 +1,10 @@
+{
+  "exclude": ["./dist/"],
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "types": ["chrome"],
+    "target": "ESNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true
+  }
+}
