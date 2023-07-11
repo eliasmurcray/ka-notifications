@@ -19,3 +19,8 @@ export interface NotificationResponse {
     cursor: string;
   };
 }
+
+export interface NotificationCountResponse {
+  error?: string;
+  value?: number;
+}

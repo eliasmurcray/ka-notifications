@@ -1,4 +1,7 @@
-import { NotificationResponse } from "../@types/extension";
+import {
+  NotificationCountResponse,
+  NotificationResponse,
+} from "../@types/extension";
 import { getUserKaasCookie, graphQLFetch } from "./graphql";
 
 /**
@@ -22,14 +25,20 @@ export async function createOffscreenHeartbeat(): Promise<void> {
  *
  * @returns An object with an error if invalid, otherwise a value containing the notifications and the next cursor.
  */
-export async function getNotifications(): Promise<NotificationResponse> {
+export async function getNotificationData(
+  kaas?: string
+): Promise<NotificationResponse> {
   let cookie: string;
-  try {
-    cookie = await getUserKaasCookie();
-  } catch (e) {
-    return {
-      error: "cookie",
-    };
+  if (kaas !== undefined) {
+    cookie = kaas;
+  } else {
+    try {
+      cookie = await getUserKaasCookie();
+    } catch (e) {
+      return {
+        error: "cookie",
+      };
+    }
   }
   let response: Response;
   try {
@@ -57,5 +66,43 @@ export async function getNotifications(): Promise<NotificationResponse> {
       notifications: notificationsResponse.notifications,
       cursor: notificationsResponse.pageInfo.nextCursor,
     },
+  };
+}
+
+export async function getNotificationCount(
+  kaas?: string
+): Promise<NotificationCountResponse> {
+  let cookie: string;
+  if (kaas !== undefined) {
+    cookie = kaas;
+  } else {
+    try {
+      cookie = await getUserKaasCookie();
+    } catch (e) {
+      return {
+        error: "cookie",
+      };
+    }
+  }
+
+  let response: Response;
+  try {
+    response = await graphQLFetch("getFullUserProfile", cookie);
+  } catch (e) {
+    if (e.message === "Failed to fetch") {
+      return {
+        error: "network",
+      };
+    }
+    return {
+      error: "response",
+      value: e.message,
+    };
+  }
+
+  const json = await response.json();
+
+  return {
+    value: json.data.user.newNotificationCount,
   };
 }

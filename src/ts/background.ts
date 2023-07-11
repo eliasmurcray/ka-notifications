@@ -1,4 +1,9 @@
-import { createOffscreenHeartbeat, getNotifications } from "../util/background";
+import {
+  createOffscreenHeartbeat,
+  getNotificationCount,
+  getNotificationData,
+} from "../util/background";
+import { getUserKaasCookie, graphQLFetch } from "../util/graphql";
 const ALARM_NAME = "khanAcademyNotifications";
 
 /*
@@ -55,22 +60,34 @@ void handleNotifications();
 
 async function handleNotifications(): Promise<void> {
   const perf = performance.now();
-  const response = await getNotifications();
+  let cookie: string;
+  try {
+    cookie = await getUserKaasCookie();
+  } catch (e) {
+    console.log("User is not logged in.");
+    return;
+  }
+
+  const notificationCount = await getNotificationCount(cookie);
+
+  void chrome.action.setBadgeText({ text: notificationCount.value.toString() });
+
+  const notificationData = await getNotificationData(cookie);
 
   // If everything works perfectly, use the data
-  if (response.error === undefined) {
+  if (notificationData.error === undefined) {
     console.log(
       `Notifications (${(performance.now() - perf).toFixed(3)}ms): `,
-      response.value.notifications
+      notificationData.value.notifications
     );
     void chrome.storage.local.set({
-      prefetch_data: response.value.notifications,
-      prefetch_cursor: response.value.cursor,
+      prefetch_data: notificationData.value.notifications,
+      prefetch_cursor: notificationData.value.cursor,
     });
     return;
   }
 
-  switch (response.error) {
+  switch (notificationData.error) {
     case "cookie":
       // User is logged out
       console.log("User is not logged in.");
@@ -82,7 +99,7 @@ async function handleNotifications(): Promise<void> {
       break;
     case "response":
       // This is the only real error
-      console.error("Error in response: ", response.value);
+      console.error("Error in response: ", notificationData.value);
       break;
     case "network":
       // In case of possible disconnect mid-fetch
