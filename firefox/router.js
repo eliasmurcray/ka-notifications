@@ -1,0 +1,1 @@
+(()=>{const t=window.location.pathname.split("/");if(("computer-programming"===t[1]||"cs"===t[1])&&/^\d{16}$/.test(t[3].split("?")[0])){const t=document.createElement("script");t.src=chrome.runtime.getURL("project.js"),document.head.append(t)}})();

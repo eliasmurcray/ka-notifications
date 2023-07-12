@@ -6,18 +6,12 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 module.exports = {
   mode: "production",
   entry: {
-    content: "/src/ts/content.ts",
+    router: "/src/ts/router.ts",
     background: "/src/ts/background.ts",
     popup: "/src/ts/popup.ts",
-    // reply: "/src/ts/reply.ts",
+    project: "/src/ts/project.ts",
     heartbeat: "/src/ts/heartbeat.ts",
   },
-  // externals: {
-  //   "/src/notification.d.ts": true,
-  // },
-  // experiments: {
-  //   topLevelAwait: true,
-  // },
   resolve: {
     extensions: [".ts"],
   },

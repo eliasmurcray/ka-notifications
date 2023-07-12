@@ -25,7 +25,7 @@
   },
   "content_scripts": [
     {
-      "js": ["content.js"],
+      "js": ["router.js"],
       "matches": ["https://www.khanacademy.org/*"],
       "run_at": "document_end"
     }
@@ -34,7 +34,7 @@
   "host_permissions": ["https://www.khanacademy.org/"],
   "web_accessible_resources": [
     {
-      "resources": ["reply.js"],
+      "resources": ["project.js"],
       "matches": ["https://www.khanacademy.org/*"]
     }
   ],

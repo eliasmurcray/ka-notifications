@@ -1,8 +1,4 @@
-import {
-  createOffscreenHeartbeat,
-  getNotificationCount,
-  getNotificationData,
-} from "../util/background";
+import { createOffscreenHeartbeat, getNotificationCount, getNotificationData } from "../util/background";
 import { getUserKaasCookie } from "../util/graphql";
 const ALARM_NAME = "khanAcademyNotifications";
 
@@ -20,19 +16,17 @@ void chrome.runtime.onMessage.addListener((message: { keepAlive: boolean }) => {
 });
 
 // Listens to logout via auth cookie changes
-void chrome.cookies.onChanged.addListener(
-  async ({ cookie: { name }, removed }) => {
-    if (name === "KAAS") {
-      void chrome.action.setBadgeText({ text: "" });
-      void chrome.storage.local.remove(["prefetch_data", "prefetch_cursor"]);
-      // If it was a login, check for notifications immediately
-      if (removed === false) {
-        console.log("Logged in!");
-        void handleNotifications();
-      }
+void chrome.cookies.onChanged.addListener(async ({ cookie: { name }, removed }) => {
+  if (name === "KAAS") {
+    void chrome.action.setBadgeText({ text: "" });
+    void chrome.storage.local.remove(["prefetch_data", "prefetch_cursor"]);
+    // If it was a login, check for notifications immediately
+    if (removed === false) {
+      console.log("Logged in!");
+      void handleNotifications();
     }
   }
-);
+});
 
 void chrome.alarms.onAlarm.addListener(async ({ name }) => {
   if (name === ALARM_NAME) {
@@ -102,10 +96,7 @@ async function handleNotifications(): Promise<void> {
 
   // If everything works perfectly, use the data
   if (notificationData.error === undefined) {
-    console.log(
-      `Notifications (${(performance.now() - perf).toFixed(3)}ms): `,
-      notificationData.value.notifications
-    );
+    console.log(`Notifications (${(performance.now() - perf).toFixed(3)}ms): `, notificationData.value.notifications);
     void chrome.storage.local.set({
       prefetch_data: notificationData.value.notifications,
       prefetch_cursor: notificationData.value.cursor,

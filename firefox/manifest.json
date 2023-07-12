@@ -26,7 +26,7 @@
   "content_scripts": [
     {
       "js": [
-        "content.js"
+        "router.js"
       ],
       "matches": [
         "https://www.khanacademy.org/*"
@@ -45,7 +45,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "reply.js"
+        "project.js"
       ],
       "matches": [
         "https://www.khanacademy.org/*"

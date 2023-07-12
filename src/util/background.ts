@@ -1,7 +1,4 @@
-import {
-  NotificationCountResponse,
-  NotificationResponse,
-} from "../@types/extension";
+import { NotificationCountResponse, NotificationResponse } from "../@types/extension";
 import { graphQLFetchJsonResponse } from "./graphql";
 
 /**
@@ -25,13 +22,8 @@ export async function createOffscreenHeartbeat(): Promise<void> {
  * @param kaas - optional cookie to speed up requests.
  * @returns An object with an error if invalid, otherwise a value containing the notifications and the next cursor.
  */
-export async function getNotificationData(
-  kaas?: string
-): Promise<NotificationResponse> {
-  const response = await graphQLFetchJsonResponse(
-    "getNotificationsForUser",
-    kaas
-  );
+export async function getNotificationData(kaas?: string): Promise<NotificationResponse> {
+  const response = await graphQLFetchJsonResponse("getNotificationsForUser", kaas);
 
   // Nonexistent cookie
   if (response.cookieError === true) {
@@ -66,9 +58,7 @@ export async function getNotificationData(
  * @param kaas - optional cookie to speed up requests.
  * @returns An object with an error if invalid, otherwise a value containing the notification count.
  */
-export async function getNotificationCount(
-  kaas?: string
-): Promise<NotificationCountResponse> {
+export async function getNotificationCount(kaas?: string): Promise<NotificationCountResponse> {
   const response = await graphQLFetchJsonResponse("getFullUserProfile", kaas);
 
   // Error has been handled

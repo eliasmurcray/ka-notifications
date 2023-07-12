@@ -116,19 +116,6 @@ export interface ProgramFeedbackNotification {
   translatedScratchpadTitle: string;
 }
 
-export interface KaNotification
-  extends AssignmentCreatedNotification,
-    AssignmentDueDateNotification,
-    AvatarNotification,
-    BadgeNotification,
-    CoachRequestAcceptedNotification,
-    CoachRequestNotification,
-    CourseMasteryGoalCreatedNotification,
-    GroupedBadgeNotification,
-    InfoNotification,
-    ModeratorNotification,
-    ProgramFeedbackNotification,
-    ResponseFeedbackNotification,
-    BasicNotification {
+export interface KaNotification extends AssignmentCreatedNotification, AssignmentDueDateNotification, AvatarNotification, BadgeNotification, CoachRequestAcceptedNotification, CoachRequestNotification, CourseMasteryGoalCreatedNotification, GroupedBadgeNotification, InfoNotification, ModeratorNotification, ProgramFeedbackNotification, ResponseFeedbackNotification, BasicNotification {
   __typename: string;
 }
