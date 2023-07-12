@@ -1,13 +1,17 @@
 import { GraphQLBody } from "../@types/graphql";
+import { blacklist } from "../util/blacklist";
 import { requestToRequestInit } from "../util/request";
+
+blacklist();
 
 /*
   Make comments load 100 at a time
 */
-const originalFetch = fetch;
+const proxiedFetch = fetch;
 window.fetch = async function (request: Request, requestInit: RequestInit): Promise<Response> {
-  if (!request?.url?.startsWith("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
-    return originalFetch(request, requestInit).catch(Math.abs) as Promise<Response>;
+  const { url } = request;
+  if (!url?.startsWith("https://www.khanacademy.org/api/internal/graphql/getFeedbackRepliesPage")) {
+    return proxiedFetch(request, requestInit).catch(Math.abs) as Promise<Response>;
   }
 
   return new Promise(async (resolve) => {
@@ -24,7 +28,7 @@ window.fetch = async function (request: Request, requestInit: RequestInit): Prom
         ...requestToRequestInit(request),
         body: JSON.stringify(graphQLBody),
       });
-      resolve(originalFetch(updatedRequest));
+      resolve(proxiedFetch(updatedRequest));
     };
     reader.readAsDataURL(blob);
   });
@@ -37,12 +41,10 @@ const qaExpandType = new URLSearchParams(window.location.search).get("qa_expand_
 let i = 0;
 let button: HTMLButtonElement;
 
-if (qaExpandType !== null) {
-  requestAnimationFrame(goToFeedback);
-}
+requestAnimationFrame(goToFeedback);
 
 function goToFeedback() {
-  if (i++ > 10000) {
+  if (i++ > 100000) {
     return;
   }
   switch (qaExpandType) {
@@ -52,6 +54,7 @@ function goToFeedback() {
       break;
     case "comment":
     case "reply":
+    case null:
       button = document.getElementById("ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-1") as HTMLButtonElement;
       break;
     case "project_help_question":

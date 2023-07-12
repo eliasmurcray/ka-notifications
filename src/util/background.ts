@@ -26,7 +26,7 @@ export async function getNotificationData(kaas?: string): Promise<NotificationRe
   const response = await graphQLFetchJsonResponse("getNotificationsForUser", kaas);
 
   // Nonexistent cookie
-  if (response.cookieError === true) {
+  if (response?.cookieError === true) {
     return {
       error: "cookie",
     };

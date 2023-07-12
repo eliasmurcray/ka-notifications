@@ -10,6 +10,7 @@ module.exports = {
     background: "/src/ts/background.ts",
     popup: "/src/ts/popup.ts",
     project: "/src/ts/project.ts",
+    hotlist: "/src/ts/hotlist.ts",
     heartbeat: "/src/ts/heartbeat.ts",
   },
   resolve: {
