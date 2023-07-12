@@ -1,4 +1,4 @@
-import { graphQLVariables } from "../@types/extension";
+import { GeneralResponse, graphQLVariables } from "../@types/extension";
 import graphQLQueries from "../json/graphql-queries.json";
 
 /**
@@ -53,6 +53,10 @@ export function graphQLFetch(
   });
 }
 
+/**
+ * Retrieves user KAAS cookie from Khan Academy.
+ * @returns KAAS cookie value or rejects if no cookie was found.
+ */
 export function getUserKaasCookie(): Promise<string> {
   return new Promise((resolve, reject) => {
     chrome.cookies.get(
@@ -68,4 +72,57 @@ export function getUserKaasCookie(): Promise<string> {
       }
     );
   });
+}
+
+/**
+ * Better error handling for graphQL calls.
+ * @param queryName graphQL query name.
+ * @param kaas cookie is required to make requests.
+ * @returns Returns an object with either an error or a JSON value
+ */
+export async function graphQLFetchJsonResponse(
+  queryName:
+    | "AddFeedbackToDiscussion"
+    | "clearBrandNewNotifications"
+    | "feedbackQuery"
+    | "getFeedbackRepliesPage"
+    | "getFullUserProfile"
+    | "getNotificationsForUser",
+  kaas: string
+): Promise<GeneralResponse> {
+  // Optimized cookie retrieval
+  let cookie: string;
+  if (kaas !== undefined) {
+    cookie = kaas;
+  } else {
+    try {
+      cookie = await getUserKaasCookie();
+    } catch (e) {
+      return {
+        cookieError: true,
+      };
+    }
+  }
+
+  // Attempts to fetch data and handles common errors
+  let response: Response;
+  try {
+    response = await graphQLFetch(queryName, cookie);
+  } catch (e) {
+    // It's possible you disconnected mid-fetch
+    if (e.message === "Failed to fetch") {
+      console.log(
+        "Possible network disconnect detected, please check your internet connection."
+      );
+      return;
+    }
+
+    // Otherwise you have a geniune network error
+    console.error("Error in response: ", e.message);
+    return;
+  }
+
+  return {
+    value: await response.json(),
+  };
 }

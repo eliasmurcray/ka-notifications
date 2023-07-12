@@ -24,3 +24,8 @@ export interface NotificationCountResponse {
   error?: string;
   value?: number;
 }
+
+export interface GeneralResponse {
+  cookieError?: boolean;
+  value?: any;
+}

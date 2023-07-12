@@ -3,7 +3,7 @@ import {
   getNotificationCount,
   getNotificationData,
 } from "../util/background";
-import { getUserKaasCookie, graphQLFetch } from "../util/graphql";
+import { getUserKaasCookie } from "../util/graphql";
 const ALARM_NAME = "khanAcademyNotifications";
 
 /*
@@ -60,19 +60,45 @@ void handleNotifications();
 
 async function handleNotifications(): Promise<void> {
   const perf = performance.now();
+
   let cookie: string;
   try {
     cookie = await getUserKaasCookie();
   } catch (e) {
+    // User is logged out
     console.log("User is not logged in.");
+    void chrome.action.setBadgeText({ text: "" });
+    void chrome.storage.local.set({
+      cached_data: "info:logout",
+      cached_cursor: "",
+    });
     return;
   }
 
   const notificationCount = await getNotificationCount(cookie);
 
-  void chrome.action.setBadgeText({ text: notificationCount.value.toString() });
+  if (notificationCount.error === "!user") {
+    console.log("No user found: ", notificationCount.value);
+    return;
+  }
+
+  const { value } = notificationCount;
+
+  if (value === 0) {
+    return;
+  }
 
   const notificationData = await getNotificationData(cookie);
+
+  if (notificationData.error === "!notifications") {
+    // User has no notifications
+    console.log("User has no notifications.");
+    void chrome.action.setBadgeText({ text: "" });
+    void chrome.storage.local.set({
+      prefetch_data: "info:zero",
+      prefetch_cursor: "",
+    });
+  }
 
   // If everything works perfectly, use the data
   if (notificationData.error === undefined) {
@@ -84,34 +110,10 @@ async function handleNotifications(): Promise<void> {
       prefetch_data: notificationData.value.notifications,
       prefetch_cursor: notificationData.value.cursor,
     });
-    return;
-  }
 
-  switch (notificationData.error) {
-    case "cookie":
-      // User is logged out
-      console.log("User is not logged in.");
-      void chrome.action.setBadgeText({ text: "" });
-      void chrome.storage.local.set({
-        cached_data: "<div>You are logged out!</div>",
-        cached_cursor: "",
-      });
-      break;
-    case "response":
-      // This is the only real error
-      console.error("Error in response: ", notificationData.value);
-      break;
-    case "network":
-      // In case of possible disconnect mid-fetch
-      console.log(
-        "Possible network disconnect detected, please check your internet connection."
-      );
-      break;
-    case "no notifications":
-      // User has no notifications
-      console.log("User has no notifications.");
-      void chrome.action.setBadgeText({ text: "" });
-      void chrome.storage.local.remove(["prefetch_data", "prefetch_cursor"]);
-      break;
+    void chrome.action.setBadgeText({
+      text: value > 98 ? "99+" : value.toString(),
+    });
+    return;
   }
 }
