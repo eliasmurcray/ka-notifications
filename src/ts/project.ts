@@ -67,4 +67,5 @@ function goToFeedback() {
   }
 
   button.click();
+  window.scrollTo({ top: 0 });
 }
