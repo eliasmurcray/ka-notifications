@@ -8,22 +8,25 @@ export function parseMarkdown(text: string) {
   const codeBlocks: string[] = [];
   const codeInlines: string[] = [];
 
+  // Store code blocks
   text = text.replace(/```([\s\S]*?)```/gm, (_match, codeBlock) => {
     codeBlocks.push(codeBlock);
     return `<codeblock-placeholder-${codeBlocks.length - 1}>`;
   });
 
+  // Store code inlines
   text = text.replace(/`([^\n]+?)`/g, (match, codeInline) => {
     codeInlines.push(codeInline);
-    return `<codeinlien-placeholder-${codeInlines.length - 1}>`;
+    return `<codeinline-placeholder-${codeInlines.length - 1}>`;
   });
-
-  text = text.replace(/(?:\n|^)`{3}\n?((.|\n)+?)`{3}/m, '<div class="discussion-code-block">$1</div>');
 
   let originalText = text;
   for (let i = 0; i < 100; i++) {
+    // Bolds
     text = text.replace(/\*([^\n]+?)\*/g, "<b>$1</b>");
+    // Italics
     text = text.replace(/_([^\n]+?)_/, "<i>$1</i>");
+    // Strikethroughs
     text = text.replace(/~([^\n]+?)~/, "<s>$1</s>");
     if (text === originalText) {
       break;
