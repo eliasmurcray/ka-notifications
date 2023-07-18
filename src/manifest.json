@@ -1,60 +1,45 @@
 {
-	"manifest_version": 3,
-	"name": "Khan Academy Notifications",
-	"short_name": "KA Notifications",
-	"author": "Elias Murcray",
-	"version": "1.4.2",
-	"homepage_url": "https://github.com/eliasmurcray/ka-notifications",
-	"description": "Get Khan Academy Notifications in real time!",
-	"minimum_chrome_version": "109",
-	"icons": {
-		"16": "16.png",
+  "manifest_version": 3,
+  "name": "Khan Academy Notifications",
+  "short_name": "KA Notifications",
+  "author": "Elias Murcray",
+  "version": "1.4.3",
+  "homepage_url": "https://github.com/eliasmurcray/ka-notifications",
+  "description": "Get Khan Academy Notifications in real time!",
+  "minimum_chrome_version": "109",
+  "icons": {
+    "16": "16.png",
     "32": "32.png",
-		"48": "48.png",
-		"128": "128.png"
-	},
-	"action": {
-		"default_title": "Khan Academy Notifications",
-		"default_icon": {
-			"16": "16.png",
+    "48": "48.png",
+    "128": "128.png"
+  },
+  "action": {
+    "default_title": "Khan Academy Notifications",
+    "default_icon": {
+      "16": "16.png",
       "32": "32.png",
       "48": "48.png",
       "128": "128.png"
-		},
-		"default_popup": "popup.html"
-	},
-	"content_scripts": [
-		{
-			"js": [
-				"content.js"
-			],
-			"matches": [
-				"https://www.khanacademy.org/*"
-			],
-			"run_at": "document_end"
-		}
-	],
-	"permissions": [
-		"cookies",
-		"storage",
-		"alarms",
-		"offscreen"
-	],
-	"host_permissions": [
-		"https://www.khanacademy.org/"
-	],
-	"web_accessible_resources": [
-			{
-			"resources": [
-				"reply.js"
-			],
-			"matches": [
-				"https://www.khanacademy.org/*"
-			]
-		}
-	],
-	"background": {
-		"service_worker": "background.js",
-		"type": "module"
-	}
+    },
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "js": ["content.js"],
+      "matches": ["https://www.khanacademy.org/*"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": ["cookies", "storage", "alarms", "offscreen"],
+  "host_permissions": ["https://www.khanacademy.org/"],
+  "web_accessible_resources": [
+    {
+      "resources": ["reply.js"],
+      "matches": ["https://www.khanacademy.org/*"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
 }
