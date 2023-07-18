@@ -5,6 +5,8 @@
  * @returns A formatted HTML string
  */
 export function parseMarkdown(text: string) {
+  text = cleanse(text);
+
   const codeBlocks: string[] = [];
   const codeInlines: string[] = [];
 
@@ -15,7 +17,7 @@ export function parseMarkdown(text: string) {
   });
 
   // Store code inlines
-  text = text.replace(/`([^\n]+?)`/g, (match, codeInline) => {
+  text = text.replace(/`([^\n]+?)`/g, (_match, codeInline) => {
     codeInlines.push(codeInline);
     return `<codeinline-placeholder-${codeInlines.length - 1}>`;
   });
@@ -50,7 +52,7 @@ export function parseMarkdown(text: string) {
   // @mentions (username 40 length max)
   text = text.replace(/@([a-zA-Z][a-zA-Z\d]{0,39})/g, '<a class="hyperlink" href="https://www.khanacademy.org/profile/$1" target="_blank">@$1</a>');
 
-  return cleanse(text);
+  return text;
 }
 
 /**
@@ -60,5 +62,5 @@ export function parseMarkdown(text: string) {
  * @returns HTML tag escaped text
  */
 export function cleanse(text: string): string {
-  return text.replace(/<>/g, "");
+  return text.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;");
 }
