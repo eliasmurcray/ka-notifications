@@ -45,7 +45,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "project.js"
+        "project.js",
+        "hotlist.js"
       ],
       "matches": [
         "https://www.khanacademy.org/*"

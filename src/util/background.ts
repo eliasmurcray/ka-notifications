@@ -33,7 +33,7 @@ export async function getNotificationData(kaas?: string): Promise<NotificationRe
   }
 
   // Error has been handled
-  if (response.value === undefined) {
+  if (!response?.value) {
     return;
   }
 
@@ -62,7 +62,7 @@ export async function getNotificationCount(kaas?: string): Promise<NotificationC
   const response = await graphQLFetchJsonResponse("getFullUserProfile", kaas);
 
   // Error has been handled
-  if (response.value === undefined) {
+  if (!response?.value) {
     return;
   }
 

@@ -71,6 +71,10 @@ async function handleNotifications(): Promise<void> {
 
   const notificationCount = await getNotificationCount(cookie);
 
+  if (!notificationCount) {
+    return;
+  }
+
   if (notificationCount.error === "!user") {
     console.log("No user found: ", notificationCount.value);
     return;
@@ -83,6 +87,10 @@ async function handleNotifications(): Promise<void> {
   }
 
   const notificationData = await getNotificationData(cookie);
+
+  if (!notificationData) {
+    return;
+  }
 
   if (notificationData.error === "!notifications") {
     // User has no notifications
