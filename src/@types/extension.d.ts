@@ -10,6 +10,8 @@ export interface graphQLVariables {
   parentKey?: string;
   textContent?: string;
   after?: string;
+  fromVideoAuthor?: boolean;
+  shownLowQualityNotice?: boolean;
 }
 
 export interface NotificationResponse {
@@ -29,3 +31,6 @@ export interface GeneralResponse {
   cookieError?: boolean;
   value?: any;
 }
+
+export type FeedbackRequestType = "QUESTION" | "COMMENT";
+export type FeedbackResponseType = "REPLY" | "ANSWER";

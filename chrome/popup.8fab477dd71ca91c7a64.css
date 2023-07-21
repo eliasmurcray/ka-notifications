@@ -77,7 +77,24 @@ body {
   overflow: hidden auto;
 
   --hyperlink-color: #1967d2;
+  --background-color: #ffffff;
+  --button-color: #eeeeee;
+  --button-text-color: #202124;
+  --border-color: #d8d9db;
+  background-color: var(--background-color);
   color: #202124;
+
+  transition: 0.1s ease-in-out;
+}
+
+body.dark {
+  --hyperlink-color: #00bfff;
+  --background-color: #0c0c10;
+  --button-color: #15151f;
+  --button-text-color: #e7e9f5;
+  --border-color: #202032;
+  background-color: var(--background-color);
+  color: #e7e9f5;
 }
 
 .hyperlink {
@@ -97,11 +114,12 @@ body {
   height: 38px;
   margin: 0;
   padding: 0;
-  background-color: #ffffff;
-  border-bottom: 1px solid #d8d9db;
+  background-color: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
   padding: 0 20px;
   column-gap: 12px;
   box-sizing: border-box;
+  transition: 0.1s ease-in-out;
 }
 
 .popup-header button {
@@ -137,17 +155,26 @@ body {
 
 .popup-header button#theme-button svg {
   fill: #6b27d9;
+  transition: 0.1s ease-in-out;
 }
 
 .popup-header button#settings {
   margin-left: auto;
 }
 
+body.dark .popup-header button {
+  background-color: #00000000 !important;
+}
+
+body.dark button#theme-button svg {
+  fill: #d9c727;
+  stroke: #d9c727;
+}
+
 #notifications-section,
 #settings-section {
   width: 100%;
   height: 444px;
-  /* overflow: auto hidden; */
 }
 
 #notifications-container {
@@ -213,15 +240,15 @@ body {
   padding: 6px 18px;
   border-radius: 20px;
   line-height: 1;
-  color: #202124;
-  background-color: #eee;
+  color: var(--button-text-color);
+  background-color: var(--button-color);
   font-size: 12px;
   cursor: pointer;
   transition: 0.1s ease-in-out;
 }
 
 .notification-feedback-button:hover {
-  background-color: #e6e6e6;
+  filter: brightness(102%);
 }
 
 .notification-content {
@@ -232,5 +259,19 @@ body {
   color: var(--notification-content-text-color);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+#active-textarea {
+  width: 100%;
+  display: block;
+  resize: none;
+  padding: 8px;
+  outline: 0;
+  border: 1px solid var(--border-color);
+  font: inherit;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  line-height: 1;
+  height: 30px;
 }
 

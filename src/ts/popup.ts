@@ -1,7 +1,7 @@
 import { KaNotification } from "../@types/notification";
 import "../css/popup.css";
 import { getNotificationData } from "../util/background";
-import { createLoggedOutString, createNoCookieString, createNoNotificationsString, createNotificationString } from "../util/popup";
+import { addReplyButtonEventListeners, createLoggedOutString, createNoCookieString, createNoNotificationsString, createNotificationString, initUserInterface } from "../util/popup";
 
 const NOTIFICATIONS_CONTAINER = document.getElementById("notifications-container") as HTMLDivElement;
 let loading = false,
@@ -9,40 +9,44 @@ let loading = false,
 
 // Initialize notifications
 void chrome.storage.local
-  .get(["prefetch_data", "prefetch_cursor"])
-  .then(async ({ prefetch_data, prefetch_cursor }) => {
+  .get(["prefetch_data", "prefetch_cursor", "theme"])
+  .then(async ({ prefetch_data, prefetch_cursor, theme }) => {
+    initUserInterface(theme);
     if (prefetch_data) {
-      if (prefetch_data === "info:cookie") {
-        NOTIFICATIONS_CONTAINER.innerHTML = createNoCookieString();
-        document.getElementById("loading-spinner-container")?.remove();
-      } else if (prefetch_data === "info:logout") {
-        NOTIFICATIONS_CONTAINER.innerHTML = createLoggedOutString();
-        document.getElementById("loading-spinner-container")?.remove();
-      } else if (prefetch_data === "info:nonotifications") {
-        NOTIFICATIONS_CONTAINER.innerHTML = createNoNotificationsString();
-        document.getElementById("loading-spinner-container")?.remove();
+      switch (prefetch_data) {
+        case "info:cookie":
+          NOTIFICATIONS_CONTAINER.innerHTML = createNoCookieString();
+          document.getElementById("loading-spinner-container")?.remove();
+          break;
+        case "info:logout":
+          NOTIFICATIONS_CONTAINER.innerHTML = createLoggedOutString();
+          document.getElementById("loading-spinner-container")?.remove();
+          break;
+        case "info:nonotifications":
+          NOTIFICATIONS_CONTAINER.innerHTML = createNoNotificationsString();
+          document.getElementById("loading-spinner-container")?.remove();
+          break;
+        default:
+          let notifications = prefetch_data as KaNotification[];
+
+          if (notifications === undefined) {
+            return;
+          }
+
+          NOTIFICATIONS_CONTAINER.innerHTML = notifications.map(createNotificationString).join("");
+          addReplyButtonEventListeners();
+
+          if (prefetch_cursor === undefined) {
+            return;
+          }
+
+          localCursor = prefetch_cursor;
+          // Add scroll listener, since there are notifications
+          document.body.addEventListener("scroll", handleScroll, { passive: true });
       }
-
-      let notifications = prefetch_data as KaNotification[];
-
-      if (notifications === undefined) {
-        return;
-      }
-
-      NOTIFICATIONS_CONTAINER.innerHTML = notifications.map(createNotificationString).join("");
-
-      if (prefetch_cursor === undefined) {
-        return;
-      }
-
-      localCursor = prefetch_cursor;
-      // Add scroll listener, since there are notifications
-      window.addEventListener("scroll", handleScroll, { passive: true });
-
-      return;
     } else {
       await appendNotifications();
-      window.addEventListener("scroll", handleScroll, { passive: true });
+      document.body.addEventListener("scroll", handleScroll, { passive: true });
     }
   })
   .catch((error) => {
@@ -50,7 +54,7 @@ void chrome.storage.local
   });
 
 function handleScroll() {
-  if (loading === false && Math.abs(document.documentElement.scrollHeight - document.documentElement.scrollTop - document.documentElement.clientHeight) <= 76) {
+  if (loading === false && Math.abs(document.body.scrollHeight - document.body.scrollTop - document.body.clientHeight) <= 76) {
     loading = true;
     appendNotifications();
   }
@@ -63,11 +67,12 @@ async function appendNotifications(): Promise<void> {
   if (response.value !== undefined) {
     const { notifications, cursor } = response.value;
 
-    NOTIFICATIONS_CONTAINER.innerHTML += notifications.map(createNotificationString).join("");
+    NOTIFICATIONS_CONTAINER.insertAdjacentHTML("beforeend", notifications.map(createNotificationString).join(""));
+    addReplyButtonEventListeners();
 
     if (cursor === null) {
       document.getElementById("loading-spinner-container")?.remove();
-      window.removeEventListener("scroll", handleScroll);
+      document.body.removeEventListener("scroll", handleScroll);
     }
     localCursor = cursor;
     loading = false;
@@ -85,7 +90,7 @@ async function appendNotifications(): Promise<void> {
         NOTIFICATIONS_CONTAINER.innerHTML = createNoCookieString();
         break;
       case "nonotifications":
-        window.removeEventListener("scroll", handleScroll);
+        document.body.removeEventListener("scroll", handleScroll);
         break;
     }
   }

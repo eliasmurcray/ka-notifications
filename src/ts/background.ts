@@ -1,5 +1,5 @@
 import { createOffscreenHeartbeat, getNotificationCount, getNotificationData } from "../util/background";
-import { getUserKaasCookie } from "../util/graphql";
+import { getUserFkeyCookie } from "../util/graphql";
 const ALARM_NAME = "khanAcademyNotifications";
 
 /*
@@ -64,7 +64,7 @@ async function handleNotifications(): Promise<void> {
 
   let cookie: string;
   try {
-    cookie = await getUserKaasCookie();
+    cookie = await getUserFkeyCookie();
   } catch (e) {
     void chrome.action.setBadgeText({ text: "" });
     void chrome.storage.local.set({
