@@ -90,6 +90,40 @@ export function initUserInterface(theme: string) {
       console.error(e);
     }
   };
+
+  /**
+   * Page switching
+   */
+
+  const settingsButton = document.getElementById("settings-button");
+  const notificationsSection = document.getElementById("notifications-section");
+  const settingsSection = document.getElementById("settings-section");
+
+  settingsButton.onclick = () => {
+    notificationsSection.classList.toggle("hidden");
+    settingsSection.classList.toggle("hidden");
+
+    if (settingsSection.classList.contains("hidden")) {
+      settingsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18px" height"18px"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19.1 13a7 7 0 0 0 0-2l2-1.5c.2-.2.3-.4.2-.6l-2-3.3a.5.5 0 0 0-.5-.3l-2.4 1a7 7 0 0 0-1.6-1l-.4-2.5c0-.2-.2-.4-.5-.4h-3.8c-.3 0-.4.2-.5.4l-.3 2.5-1.7 1-2.4-1c-.2 0-.4 0-.5.3l-2 3.3c0 .2 0 .4.2.6l2 1.6-.1.9v1l-2 1.5c-.1.2-.2.4 0 .6l1.8 3.3c.2.3.4.3.6.3l2.4-1 1.6 1 .4 2.5c0 .2.2.4.5.4h3.8c.3 0 .5-.2.5-.4l.4-2.6 1.6-.9 2.4 1c.2 0 .4 0 .6-.3l1.9-3.3-.1-.6-2-1.6zM12 15.5a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>';
+    } else {
+      settingsButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24" width="18px"><path d="M0 0h24v24H0V0z" fill="#00000000"/><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-1.29 1.29c-.63.63-.19 1.71.7 1.71h13.17c.89 0 1.34-1.08.71-1.71L18 16z"/></svg>';
+    }
+  };
+
+  const commentSortInput = document.getElementById("sort-comments") as HTMLInputElement;
+
+  (async () => {
+    const { commentSort } = await chrome.storage.local.get("commentSort");
+    if (commentSort) {
+      commentSortInput.value = commentSort;
+    }
+  })();
+
+  commentSortInput.onchange = () => {
+    void chrome.storage.local.set({
+      commentSort: commentSortInput.value,
+    });
+  };
 }
 
 /**
