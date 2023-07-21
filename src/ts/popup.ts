@@ -102,3 +102,16 @@ async function appendNotifications(): Promise<void> {
 
   firstTime = false;
 }
+
+/**
+ * Set up refresh button
+ */
+
+const refreshButton = document.getElementById("refresh-notifications");
+refreshButton.onclick = async () => {
+  NOTIFICATIONS_CONTAINER.innerHTML = "";
+  RAINBOW_HEADER.classList.remove("stopped");
+  document.body.removeEventListener("scroll", handleScroll);
+  localCursor = "";
+  await appendNotifications();
+};

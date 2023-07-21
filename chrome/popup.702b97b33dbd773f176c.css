@@ -343,3 +343,34 @@ body.dark button#theme-button svg {
   height: 30px;
 }
 
+#refresh-notifications {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  border: 0;
+  outline: 0;
+  box-shadow: 0;
+  padding: 0;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  background-color: var(--button-text-color);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: filter 0.1s ease-in-out;
+}
+
+#refresh-notifications:hover {
+  filter: brightness(105%);
+}
+
+#refresh-notifications:disabled {
+  filter: brightness(95%);
+}
+
+#refresh-notifications svg {
+  display: block;
+  fill: var(--button-color);
+}
+
