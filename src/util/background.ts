@@ -22,8 +22,8 @@ export async function createOffscreenHeartbeat(): Promise<void> {
  * @param kaas - optional cookie to speed up requests.
  * @returns An object with an error if invalid, otherwise a value containing the notifications and the next cursor.
  */
-export async function getNotificationData(kaas?: string): Promise<NotificationResponse> {
-  const response = await graphQLFetchJsonResponse("getNotificationsForUser", kaas);
+export async function getNotificationData(kaas?: string, cursor?: string): Promise<NotificationResponse> {
+  const response = await graphQLFetchJsonResponse("getNotificationsForUser", kaas, cursor === undefined ? undefined : { after: cursor });
 
   // Nonexistent cookie
   if (response?.cookieError === true) {
@@ -41,7 +41,7 @@ export async function getNotificationData(kaas?: string): Promise<NotificationRe
   let notificationsResponse = response.value?.data?.user?.notifications;
   if (!notificationsResponse) {
     return {
-      error: "!notifications",
+      error: "nonotifications",
     };
   }
 

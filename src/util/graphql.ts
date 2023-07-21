@@ -63,7 +63,7 @@ export function getUserKaasCookie(): Promise<string> {
  * @param kaas cookie is required to make requests.
  * @returns Returns an object with either an error or a JSON value
  */
-export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussion" | "clearBrandNewNotifications" | "feedbackQuery" | "getFeedbackRepliesPage" | "getFullUserProfile" | "getNotificationsForUser", kaas: string): Promise<GeneralResponse> {
+export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussion" | "clearBrandNewNotifications" | "feedbackQuery" | "getFeedbackRepliesPage" | "getFullUserProfile" | "getNotificationsForUser", kaas: string, variables: graphQLVariables = {}): Promise<GeneralResponse> {
   // Optimized cookie retrieval
   let cookie: string;
   if (kaas !== undefined) {
@@ -81,7 +81,7 @@ export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussi
   // Attempts to fetch data and handles common errors
   let response: Response;
   try {
-    response = await graphQLFetch(queryName, cookie);
+    response = await graphQLFetch(queryName, cookie, variables);
   } catch (e) {
     // It's possible you disconnected mid-fetch
     if (e.message === "Failed to fetch") {
