@@ -27,9 +27,9 @@ export function parseMarkdown(text: string) {
     // Bolds
     text = text.replace(/\*([^\n]+?)\*/g, "<b>$1</b>");
     // Italics
-    text = text.replace(/_([^\n]+?)_/, "<i>$1</i>");
+    text = text.replace(/_([^\n]+?)_/g, "<i>$1</i>");
     // Strikethroughs
-    text = text.replace(/~([^\n]+?)~/, "<s>$1</s>");
+    text = text.replace(/~([^\n]+?)~/g, "<s>$1</s>");
     if (text === originalText) {
       break;
     }

@@ -8,6 +8,7 @@
     "build.chrome": "webpack",
     "commit": "sh -c 'git add . && git commit -m \"$0\" && git push -u origin v2'",
     "clearcache": "git rm -r --cached .",
+    "dev": "webpack -- --watch",
     "fix": "eslint 'src/**/*.ts' --fix",
     "lint": "eslint .",
     "release": "webpack && node scripts/firefox-build.js && node scripts/zip-extension.js"
