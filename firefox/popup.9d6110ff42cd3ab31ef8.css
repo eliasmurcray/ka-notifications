@@ -1,5 +1,82 @@
-@import "./loading-spinner.css";
-@import "./rainbow-header.css";
+#loading-spinner-container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  width: 100%;
+  padding-block: 20px;
+}
+
+.loading-spinner {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  height: 50px;
+}
+
+.loading-icon {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #0000;
+  border-radius: 50%;
+  border-top-color: #1890ff;
+  border-left-color: #1890ff;
+  animation: spin 3s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+    border-top-color: #ff1744;
+    border-left-color: #ff1744;
+  }
+
+  20% {
+    transform: rotate(360deg);
+    border-top-color: #ffc400;
+    border-left-color: #ffc400;
+  }
+
+  40% {
+    transform: rotate(720deg);
+    border-top-color: #00e676;
+    border-left-color: #00e676;
+  }
+
+  60% {
+    transform: rotate(1080deg);
+    border-top-color: #2979ff;
+    border-left-color: #2979ff;
+  }
+
+  80% {
+    transform: rotate(1440deg);
+    border-top-color: #651fff;
+    border-left-color: #651fff;
+  }
+
+  100% {
+    transform: rotate(1800deg);
+    border-top-color: #ff1744;
+    border-left-color: #ff1744;
+  }
+}
+
+#rainbow-header {
+  height: 2px;
+  background: linear-gradient(90deg, #ff1744 0%, #ffc400 12.5%, #00e676 25%, #2979ff 37.5%, #651fff 50%, #2979ff 62.5%, #00e676 75%, #ffc400 87.5%, #ff1744 100%) 0 0/200% 100%;
+  animation: rainbow 2s linear infinite;
+}
+
+#rainbow-header.stopped {
+  background: #00000000;
+  animation: none;
+}
+
+@keyframes rainbow {
+  to {
+    background-position: -200% 0;
+  }
+}
 
 .hidden {
   display: none;
@@ -265,3 +342,4 @@ body.dark button#theme-button svg {
   line-height: 1;
   height: 30px;
 }
+

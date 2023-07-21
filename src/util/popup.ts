@@ -1,7 +1,8 @@
-import { FeedbackQueryResponse } from "../@types/graphql";
 import { KaNotification } from "../@types/notification";
-import { addFeedback, getUserFkeyCookie, graphQLFetch, graphQLFetchJsonResponse } from "./graphql";
+import { addFeedback, getUserFkeyCookie, graphQLFetchJsonResponse } from "./graphql";
 import { cleanse, parseMarkdown } from "./markdown";
+import AVATAR_REQUIREMENTS from "../json/avatar-requirements.json";
+import AVATAR_SHORTNAMES from "../json/avatar-shortnames.json";
 
 /**
  * Constructs notification string from input Khan Academy notification object
@@ -16,9 +17,15 @@ export function createNotificationString(notification: KaNotification): string {
       return `<li class="notification ${brandNew === true ? "new" : ""}"><div class="notification-header"><img class="notification-author-avatar" src="${notification.authorAvatarUrl}"><h3 class="notification-author-nickname">${cleanse(notification.authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${notification.feedbackType === "REPLY" ? "added a comment" : "answered your question"} on ${notification.focusTranslatedTitle}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${parseMarkdown(notification.content)}</div><div class="notification-feedback-container"><button class="notification-feedback-button add-listeners" data-url="${url}" data-typename="ResponseFeedbackNotification" data-feedbacktype="${notification.feedbackType}">Reply</button></div></li>`;
     case "ProgramFeedbackNotification":
       return `<li class="notification ${brandNew ? "new" : ""}"><div class="notification-header"><img class="notification-author-avatar" src="${notification.authorAvatarSrc}"><h3 class="notification-author-nickname">${cleanse(notification.authorNickname)}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${notification.feedbackType === "COMMENT" ? "commented" : "asked a question"} on ${cleanse(notification.translatedScratchpadTitle)}</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${parseMarkdown(notification.content)}</div><div class="notification-feedback-container"><button class="notification-feedback-button add-listeners" data-url="${url}" data-typename="ProgramFeedbackNotification" data-feedbacktype="${notification.feedbackType}">Reply</button></div></li>`;
+    case "AvatarNotification":
+      return `<li class="notification ${brandNew ? "new" : ""}"><div class="notification-header"><img class="notification-author-avatar" src="${notification.thumbnailSrc.startsWith("https://cdn.kastatic.org/") ? notification.thumbnailSrc : "https://cdn.kastatic.org" + notification.thumbnailSrc}"><h3 class="notification-author-nickname">KA Avatars</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">use avatar</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">You unlocked <b>${AVATAR_SHORTNAMES[notification.name]}</b>! <i>${AVATAR_REQUIREMENTS[notification.name]}</i></div></li>`;
+    case "GroupedBadgeNotification":
+      return `<li class="notification ${brandNew ? "new" : ""}"><div class="notification-header"><img class="notification-author-avatar" src="${notification.badgeNotifications[0].badge.icons.compactUrl}"><h3 class="notification-author-nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${notification.url}" target="_blank">view badges</a><span class="notification-date">${timeSince(new Date(date))} ago</span></div><p class="notification-content">You earned <b>${notification.badgeNotifications[0].badge.description}</b> and ${notification.badgeNotifications.length - 1} more! Congratulations!</p></li>`;
+    case "BadgeNotification":
+      return `<li class="notification ${brandNew ? "new" : ""}"><div class="notification-header"><img class="notification-author-avatar" src="${notification.badge.icons.compactUrl}"><h3 class="notification-author-nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org/${notification.badge.relativeUrl}" target="_blank">view badge</a><span class="notification-date">${timeSince(new Date(date))}</span></div><div class="notification-content">You earned <b>${notification.badge.description}</b>! <i>${notification.badge.fullDescription}</i>.</div></li>`;
     default:
       console.log(`Notification type ${notification.__typename} is currently unsupported.`);
-      return `<li class="notification ${brandNew ? "new" : ""}"><div class="notification-header"><img class="notification-author-avatar" src="48.png"><h3 class="notification-author-nickname">Unsupported Notification Type</h3><span class="notification-date">${timeSince(new Date(date))}</span></div><div class="notification-content">${JSON.stringify(notification)}</div></li>`;
+      return `<li class="notification ${brandNew ? "new" : ""}"><div class="notification-header"><img class="notification-author-avatar" src="48.png"><h3 class="notification-author-nickname">Unsupported Notification Type</h3><span class="notification-date">${timeSince(new Date(date))} ago</span></div><div class="notification-content">${JSON.stringify(notification)}</div></li>`;
   }
 }
 
@@ -41,6 +48,12 @@ export function createNoCookieString(): string {
 export function createLoggedOutString(): string {
   return `<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You are logged out. Please <a class="hyperlink" href="https://khanacademy.org/login" target="_blank">log in to Khan Academy</a> to use this extension.</div></li>`;
 }
+
+/**
+ * Adds event listeners to the user interface.
+ *
+ * @param theme Optional value to intialize the theme as
+ */
 export function initUserInterface(theme: string) {
   /**
    * Theme button setup
