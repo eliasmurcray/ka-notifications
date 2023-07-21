@@ -4,6 +4,7 @@ import { getNotificationData } from "../util/background";
 import { addReplyButtonEventListeners, createLoggedOutString, createNoCookieString, createNoNotificationsString, createNotificationString, initUserInterface } from "../util/popup";
 
 const NOTIFICATIONS_CONTAINER = document.getElementById("notifications-container") as HTMLDivElement;
+const RAINBOW_HEADER = document.getElementById("rainbow-header") as HTMLDivElement;
 let loading = false,
   localCursor: string;
 
@@ -44,6 +45,7 @@ void chrome.storage.local
           // Add scroll listener, since there are notifications
           document.body.addEventListener("scroll", handleScroll, { passive: true });
       }
+      RAINBOW_HEADER.classList.add("stopped");
     } else {
       await appendNotifications();
       document.body.addEventListener("scroll", handleScroll, { passive: true });
@@ -62,6 +64,7 @@ function handleScroll() {
 
 let firstTime = true;
 async function appendNotifications(): Promise<void> {
+  RAINBOW_HEADER.classList.remove("stopped");
   const response = await getNotificationData(undefined, localCursor);
 
   if (response.value !== undefined) {
@@ -76,7 +79,9 @@ async function appendNotifications(): Promise<void> {
     }
     localCursor = cursor;
     loading = false;
+    RAINBOW_HEADER.classList.add("stopped");
   } else {
+    RAINBOW_HEADER.classList.add("stopped");
     document.getElementById("loading-spinner-container")?.remove();
 
     if (firstTime === true && response.error === "cookie") {

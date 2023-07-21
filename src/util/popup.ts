@@ -1,6 +1,6 @@
 import { FeedbackQueryResponse } from "../@types/graphql";
 import { KaNotification } from "../@types/notification";
-import { addFeedback, getUserFkeyCookie, graphQLFetch } from "./graphql";
+import { addFeedback, getUserFkeyCookie, graphQLFetch, graphQLFetchJsonResponse } from "./graphql";
 import { cleanse, parseMarkdown } from "./markdown";
 
 /**
@@ -42,6 +42,9 @@ export function createLoggedOutString(): string {
   return `<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You are logged out. Please <a class="hyperlink" href="https://khanacademy.org/login" target="_blank">log in to Khan Academy</a> to use this extension.</div></li>`;
 }
 export function initUserInterface(theme: string) {
+  /**
+   * Theme button setup
+   */
   const themeButton = document.getElementById("theme-button");
   if (theme === "dark") {
     document.body.className = theme;
@@ -58,6 +61,33 @@ export function initUserInterface(theme: string) {
       void chrome.storage.local.set({ theme: "dark" });
       themeButton.innerHTML = '<svg stroke="#6b27d9" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="18px" width="18px" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
       document.body.className = "dark";
+    }
+  };
+
+  /**
+   * Mark all read setup
+   */
+
+  const RAINBOW_HEADER = document.getElementById("rainbow-header");
+  const markAllRead = document.getElementById("mark-all-read");
+  let markAllReadLoading = false;
+
+  markAllRead.onclick = async () => {
+    if (markAllReadLoading === true) {
+      return;
+    }
+    markAllReadLoading = true;
+    RAINBOW_HEADER.classList.remove("stopped");
+    try {
+      const fkey = await getUserFkeyCookie();
+      const response = await graphQLFetchJsonResponse("clearBrandNewNotifications", fkey);
+      if (response.value) {
+        RAINBOW_HEADER.classList.add("stopped");
+        markAllReadLoading = false;
+        void chrome.action.setBadgeText({ text: "" });
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 }

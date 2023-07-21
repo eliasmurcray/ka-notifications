@@ -91,7 +91,7 @@ export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussi
     }
 
     // Otherwise you have a geniune network error
-    console.error("Error in response: ", e.message);
+    console.error("Error in response: ", e);
     return;
   }
 

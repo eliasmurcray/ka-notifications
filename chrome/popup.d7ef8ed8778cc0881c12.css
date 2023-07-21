@@ -61,6 +61,26 @@
   }
 }
 
+#rainbow-header {
+  height: 2px;
+}
+
+body.dark #rainbow-header {
+  background: linear-gradient(90deg, #ff1744 0%, #ffc400 12.5%, #00e676 25%, #2979ff 37.5%, #651fff 50%, #2979ff 62.5%, #00e676 75%, #ffc400 87.5%, #ff1744 100%) 0 0/200% 100%;
+  animation: rainbow 2s linear infinite;
+}
+
+body.dark #rainbow-header.stopped {
+  background: #00000000;
+  animation: none;
+}
+
+@keyframes rainbow {
+  to {
+    background-position: -200% 0;
+  }
+}
+
 .hidden {
   display: none;
 }
@@ -122,7 +142,8 @@ body.dark {
   transition: 0.1s ease-in-out;
 }
 
-.popup-header button {
+.popup-header button,
+.popup-header a {
   margin: 0;
   padding: 5px;
   border-radius: 50%;
@@ -133,42 +154,64 @@ body.dark {
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
+  display: block;
 }
 
-.popup-header button svg {
+.popup-header button svg,
+.popup-header a svg {
   margin: 0;
   padding: 0;
   display: block;
 }
 
-.popup-header button#notifications-button {
-  background-color: #def2fb;
+.popup-header button#settings-button {
+  background-color: #d6deff;
 }
 
-.popup-header button#notifications-button svg {
-  fill: #1aadde;
+.popup-header button#settings-button svg {
+  fill: #345bf1;
 }
 
 .popup-header button#theme-button {
-  background-color: #d8caef;
+  background-color: #ece6ff;
 }
 
 .popup-header button#theme-button svg {
-  fill: #6b27d9;
+  fill: #7b5fe2;
   transition: 0.1s ease-in-out;
 }
 
-.popup-header button#settings {
+.popup-header button#mark-all-read {
+  background-color: #cdfff5;
+}
+.popup-header button#mark-all-read svg {
+  fill: #1abc9c;
+}
+
+.popup-header a.github {
+  background-color: #e9f1ff;
   margin-left: auto;
 }
 
-body.dark .popup-header button {
+.popup-header a.github svg {
+  fill: #2979ff;
+}
+
+.popup-header a.discord {
+  background-color: #eee7ff;
+}
+.popup-header a.discord svg {
+  fill: #651fff;
+}
+
+body.dark .popup-header button,
+body.dark a {
   background-color: #00000000 !important;
 }
 
 body.dark button#theme-button svg {
-  fill: #d9c727;
-  stroke: #d9c727;
+  fill: #7b5fe2;
+  stroke: #7b5fe2;
 }
 
 #notifications-section,
@@ -179,7 +222,7 @@ body.dark button#theme-button svg {
 
 #notifications-container {
   margin: 0;
-  padding: 12px 0;
+  padding: 10px 0 12px;
   list-style: none;
 }
 
