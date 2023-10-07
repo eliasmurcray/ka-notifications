@@ -1,6 +1,6 @@
 {
   "name": "ka-notifications-2.0",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "The updated version of the original Khan Academy notifications extension with more maintainable code.",
   "main": "index.js",
   "scripts": {
@@ -9,14 +9,10 @@
     "commit": "sh -c 'git add . && git commit -m \"$0\" && git push -u origin v2'",
     "clearcache": "git rm -r --cached .",
     "dev": "webpack -- --watch",
-    "fix": "eslint 'src/**/*.ts' --fix",
-    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.ts\"",
     "release": "webpack && node scripts/firefox-build.js && node scripts/zip-extension.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/eliasmurcray/ka-notifications.git"
-  },
+  "repository": "git+https://github.com/eliasmurcray/ka-notifications.git",
   "keywords": [
     "chrome-extension",
     "firefox-addon"
@@ -30,14 +26,26 @@
   "devDependencies": {
     "@types/chrome": "^0.0.239",
     "@types/html-webpack-plugin": "^3.2.6",
+    "@types/node": "^20.4.4",
+    "@types/webpack-env": "^1.18.1",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
     "archiver": "^5.3.1",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
+    "eslint-config-standard-with-typescript": "^39.1.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-promise": "^6.0.0",
     "fs-extra": "^11.1.1",
     "html-webpack-plugin": "^5.5.3",
     "mini-css-extract-plugin": "^2.7.6",
     "ts-loader": "^9.4.4",
     "webpack": "^5.88.1",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@bhavjit/khan-api": "^0.6.2",
+    "lint": "^0.8.19",
+    "typescript": "*"
   }
 }

@@ -1,117 +1,138 @@
-import { KaNotification } from "../@types/notification";
 import "../css/popup.css";
+import { KaNotification } from "../@types/notification";
 import { getNotificationData } from "../util/background";
-import { addReplyButtonEventListeners, createLoggedOutString, createNoCookieString, createNoNotificationsString, createNotificationString, initUserInterface } from "../util/popup";
+import {
+  addReplyButtonEventListeners,
+  createLoggedOutString,
+  createNoCookieString,
+  createNoNotificationsString,
+  createNotificationString,
+  initUserInterface
+} from "../util/popup";
 
-const NOTIFICATIONS_CONTAINER = document.getElementById("notifications-container") as HTMLDivElement;
-const RAINBOW_HEADER = document.getElementById("rainbow-header") as HTMLDivElement;
-let loading = false,
-  localCursor: string;
+const notificationsContainer = document.querySelector(
+  "#notifications-container"
+);
+const notificationsSection = document.querySelector("#notifications-section");
+const loadingSpinnerContainer = document.querySelector(
+  "#loading-spinner-container"
+);
 
-// Initialize notifications
-void chrome.storage.local
-  .get(["prefetch_data", "prefetch_cursor", "theme"])
-  .then(async ({ prefetch_data, prefetch_cursor, theme }) => {
+let loading = false;
+let localCursor: string;
+
+async function init() {
+  try {
+    const {
+      prefetchData,
+      prefetchCursor,
+      theme
+    } = await chrome.storage.local.get([
+      "prefetchData",
+      "prefetchCursor",
+      "theme"
+    ]);
     initUserInterface(theme);
-    if (prefetch_data) {
-      switch (prefetch_data) {
+
+    if (prefetchData) {
+      switch (prefetchData) {
         case "info:cookie":
-          NOTIFICATIONS_CONTAINER.innerHTML = createNoCookieString();
-          document.getElementById("loading-spinner-container")?.remove();
+          notificationsContainer.innerHTML = createNoCookieString();
+          loadingSpinnerContainer?.remove();
           break;
         case "info:logout":
-          NOTIFICATIONS_CONTAINER.innerHTML = createLoggedOutString();
-          document.getElementById("loading-spinner-container")?.remove();
+          notificationsContainer.innerHTML = createLoggedOutString();
           break;
         case "info:nonotifications":
-          NOTIFICATIONS_CONTAINER.innerHTML = createNoNotificationsString();
-          document.getElementById("loading-spinner-container")?.remove();
+          notificationsContainer.innerHTML = createNoNotificationsString();
+          loadingSpinnerContainer?.remove();
           break;
         default:
-          let notifications = prefetch_data as KaNotification[];
+          const notifications = prefetchData as KaNotification[];
 
-          if (notifications === undefined) {
+          if (!notifications) {
             return;
           }
 
-          NOTIFICATIONS_CONTAINER.innerHTML = notifications.map(createNotificationString).join("");
+          notificationsContainer.innerHTML = notifications
+            .map(createNotificationString)
+            .join("");
           addReplyButtonEventListeners();
 
-          if (prefetch_cursor === undefined) {
+          if (!prefetchCursor) {
             return;
           }
 
-          localCursor = prefetch_cursor;
-          // Add scroll listener, since there are notifications
-          document.body.addEventListener("scroll", handleScroll, { passive: true });
+          localCursor = prefetchCursor;
+          notificationsSection.addEventListener("scroll", handleScroll, {
+            passive: true
+          });
       }
-      RAINBOW_HEADER.classList.add("stopped");
     } else {
       await appendNotifications();
-      document.body.addEventListener("scroll", handleScroll, { passive: true });
+      notificationsSection.addEventListener("scroll", handleScroll, {
+        passive: true
+      });
     }
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function appendNotifications(): Promise<void> {
+  try {
+    const response = await getNotificationData(undefined, localCursor);
+
+    if (!response.value) {
+      if (firstTime && response.error === "cookie") {
+        notificationsContainer.innerHTML = createLoggedOutString();
+        loadingSpinnerContainer?.remove();
+        firstTime = false;
+        return;
+      }
+
+      switch (response.error) {
+        case "cookie":
+          notificationsContainer.innerHTML = createNoCookieString();
+          loadingSpinnerContainer?.remove();
+          break;
+        case "nonotifications":
+          notificationsSection.removeEventListener("scroll", handleScroll);
+          loadingSpinnerContainer?.remove();
+          break;
+      }
+    } else {
+      const { notifications, cursor } = response.value;
+      notificationsContainer.insertAdjacentHTML(
+        "beforeend",
+        notifications.map(createNotificationString).join("")
+      );
+      addReplyButtonEventListeners();
+
+      if (cursor === null) {
+        notificationsSection.removeEventListener("scroll", handleScroll);
+      }
+      localCursor = cursor;
+      loading = false;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 function handleScroll() {
-  if (loading === false && Math.abs(document.body.scrollHeight - document.body.scrollTop - document.body.clientHeight) <= 76) {
+  if (
+    !loading &&
+    Math.abs(
+      notificationsSection.scrollHeight -
+        notificationsSection.scrollTop -
+        notificationsSection.clientHeight
+    ) <= 76
+  ) {
     loading = true;
     appendNotifications();
   }
 }
 
 let firstTime = true;
-async function appendNotifications(): Promise<void> {
-  RAINBOW_HEADER.classList.remove("stopped");
-  const response = await getNotificationData(undefined, localCursor);
-
-  if (response.value !== undefined) {
-    const { notifications, cursor } = response.value;
-
-    NOTIFICATIONS_CONTAINER.insertAdjacentHTML("beforeend", notifications.map(createNotificationString).join(""));
-    addReplyButtonEventListeners();
-
-    if (cursor === null) {
-      document.getElementById("loading-spinner-container")?.remove();
-      document.body.removeEventListener("scroll", handleScroll);
-    }
-    localCursor = cursor;
-    loading = false;
-    RAINBOW_HEADER.classList.add("stopped");
-  } else {
-    RAINBOW_HEADER.classList.add("stopped");
-    document.getElementById("loading-spinner-container")?.remove();
-
-    if (firstTime === true && response.error === "cookie") {
-      NOTIFICATIONS_CONTAINER.innerHTML = createLoggedOutString();
-      firstTime = false;
-      return;
-    }
-
-    switch (response.error) {
-      case "cookie":
-        NOTIFICATIONS_CONTAINER.innerHTML = createNoCookieString();
-        break;
-      case "nonotifications":
-        document.body.removeEventListener("scroll", handleScroll);
-        break;
-    }
-  }
-
-  firstTime = false;
-}
-
-/**
- * Set up refresh button
- */
-
-const refreshButton = document.getElementById("refresh-notifications");
-refreshButton.onclick = async () => {
-  NOTIFICATIONS_CONTAINER.innerHTML = "";
-  RAINBOW_HEADER.classList.remove("stopped");
-  document.body.removeEventListener("scroll", handleScroll);
-  localCursor = "";
-  await appendNotifications();
-};
+init();

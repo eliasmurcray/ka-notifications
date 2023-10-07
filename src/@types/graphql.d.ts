@@ -20,9 +20,9 @@ export interface GraphQLBody {
 interface QuestionFeedback {
   key: string;
   expandKey?: string;
-  answers: {
+  answers: Array<{
     key: string;
-  }[];
+  }>;
 }
 
 interface FeedbackReply {

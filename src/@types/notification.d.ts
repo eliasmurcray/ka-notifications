@@ -40,7 +40,7 @@ export interface BadgeNotification {
 export interface BasicNotification {
   __typename: string;
   brandNew: boolean;
-  class_: Array<string>;
+  class_: string[];
   date: string;
   kaid: string;
   read: boolean;
@@ -85,10 +85,10 @@ export interface CourseMasteryGoalCreatedNotification {
 }
 
 export interface GroupedBadgeNotification {
-  badgeNotifications: {
+  badgeNotifications: Array<{
     __typename: "BadgeNotification";
     badge: Badge;
-  }[];
+  }>;
 }
 
 export interface InfoNotification {
@@ -116,6 +116,19 @@ export interface ProgramFeedbackNotification {
   translatedScratchpadTitle: string;
 }
 
-export interface KaNotification extends AssignmentCreatedNotification, AssignmentDueDateNotification, AvatarNotification, BadgeNotification, CoachRequestAcceptedNotification, CoachRequestNotification, CourseMasteryGoalCreatedNotification, GroupedBadgeNotification, InfoNotification, ModeratorNotification, ProgramFeedbackNotification, ResponseFeedbackNotification, BasicNotification {
+export interface KaNotification
+  extends AssignmentCreatedNotification,
+    AssignmentDueDateNotification,
+    AvatarNotification,
+    BadgeNotification,
+    CoachRequestAcceptedNotification,
+    CoachRequestNotification,
+    CourseMasteryGoalCreatedNotification,
+    GroupedBadgeNotification,
+    InfoNotification,
+    ModeratorNotification,
+    ProgramFeedbackNotification,
+    ResponseFeedbackNotification,
+    BasicNotification {
   __typename: string;
 }

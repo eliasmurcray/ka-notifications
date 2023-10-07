@@ -1,4 +1,9 @@
-import { GeneralResponse, FeedbackRequestType, FeedbackResponseType, graphQLVariables } from "../@types/extension";
+import {
+  GeneralResponse,
+  FeedbackRequestType,
+  FeedbackResponseType,
+  graphQLVariables
+} from "../@types/extension";
 import { FeedbackQueryResponse } from "../@types/graphql";
 import graphQLQueries from "../json/graphql-queries.json";
 
@@ -10,28 +15,46 @@ import graphQLQueries from "../json/graphql-queries.json";
  * @param variables - The inputs for the GraphQL function.
  * @returns A Promise that resolves with the response or rejects if the fetch fails.
  */
-export function graphQLFetch(queryName: "AddFeedbackToDiscussion" | "clearBrandNewNotifications" | "feedbackQuery" | "getFeedbackRepliesPage" | "getFullUserProfile" | "getNotificationsForUser", fkey: string, variables: graphQLVariables = {}): Promise<Response> {
-  return new Promise((resolve, reject) => {
+export async function graphQLFetch(
+  queryName:
+    | "AddFeedbackToDiscussion"
+    | "clearBrandNewNotifications"
+    | "feedbackQuery"
+    | "getFeedbackRepliesPage"
+    | "getFullUserProfile"
+    | "getNotificationsForUser",
+  fkey: string,
+  variables: graphQLVariables = {}
+): Promise<Response> {
+  return await new Promise((resolve, reject) => {
     // Implement fastly phrase to match safelist regex, pushing ratelimit to 100 tps for any Khan Academy GraphQL call
-    fetch("https://www.khanacademy.org/api/internal/graphql/" + queryName + "?/fastly/", {
-      method: "POST",
-      headers: {
-        "X-KA-fkey": fkey,
-        "Content-Type": "application/json",
-        // cookie: `fkey=a; fkey=${fkey}`,
-      },
-      body: JSON.stringify({
-        operationName: queryName,
-        query: graphQLQueries[queryName],
-        variables,
-      }),
-      credentials: "same-origin",
-    })
+    fetch(
+      "https://www.khanacademy.org/api/internal/graphql/" +
+        queryName +
+        "?/fastly/",
+      {
+        method: "POST",
+        headers: {
+          "X-KA-fkey": fkey,
+          "Content-Type": "application/json"
+          // cookie: `fkey=a; fkey=${fkey}`,
+        },
+        body: JSON.stringify({
+          operationName: queryName,
+          query: graphQLQueries[queryName],
+          variables
+        }),
+        credentials: "same-origin"
+      }
+    )
       .then(async (response: Response) => {
         if (response.status === 200) {
-          return resolve(response);
+          resolve(response);
+          return;
         }
-        reject(`Error in GraphQL "${queryName}" call: Server responded  with status ${response.status}.`);
+        reject(
+          `Error in GraphQL "${queryName}" call: Server responded  with status ${response.status}.`
+        );
       })
       .catch(reject);
   });
@@ -41,16 +64,17 @@ export function graphQLFetch(queryName: "AddFeedbackToDiscussion" | "clearBrandN
  * Retrieves user fkey cookie from Khan Academy.
  * @returns fkey cookie value or rejects if no cookie was found.
  */
-export function getUserFkeyCookie(): Promise<string> {
-  return new Promise((resolve, reject) => {
+export async function getUserFkeyCookie(): Promise<string> {
+  return await new Promise((resolve, reject) => {
     chrome.cookies.get(
       {
         url: "https://www.khanacademy.org",
-        name: "fkey",
+        name: "fkey"
       },
-      (cookie) => {
+      cookie => {
         if (cookie === null) {
-          return reject("No fkey cookie found.");
+          reject("No fkey cookie found.");
+          return;
         }
         resolve(cookie.value);
       }
@@ -64,7 +88,17 @@ export function getUserFkeyCookie(): Promise<string> {
  * @param fkey cookie is required to make requests.
  * @returns Returns an object with either an error or a JSON value
  */
-export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussion" | "clearBrandNewNotifications" | "feedbackQuery" | "getFeedbackRepliesPage" | "getFullUserProfile" | "getNotificationsForUser", fkey: string, variables: graphQLVariables = {}): Promise<GeneralResponse> {
+export async function graphQLFetchJsonResponse(
+  queryName:
+    | "AddFeedbackToDiscussion"
+    | "clearBrandNewNotifications"
+    | "feedbackQuery"
+    | "getFeedbackRepliesPage"
+    | "getFullUserProfile"
+    | "getNotificationsForUser",
+  fkey: string,
+  variables: graphQLVariables = {}
+): Promise<GeneralResponse> {
   // Optimized cookie retrieval
   let cookie: string;
   if (fkey !== undefined) {
@@ -74,7 +108,7 @@ export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussi
       cookie = await getUserFkeyCookie();
     } catch (e) {
       return {
-        cookieError: true,
+        cookieError: true
       };
     }
   }
@@ -86,7 +120,9 @@ export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussi
   } catch (e) {
     // It's possible you disconnected mid-fetch
     if (e.message === "Failed to fetch") {
-      console.log("Possible network disconnect detected, please check your internet connection.");
+      console.log(
+        "Possible network disconnect detected, please check your internet connection."
+      );
       return;
     }
 
@@ -96,7 +132,7 @@ export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussi
   }
 
   return {
-    value: await response.json(),
+    value: await response.json()
   };
 }
 
@@ -110,7 +146,13 @@ export async function graphQLFetchJsonResponse(queryName: "AddFeedbackToDiscussi
  * @param textContent The content you want to send
  * @returns A boolean that is true if the data was sent successfully
  */
-export async function addFeedback(fkey: string, url: string, typename: string, feedbackType: string, textContent: string): Promise<boolean> {
+export async function addFeedback(
+  fkey: string,
+  url: string,
+  typename: string,
+  feedbackType: string,
+  textContent: string
+): Promise<boolean> {
   let responseType: FeedbackResponseType;
   let requestType: FeedbackRequestType;
   let focusKind = "scratchpad";
@@ -128,30 +170,43 @@ export async function addFeedback(fkey: string, url: string, typename: string, f
     return false;
   }
 
-  const topicId = url.split("?")[0].split("/").pop();
+  const topicId = url
+    .split("?")[0]
+    .split("/")
+    .pop();
 
-  return graphQLFetch("feedbackQuery", fkey, {
+  return await graphQLFetch("feedbackQuery", fkey, {
     topicId,
     feedbackType: requestType,
     currentSort: 5,
     qaExpandKey: params.get("qa_expand_key"),
-    focusKind,
+    focusKind
   })
-    .then((response: Response) => response.json())
+    .then(async (response: Response) => await response.json())
     .then(async (json: FeedbackQueryResponse) => {
       const feedback = json.data.feedback.feedback[0];
-      const key: string = feedbackType === "QUESTION" && params.get("qa_expand_type") === "answer" ? feedback.answers[0].key : feedback.key;
-      return graphQLFetch("AddFeedbackToDiscussion", fkey, {
+      const key: string =
+        feedbackType === "QUESTION" && params.get("qa_expand_type") === "answer"
+          ? feedback.answers[0].key
+          : feedback.key;
+      return await graphQLFetch("AddFeedbackToDiscussion", fkey, {
         parentKey: key,
         textContent,
         feedbackType: responseType,
         fromVideoAuthor: false,
-        shownLowQualityNotice: false,
+        shownLowQualityNotice: false
       });
     })
-    .then((response) => response.ok)
-    .catch((error) => {
+    .then(response => response.ok)
+    .catch(error => {
       console.error("Error in sending feedback: ", error);
       return false;
     });
+}
+
+export async function getJsonUserProfile() {
+  const response = await fetch(
+    "https://www.khanacademy.org/api/internal/graphql/getFullUserProfile?hash=2921543415"
+  );
+  return await response.json();
 }

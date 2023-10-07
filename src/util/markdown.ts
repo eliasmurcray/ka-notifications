@@ -37,20 +37,28 @@ export function parseMarkdown(text: string) {
   }
 
   // Restore code blocks
-  text = text.replace(/<codeblock-placeholder-(\d+)>/g, (_match, index) => {
-    return `<pre><code>${codeBlocks[parseInt(index)]}</code></pre>`;
-  });
+  text = text.replace(
+    /<codeblock-placeholder-(\d+)>/g,
+    (_match, index) => `<pre><code>${codeBlocks[parseInt(index)]}</code></pre>`
+  );
 
   // Restore code inlines
-  text = text.replace(/<codeinline-placeholder-(\d+)>/g, (_match, index) => {
-    return `<code>${codeInlines[parseInt(index)]}</code>`;
-  });
+  text = text.replace(
+    /<codeinline-placeholder-(\d+)>/g,
+    (_match, index) => `<code>${codeInlines[parseInt(index)]}</code>`
+  );
 
   // URLs
-  text = text.replace(/((?:http|https)(?:.*?))(?:\s|$)/g, '<a class="hyperlink" href="$1" target="_blank">$1</a>');
+  text = text.replace(
+    /((?:http|https)(?:.*?))(?:\s|$)/g,
+    '<a class="hyperlink" href="$1" target="_blank">$1</a>'
+  );
 
   // @mentions (username 40 length max)
-  text = text.replace(/@([a-zA-Z][a-zA-Z\d]{0,39})/g, '<a class="hyperlink" href="https://www.khanacademy.org/profile/$1" target="_blank">@$1</a>');
+  text = text.replace(
+    /@([a-zA-Z][a-zA-Z\d]{0,39})/g,
+    '<a class="hyperlink" href="https://www.khanacademy.org/profile/$1" target="_blank">@$1</a>'
+  );
 
   return text;
 }
@@ -62,5 +70,8 @@ export function parseMarkdown(text: string) {
  * @returns HTML tag escaped text
  */
 export function cleanse(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;");
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/>/g, "&gt;")
+    .replace(/</g, "&lt;");
 }

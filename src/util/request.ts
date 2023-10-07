@@ -11,6 +11,6 @@ export function requestToRequestInit(request: Request): RequestInit {
     redirect: request.redirect,
     referrer: request.referrer,
     referrerPolicy: request.referrerPolicy,
-    signal: request.signal,
+    signal: request.signal
   };
 }

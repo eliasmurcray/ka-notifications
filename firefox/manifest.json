@@ -3,7 +3,7 @@
   "name": "Khan Academy Notifications",
   "short_name": "KA Notifications",
   "author": "Elias Murcray",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "homepage_url": "https://github.com/eliasmurcray/ka-notifications",
   "description": "Get Khan Academy Notifications in real time! Now in color!",
   "minimum_chrome_version": "109",
@@ -46,7 +46,8 @@
     {
       "resources": [
         "project.js",
-        "hotlist.js"
+        "hotlist.js",
+        "monaco/*"
       ],
       "matches": [
         "https://www.khanacademy.org/*"

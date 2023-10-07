@@ -1,4 +1,7 @@
-import { NotificationCountResponse, NotificationResponse } from "../@types/extension";
+import {
+  NotificationCountResponse,
+  NotificationResponse
+} from "../@types/extension";
 import { graphQLFetchJsonResponse } from "./graphql";
 
 /**
@@ -13,7 +16,7 @@ export async function createOffscreenHeartbeat(): Promise<void> {
   await chrome.offscreen.createDocument({
     url: chrome.runtime.getURL("heartbeat.html"),
     reasons: [chrome.offscreen.Reason.BLOBS],
-    justification: "Keep service worker alive.",
+    justification: "Keep service worker alive."
   });
 }
 
@@ -22,13 +25,20 @@ export async function createOffscreenHeartbeat(): Promise<void> {
  * @param kaas - optional cookie to speed up requests.
  * @returns An object with an error if invalid, otherwise a value containing the notifications and the next cursor.
  */
-export async function getNotificationData(kaas?: string, cursor?: string): Promise<NotificationResponse> {
-  const response = await graphQLFetchJsonResponse("getNotificationsForUser", kaas, cursor === undefined ? undefined : { after: cursor });
+export async function getNotificationData(
+  kaas?: string,
+  cursor?: string
+): Promise<NotificationResponse> {
+  const response = await graphQLFetchJsonResponse(
+    "getNotificationsForUser",
+    kaas,
+    cursor === undefined ? undefined : { after: cursor }
+  );
 
   // Nonexistent cookie
-  if (response?.cookieError === true) {
+  if (response?.cookieError) {
     return {
-      error: "cookie",
+      error: "cookie"
     };
   }
 
@@ -38,18 +48,18 @@ export async function getNotificationData(kaas?: string, cursor?: string): Promi
   }
 
   // No notifications
-  let notificationsResponse = response.value?.data?.user?.notifications;
+  const notificationsResponse = response.value?.data?.user?.notifications;
   if (!notificationsResponse) {
     return {
-      error: "nonotifications",
+      error: "nonotifications"
     };
   }
 
   return {
     value: {
       notifications: notificationsResponse.notifications,
-      cursor: notificationsResponse.pageInfo.nextCursor,
-    },
+      cursor: notificationsResponse.pageInfo.nextCursor
+    }
   };
 }
 
@@ -58,7 +68,9 @@ export async function getNotificationData(kaas?: string, cursor?: string): Promi
  * @param kaas - optional cookie to speed up requests.
  * @returns An object with an error if invalid, otherwise a value containing the notification count.
  */
-export async function getNotificationCount(kaas?: string): Promise<NotificationCountResponse> {
+export async function getNotificationCount(
+  kaas?: string
+): Promise<NotificationCountResponse> {
   const response = await graphQLFetchJsonResponse("getFullUserProfile", kaas);
 
   // Error has been handled
@@ -67,15 +79,15 @@ export async function getNotificationCount(kaas?: string): Promise<NotificationC
   }
 
   // User is not defined
-  let userResponse = response.value?.data?.user;
+  const userResponse = response.value?.data?.user;
   if (!userResponse) {
     return {
       error: "!user",
-      value: userResponse,
+      value: userResponse
     };
   }
 
   return {
-    value: userResponse.newNotificationCount,
+    value: userResponse.newNotificationCount
   };
 }

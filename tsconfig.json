@@ -4,6 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "types": ["chrome"],
     "target": "ESNext",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "resolveJsonModule": true
   }
