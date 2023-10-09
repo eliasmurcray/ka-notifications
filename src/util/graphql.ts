@@ -6,6 +6,7 @@ import {
 } from "../@types/extension";
 import { FeedbackQueryResponse } from "../@types/graphql";
 import graphQLQueries from "../json/graphql-queries.json";
+import { getLatestMutation, getLatestQuery } from "@bhavjit/khan-api";
 
 /**
  * Executes a fetch to Khan Academy's GraphQL API.
@@ -28,29 +29,66 @@ export async function graphQLFetch(
 ): Promise<Response> {
   return await new Promise((resolve, reject) => {
     // Implement fastly phrase to match safelist regex, pushing ratelimit to 100 tps for any Khan Academy GraphQL call
-    fetch(
+    const requestUrl =
       "https://www.khanacademy.org/api/internal/graphql/" +
-        queryName +
-        "?/fastly/",
-      {
-        method: "POST",
-        headers: {
-          "X-KA-fkey": fkey,
-          "Content-Type": "application/json"
-          // cookie: `fkey=a; fkey=${fkey}`,
-        },
-        body: JSON.stringify({
-          operationName: queryName,
-          query: graphQLQueries[queryName],
-          variables
-        }),
-        credentials: "same-origin"
-      }
-    )
+      queryName +
+      "?/fastly/";
+
+    // British request object
+    const requestInit: RequestInit = {
+      method: "POST",
+      headers: {
+        "X-KA-fkey": fkey,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        operationName: queryName,
+        query: graphQLQueries[queryName],
+        variables
+      }),
+      credentials: "same-origin"
+    };
+
+    fetch(requestUrl, requestInit)
       .then(async (response: Response) => {
         if (response.status === 200) {
           resolve(response);
           return;
+        } else if (response.status === 403) {
+          // Stolen from KA Extension implementation by Aliquis
+          // https://github.com/ka-extension/ka-extension-ts/blob/master/src/util/graphql-util.ts#L64
+          const isMutation: boolean = graphQLQueries[queryName].startsWith(
+            "mutation"
+          );
+          console.warn(
+            `The query for operation "${queryName}" is no longer in the safelist. Attempting to fetch the latest version from the safelist...`
+          );
+          const latestQuery: string | null = isMutation
+            ? await getLatestMutation(queryName)
+            : await getLatestQuery(queryName);
+
+          if (!latestQuery) {
+            throw new Error(
+              `The query for operation "${queryName}" was not found in the safelist`
+            );
+          }
+
+          requestInit.body = JSON.stringify({
+            operationName: queryName,
+            query: latestQuery,
+            variables
+          });
+
+          return fetch(requestUrl, requestInit).then((response: Response) => {
+            if (response.status === 200) {
+              graphQLQueries[queryName] = latestQuery;
+              resolve(response);
+            } else {
+              reject(
+                `Error in GraphQL "${queryName}" call: Server responded  with status ${response.status}.`
+              );
+            }
+          });
         }
         reject(
           `Error in GraphQL "${queryName}" call: Server responded  with status ${response.status}.`
