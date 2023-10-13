@@ -1,12 +1,15 @@
+import { StringMap } from "../@types/common-types";
 import {
   GeneralResponse,
   FeedbackRequestType,
   FeedbackResponseType,
-  graphQLVariables
+  graphQLVariables,
 } from "../@types/extension";
 import { FeedbackQueryResponse } from "../@types/graphql";
-import graphQLQueries from "../json/graphql-queries.json";
+import * as graphQLQueriesJson from "../json/graphql-queries.json";
 import { getLatestMutation, getLatestQuery } from "@bhavjit/khan-api";
+
+const graphQLQueries: StringMap = graphQLQueriesJson;
 
 /**
  * Executes a fetch to Khan Academy's GraphQL API.
@@ -17,85 +20,70 @@ import { getLatestMutation, getLatestQuery } from "@bhavjit/khan-api";
  * @returns A Promise that resolves with the response or rejects if the fetch fails.
  */
 export async function graphQLFetch(
-  queryName:
-    | "AddFeedbackToDiscussion"
-    | "clearBrandNewNotifications"
-    | "feedbackQuery"
-    | "getFeedbackRepliesPage"
-    | "getFullUserProfile"
-    | "getNotificationsForUser",
+  queryName: string,
   fkey: string,
-  variables: graphQLVariables = {}
+  variables: graphQLVariables = {},
 ): Promise<Response> {
-  return await new Promise((resolve, reject) => {
-    // Implement fastly phrase to match safelist regex, pushing ratelimit to 100 tps for any Khan Academy GraphQL call
-    const requestUrl =
-      "https://www.khanacademy.org/api/internal/graphql/" +
-      queryName +
-      "?/fastly/";
+  try {
+    const requestUrl = `https://www.khanacademy.org/api/internal/graphql/${queryName}?/fastly/`;
 
     // British request object
     const requestInit: RequestInit = {
       method: "POST",
       headers: {
         "X-KA-fkey": fkey,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         operationName: queryName,
         query: graphQLQueries[queryName],
-        variables
+        variables,
       }),
-      credentials: "same-origin"
+      credentials: "same-origin",
     };
 
-    fetch(requestUrl, requestInit)
-      .then(async (response: Response) => {
-        if (response.status === 200) {
-          resolve(response);
-          return;
-        } else if (response.status === 403) {
-          // Stolen from KA Extension implementation by Aliquis
-          // https://github.com/ka-extension/ka-extension-ts/blob/master/src/util/graphql-util.ts#L64
-          const isMutation: boolean = graphQLQueries[queryName].startsWith(
-            "mutation"
-          );
-          console.warn(
-            `The query for operation "${queryName}" is no longer in the safelist. Attempting to fetch the latest version from the safelist...`
-          );
-          const latestQuery: string | null = isMutation
-            ? await getLatestMutation(queryName)
-            : await getLatestQuery(queryName);
+    const response = await fetch(requestUrl, requestInit);
 
-          if (!latestQuery) {
-            throw new Error(
-              `The query for operation "${queryName}" was not found in the safelist`
-            );
-          }
+    if (response.status === 200) {
+      return response;
+    } else if (response.status === 400) {
+      const isMutation = graphQLQueries[queryName].startsWith("mutation");
+      console.warn(
+        `The query for operation "${queryName}" is no longer in the safelist. Attempting to fetch the latest version from the safelist...`,
+      );
 
-          requestInit.body = JSON.stringify({
-            operationName: queryName,
-            query: latestQuery,
-            variables
-          });
+      const latestQuery = isMutation
+        ? await getLatestMutation(queryName)
+        : await getLatestQuery(queryName);
 
-          return fetch(requestUrl, requestInit).then((response: Response) => {
-            if (response.status === 200) {
-              graphQLQueries[queryName] = latestQuery;
-              resolve(response);
-            } else {
-              reject(
-                `Error in GraphQL "${queryName}" call: Server responded  with status ${response.status}.`
-              );
-            }
-          });
-        }
-        reject(
-          `Error in GraphQL "${queryName}" call: Server responded  with status ${response.status}.`
+      if (!latestQuery) {
+        throw new Error(`The query for operation "${queryName}" was not found in the safelist`);
+      }
+
+      requestInit.body = JSON.stringify({
+        operationName: queryName,
+        query: latestQuery,
+        variables,
+      });
+
+      const updatedResponse = await fetch(requestUrl, requestInit);
+
+      if (updatedResponse.status === 200) {
+        graphQLQueries[queryName] = latestQuery;
+        return updatedResponse;
+      } else {
+        throw new Error(
+          `Error in GraphQL "${queryName}" call: Server responded with status ${updatedResponse.status}.`,
         );
-      })
-      .catch(reject);
-  });
+      }
+    } else {
+      throw new Error(
+        `Error in GraphQL "${queryName}" call: Server responded with status ${response.status}.`,
+      );
+    }
+  } catch (error) {
+    throw error;
+  }
 }
 
 /**
@@ -103,19 +91,19 @@ export async function graphQLFetch(
  * @returns fkey cookie value or rejects if no cookie was found.
  */
 export async function getUserFkeyCookie(): Promise<string> {
-  return await new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     chrome.cookies.get(
       {
         url: "https://www.khanacademy.org",
-        name: "fkey"
+        name: "fkey",
       },
-      cookie => {
+      (cookie) => {
         if (cookie === null) {
           reject("No fkey cookie found.");
-          return;
+        } else {
+          resolve(cookie.value);
         }
-        resolve(cookie.value);
-      }
+      },
     );
   });
 }
@@ -135,7 +123,7 @@ export async function graphQLFetchJsonResponse(
     | "getFullUserProfile"
     | "getNotificationsForUser",
   fkey: string,
-  variables: graphQLVariables = {}
+  variables: graphQLVariables = {},
 ): Promise<GeneralResponse> {
   // Optimized cookie retrieval
   let cookie: string;
@@ -146,32 +134,25 @@ export async function graphQLFetchJsonResponse(
       cookie = await getUserFkeyCookie();
     } catch (e) {
       return {
-        cookieError: true
+        cookieError: true,
       };
     }
   }
 
-  // Attempts to fetch data and handles common errors
-  let response: Response;
   try {
-    response = await graphQLFetch(queryName, cookie, variables);
-  } catch (e) {
-    // It's possible you disconnected mid-fetch
-    if (e.message === "Failed to fetch") {
-      console.log(
-        "Possible network disconnect detected, please check your internet connection."
-      );
-      return;
+    const response = await graphQLFetch(queryName, cookie, variables);
+    const data = await response.json();
+
+    return { value: data };
+  } catch (error) {
+    if (error instanceof Error && error.message === "Failed to fetch") {
+      console.log("Possible network disconnect detected, please check your internet connection.");
+    } else {
+      console.error("Error in response: ", error);
     }
 
-    // Otherwise you have a geniune network error
-    console.error("Error in response: ", e);
-    return;
+    return { value: null };
   }
-
-  return {
-    value: await response.json()
-  };
 }
 
 /**
@@ -189,62 +170,54 @@ export async function addFeedback(
   url: string,
   typename: string,
   feedbackType: string,
-  textContent: string
+  textContent: string,
 ): Promise<boolean> {
-  let responseType: FeedbackResponseType;
-  let requestType: FeedbackRequestType;
-  let focusKind = "scratchpad";
+  try {
+    const params = new URL("https://www.khanacademy.org/" + url).searchParams;
+    let requestType: FeedbackRequestType;
+    let responseType: FeedbackResponseType;
+    let focusKind = "scratchpad";
 
-  const params = new URL("https://www.khanacademy.org/" + url).searchParams;
+    if (typename === "ResponseFeedbackNotification") {
+      requestType = feedbackType === "ANSWER" ? "QUESTION" : "COMMENT";
+      responseType = "REPLY";
+      focusKind = params.get("qa_expand_type") as string;
+    } else if (typename === "ProgramFeedbackNotification") {
+      requestType = feedbackType as FeedbackRequestType;
+      responseType = feedbackType === "QUESTION" ? "ANSWER" : "REPLY";
+    } else {
+      return false;
+    }
 
-  if (typename === "ResponseFeedbackNotification") {
-    requestType = feedbackType === "ANSWER" ? "QUESTION" : "COMMENT";
-    responseType = "REPLY";
-    focusKind = params.get("qa_expand_type");
-  } else if (typename === "ProgramFeedbackNotification") {
-    requestType = feedbackType as FeedbackRequestType;
-    responseType = feedbackType === "QUESTION" ? "ANSWER" : "REPLY";
-  } else {
+    const topicId = url.split("?")[0].split("/").pop();
+
+    const feedbackResponse = await graphQLFetch("feedbackQuery", fkey, {
+      topicId,
+      feedbackType: requestType,
+      currentSort: 5,
+      qaExpandKey: params.get("qa_expand_key") as string,
+      focusKind,
+    });
+
+    const feedbackJson: FeedbackQueryResponse = await feedbackResponse.json();
+    const feedback = feedbackJson.data.feedback.feedback[0];
+
+    const key =
+      feedbackType === "QUESTION" && params.get("qa_expand_type") === "answer"
+        ? feedback.answers[0].key
+        : feedback.key;
+
+    const addFeedbackResponse = await graphQLFetch("AddFeedbackToDiscussion", fkey, {
+      parentKey: key,
+      textContent,
+      feedbackType: responseType,
+      fromVideoAuthor: false,
+      shownLowQualityNotice: false,
+    });
+
+    return addFeedbackResponse.ok;
+  } catch (error) {
+    console.error("Error in sending feedback: ", error);
     return false;
   }
-
-  const topicId = url
-    .split("?")[0]
-    .split("/")
-    .pop();
-
-  return await graphQLFetch("feedbackQuery", fkey, {
-    topicId,
-    feedbackType: requestType,
-    currentSort: 5,
-    qaExpandKey: params.get("qa_expand_key"),
-    focusKind
-  })
-    .then(async (response: Response) => await response.json())
-    .then(async (json: FeedbackQueryResponse) => {
-      const feedback = json.data.feedback.feedback[0];
-      const key: string =
-        feedbackType === "QUESTION" && params.get("qa_expand_type") === "answer"
-          ? feedback.answers[0].key
-          : feedback.key;
-      return await graphQLFetch("AddFeedbackToDiscussion", fkey, {
-        parentKey: key,
-        textContent,
-        feedbackType: responseType,
-        fromVideoAuthor: false,
-        shownLowQualityNotice: false
-      });
-    })
-    .then(response => response.ok)
-    .catch(error => {
-      console.error("Error in sending feedback: ", error);
-      return false;
-    });
-}
-
-export async function getJsonUserProfile() {
-  const response = await fetch(
-    "https://www.khanacademy.org/api/internal/graphql/getFullUserProfile?hash=2921543415"
-  );
-  return await response.json();
 }

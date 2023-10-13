@@ -32,5 +32,9 @@ export interface GeneralResponse {
   value?: any;
 }
 
+export interface GraphQLJsonResponseSuccess {
+  value: number;
+}
+
 export type FeedbackRequestType = "QUESTION" | "COMMENT";
 export type FeedbackResponseType = "REPLY" | "ANSWER";

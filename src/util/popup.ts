@@ -1,12 +1,11 @@
 import { KaNotification } from "../@types/notification";
-import {
-  addFeedback,
-  getUserFkeyCookie,
-  graphQLFetchJsonResponse
-} from "./graphql";
+import { addFeedback, getUserFkeyCookie, graphQLFetchJsonResponse } from "./graphql";
 import { cleanse, parseMarkdown } from "./markdown";
+import { StringMap } from "../@types/common-types";
 import AVATAR_REQUIREMENTS from "../json/avatar-requirements.json";
 import AVATAR_SHORTNAMES from "../json/avatar-shortnames.json";
+const avatarRequirements: StringMap = AVATAR_REQUIREMENTS;
+const avatarShortnames: StringMap = AVATAR_SHORTNAMES;
 
 /**
  * Constructs notification string from input Khan Academy notification object
@@ -23,17 +22,13 @@ export function createNotificationString(notification: KaNotification): string {
       }"><div class="notification-header"><img class="notification-author-avatar" src="${
         notification.authorAvatarUrl
       }"><h3 class="notification-author-nickname">${cleanse(
-        notification.authorNickname
+        notification.authorNickname,
       )}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${
-        notification.feedbackType === "REPLY"
-          ? "added a comment"
-          : "answered your question"
-      } on ${
-        notification.focusTranslatedTitle
-      }</a><span class="notification-date">${timeSince(
-        new Date(date)
+        notification.feedbackType === "REPLY" ? "added a comment" : "answered your question"
+      } on ${notification.focusTranslatedTitle}</a><span class="notification-date">${timeSince(
+        new Date(date),
       )} ago</span></div><div class="notification-content">${parseMarkdown(
-        notification.content
+        notification.content,
       )}</div><div class="notification-feedback-container"><button class="notification-feedback-button add-listeners" data-url="${url}" data-typename="ResponseFeedbackNotification" data-feedbacktype="${
         notification.feedbackType
       }">Reply</button></div></li>`;
@@ -43,17 +38,15 @@ export function createNotificationString(notification: KaNotification): string {
       }"><div class="notification-header"><img class="notification-author-avatar" src="${
         notification.authorAvatarSrc
       }"><h3 class="notification-author-nickname">${cleanse(
-        notification.authorNickname
+        notification.authorNickname,
       )}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${
-        notification.feedbackType === "COMMENT"
-          ? "commented"
-          : "asked a question"
+        notification.feedbackType === "COMMENT" ? "commented" : "asked a question"
       } on ${cleanse(
-        notification.translatedScratchpadTitle
+        notification.translatedScratchpadTitle,
       )}</a><span class="notification-date">${timeSince(
-        new Date(date)
+        new Date(date),
       )} ago</span></div><div class="notification-content">${parseMarkdown(
-        notification.content
+        notification.content,
       )}</div><div class="notification-feedback-container"><button class="notification-feedback-button add-listeners" data-url="${url}" data-typename="ProgramFeedbackNotification" data-feedbacktype="${
         notification.feedbackType
       }">Reply</button></div></li>`;
@@ -65,10 +58,10 @@ export function createNotificationString(notification: KaNotification): string {
           ? notification.thumbnailSrc
           : "https://cdn.kastatic.org" + notification.thumbnailSrc
       }"><h3 class="notification-author-nickname">KA Avatars</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">use avatar</a><span class="notification-date">${timeSince(
-        new Date(date)
+        new Date(date),
       )} ago</span></div><div class="notification-content">You unlocked <b>${
-        AVATAR_SHORTNAMES[notification.name]
-      }</b>! <i>${AVATAR_REQUIREMENTS[notification.name]}</i></div></li>`;
+        avatarShortnames[notification.name]
+      }</b>! <i>${avatarRequirements[notification.name]}</i></div></li>`;
     case "GroupedBadgeNotification":
       return `<li class="notification ${
         brandNew ? "new" : ""
@@ -77,11 +70,10 @@ export function createNotificationString(notification: KaNotification): string {
       }"><h3 class="notification-author-nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org${
         notification.url
       }" target="_blank">view badges</a><span class="notification-date">${timeSince(
-        new Date(date)
+        new Date(date),
       )} ago</span></div><p class="notification-content">You earned <b>${
         notification.badgeNotifications[0].badge.description
-      }</b> and ${notification.badgeNotifications.length -
-        1} more! Congratulations!</p></li>`;
+      }</b> and ${notification.badgeNotifications.length - 1} more! Congratulations!</p></li>`;
     case "BadgeNotification":
       return `<li class="notification ${
         brandNew ? "new" : ""
@@ -90,26 +82,26 @@ export function createNotificationString(notification: KaNotification): string {
       }"><h3 class="notification-author-nickname">KA Badges</h3><a class="hyperlink" href="https://www.khanacademy.org/${
         notification.badge.relativeUrl
       }" target="_blank">view badge</a><span class="notification-date">${timeSince(
-        new Date(date)
+        new Date(date),
       )}</span></div><div class="notification-content">You earned <b>${
         notification.badge.description
       }</b>! <i>${notification.badge.fullDescription}</i>.</div></li>`;
     default:
-      console.log(
-        `Notification type ${notification.__typename} is currently unsupported.`
-      );
+      console.log(`Notification type ${notification.__typename} is currently unsupported.`);
       return `<li class="notification ${
         brandNew ? "new" : ""
       }"><div class="notification-header"><img class="notification-author-avatar" src="48.png"><h3 class="notification-author-nickname">Unsupported Notification Type</h3><span class="notification-date">${timeSince(
-        new Date(date)
+        new Date(date),
       )} ago</span></div><div class="notification-content">${JSON.stringify(
-        notification
+        notification,
       )}</div></li>`;
   }
 }
 
 export function addReplyButtonEventListeners() {
-  const replyButtons = document.getElementsByClassName("add-listeners");
+  const replyButtons = document.getElementsByClassName(
+    "add-listeners",
+  ) as HTMLCollectionOf<HTMLButtonElement>;
   for (let i = replyButtons.length; i--; ) {
     replyButtons[i].addEventListener("click", handleReplyButtonClick);
     replyButtons[i].className = "notification-feedback-button";
@@ -117,15 +109,15 @@ export function addReplyButtonEventListeners() {
 }
 
 export function createNoNotificationsString(): string {
-  return "<li class=\"notification new\"><div class=\"notification-header\"><img class=\"notification-author-avatar\" src=\"32.png\"><h3 class=\"notification-author-nickname\">KA Notifications</h3></div><div class=\"notification-content\">You have no notifications.</div></li>";
+  return '<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You have no notifications.</div></li>';
 }
 
 export function createNoCookieString(): string {
-  return "<li class=\"notification new\"><div class=\"notification-header\"><img class=\"notification-author-avatar\" src=\"32.png\"><h3 class=\"notification-author-nickname\">KA Notifications</h3></div><div class=\"notification-content\">Your authentication cookie has expired. Please <a class=\"hyperlink\" href=\"https://khanacademy.org/\" target=\"_blank\">navigate to Khan Academy</a> to refresh it.</div></li>";
+  return '<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">Your authentication cookie has expired. Please <a class="hyperlink" href="https://khanacademy.org/" target="_blank">navigate to Khan Academy</a> to refresh it.</div></li>';
 }
 
 export function createLoggedOutString(): string {
-  return "<li class=\"notification new\"><div class=\"notification-header\"><img class=\"notification-author-avatar\" src=\"32.png\"><h3 class=\"notification-author-nickname\">KA Notifications</h3></div><div class=\"notification-content\">You are logged out. Please <a class=\"hyperlink\" href=\"https://khanacademy.org/login\" target=\"_blank\">log in to Khan Academy</a> to use this extension.</div></li>";
+  return '<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You are logged out. Please <a class="hyperlink" href="https://khanacademy.org/login" target="_blank">log in to Khan Academy</a> to use this extension.</div></li>';
 }
 
 /**
@@ -137,7 +129,7 @@ export function initUserInterface(theme: string) {
   /**
    * Theme button setup
    */
-  const themeButton = document.getElementById("theme-button");
+  const themeButton = document.getElementById("theme-button") as HTMLButtonElement;
   if (theme === "dark") {
     document.body.className = theme;
     themeButton.innerHTML =
@@ -163,10 +155,10 @@ export function initUserInterface(theme: string) {
    * Mark all read setup
    */
 
-  const markAllRead = document.getElementById("mark-all-read");
+  const markAllRead = document.getElementById("mark-all-read") as HTMLButtonElement;
   const markAllReadLoadingSpinner = document.getElementById(
-    "mark-all-read-loading"
-  );
+    "mark-all-read-loading",
+  ) as HTMLDivElement;
 
   let markAllReadLoading = false;
 
@@ -178,10 +170,7 @@ export function initUserInterface(theme: string) {
     markAllReadLoadingSpinner.classList.remove("hidden");
     try {
       const fkey = await getUserFkeyCookie();
-      const response = await graphQLFetchJsonResponse(
-        "clearBrandNewNotifications",
-        fkey
-      );
+      const response = await graphQLFetchJsonResponse("clearBrandNewNotifications", fkey);
       if (response.value) {
         markAllReadLoading = false;
         markAllReadLoadingSpinner.classList.add("hidden");
@@ -197,9 +186,9 @@ export function initUserInterface(theme: string) {
    * Page switching
    */
 
-  const settingsButton = document.getElementById("settings-button");
-  const notificationsSection = document.getElementById("notifications-section");
-  const settingsSection = document.getElementById("settings-section");
+  const settingsButton = document.getElementById("settings-button") as HTMLButtonElement;
+  const notificationsSection = document.getElementById("notifications-section") as HTMLDivElement;
+  const settingsSection = document.getElementById("settings-section") as HTMLDivElement;
 
   settingsButton.onclick = () => {
     notificationsSection.classList.toggle("hidden");
@@ -216,9 +205,7 @@ export function initUserInterface(theme: string) {
     }
   };
 
-  const commentSortInput = document.getElementById(
-    "sort-comments"
-  ) as HTMLInputElement;
+  const commentSortInput = document.getElementById("sort-comments") as HTMLInputElement;
 
   (async () => {
     const { commentSort } = await chrome.storage.local.get("commentSort");
@@ -231,7 +218,7 @@ export function initUserInterface(theme: string) {
 
   commentSortInput.onchange = () => {
     void chrome.storage.local.set({
-      commentSort: commentSortInput.value
+      commentSort: commentSortInput.value,
     });
   };
 }
@@ -273,15 +260,16 @@ function timeSince(date: Date): string {
 }
 
 function handleReplyButtonClick(event: MouseEvent) {
-  const activeTextarea = document.getElementById("active-textarea");
+  const activeTextarea = document.getElementById("active-textarea") as HTMLTextAreaElement;
 
   if (activeTextarea) {
-    const button = activeTextarea.parentElement.getElementsByClassName(
-      "notification-feedback-button"
+    const textareaContainer = activeTextarea.parentElement as HTMLDivElement;
+    const feedbackButton = textareaContainer.getElementsByClassName(
+      "notification-feedback-button",
     )[0] as HTMLButtonElement;
-    button.removeEventListener("click", sendMessageOnClick);
-    button.addEventListener("click", handleReplyButtonClick);
-    button.textContent = "Reply";
+    feedbackButton.removeEventListener("click", sendMessageOnClick);
+    feedbackButton.addEventListener("click", handleReplyButtonClick);
+    feedbackButton.textContent = "Reply";
     activeTextarea.remove();
   }
 
@@ -306,9 +294,7 @@ function handleReplyButtonClick(event: MouseEvent) {
 
 async function sendMessageOnClick(event: Event) {
   const button = event.target as HTMLButtonElement;
-  const textarea = document.getElementById(
-    "active-textarea"
-  ) as HTMLTextAreaElement;
+  const textarea = document.getElementById("active-textarea") as HTMLTextAreaElement;
   if (textarea.value.length === 0) {
     button.textContent = "Reply";
     button.removeEventListener("click", sendMessageOnClick);
@@ -325,7 +311,13 @@ async function sendMessageOnClick(event: Event) {
 
   try {
     const fkey = await getUserFkeyCookie();
-    const success = await addFeedback(fkey, url, typename, feedbacktype, value);
+    const success = await addFeedback(
+      fkey,
+      url as string,
+      typename as string,
+      feedbacktype as string,
+      value,
+    );
 
     if (success) {
       button.textContent = "Success!";
@@ -342,26 +334,3 @@ async function sendMessageOnClick(event: Event) {
     textarea.value = "Error in sending request: " + e;
   }
 }
-
-// async function getFeedbackParent(fkey: string, url: string, typename: string): Promise<string | null> {
-//   if (typename !== "ResponseFeedbackNotification" && typename !== "ProgramFeedbackNotification") {
-//     return null;
-//   }
-//   const params = new URL("https://www.khanacademy.org/" + url).searchParams;
-
-//   const response = await graphQLFetch("feedbackQuery", fkey, {
-//     topicId: url.split("?")[0].split("/").slice(-1)[0],
-//     feedbackType: params.get("qa_expand_type") === "reply" ? "QUESTION" : "COMMENT",
-//     currentSort: 1,
-//     qaExpandKey: params.get("qa_expand_key"),
-//     focusKind: "scratchpad",
-//   });
-
-//   const json: FeedbackQueryResponse = await response.json();
-
-//   if (json.data.errors === undefined && json.data?.feedback?.feedback[0]?.expandKey) {
-//     return json.data.feedback.feedback[0].expandKey;
-//   }
-//   console.error(`Error in retrieving feedback parent with URL ${url} and errors ${json.data.errors}`);
-//   return null;
-// }

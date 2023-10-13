@@ -79,7 +79,7 @@ export interface FeedbackQueryResponse {
   data: {
     feedback: {
       cursor: null | string;
-      feedback: null | QuestionFeedback[];
+      feedback: QuestionFeedback[];
       isComplete: boolean;
       sortedByDate: boolean;
       __typename: "FeedbackForFocus";

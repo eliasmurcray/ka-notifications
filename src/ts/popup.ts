@@ -7,30 +7,24 @@ import {
   createNoCookieString,
   createNoNotificationsString,
   createNotificationString,
-  initUserInterface
+  initUserInterface,
 } from "../util/popup";
 
-const notificationsContainer = document.querySelector(
-  "#notifications-container"
-);
-const notificationsSection = document.querySelector("#notifications-section");
+const notificationsContainer = document.querySelector("#notifications-container") as HTMLDivElement;
+const notificationsSection = document.querySelector("#notifications-section") as HTMLDivElement;
 const loadingSpinnerContainer = document.querySelector(
-  "#loading-spinner-container"
-);
+  "#loading-spinner-container",
+) as HTMLDivElement;
 
 let loading = false;
 let localCursor: string;
 
 async function init() {
   try {
-    const {
-      prefetchData,
-      prefetchCursor,
-      theme
-    } = await chrome.storage.local.get([
+    const { prefetchData, prefetchCursor, theme } = await chrome.storage.local.get([
       "prefetchData",
       "prefetchCursor",
-      "theme"
+      "theme",
     ]);
     initUserInterface(theme);
 
@@ -54,9 +48,7 @@ async function init() {
             return;
           }
 
-          notificationsContainer.innerHTML = notifications
-            .map(createNotificationString)
-            .join("");
+          notificationsContainer.innerHTML = notifications.map(createNotificationString).join("");
           addReplyButtonEventListeners();
 
           if (!prefetchCursor) {
@@ -65,13 +57,13 @@ async function init() {
 
           localCursor = prefetchCursor;
           notificationsSection.addEventListener("scroll", handleScroll, {
-            passive: true
+            passive: true,
           });
       }
     } else {
       await appendNotifications();
       notificationsSection.addEventListener("scroll", handleScroll, {
-        passive: true
+        passive: true,
       });
     }
   } catch (error) {
@@ -81,7 +73,7 @@ async function init() {
 
 async function appendNotifications(): Promise<void> {
   try {
-    const response = await getNotificationData(undefined, localCursor);
+    const response = await getNotificationData("", localCursor);
 
     if (!response.value) {
       if (firstTime && response.error === "cookie") {
@@ -105,7 +97,7 @@ async function appendNotifications(): Promise<void> {
       const { notifications, cursor } = response.value;
       notificationsContainer.insertAdjacentHTML(
         "beforeend",
-        notifications.map(createNotificationString).join("")
+        notifications.map(createNotificationString).join(""),
       );
       addReplyButtonEventListeners();
 
@@ -126,7 +118,7 @@ function handleScroll() {
     Math.abs(
       notificationsSection.scrollHeight -
         notificationsSection.scrollTop -
-        notificationsSection.clientHeight
+        notificationsSection.clientHeight,
     ) <= 76
   ) {
     loading = true;

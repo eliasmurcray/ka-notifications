@@ -12,16 +12,13 @@ if (
    * Auto sort comments
    */
 
-  chrome.storage.local.get("commentSort", keys => {
+  chrome.storage.local.get("commentSort", (keys) => {
     if (keys.commentSort === undefined) {
       return;
     }
     updateSortBy(keys.commentSort as string, 0);
   });
-} else if (
-  (split[2] === "computer-programming" || split[2] === "cs") &&
-  split[3] === "browse"
-) {
+} else if ((split[2] === "computer-programming" || split[2] === "cs") && split[3] === "browse") {
   const hotlistScript = document.createElement("script");
   hotlistScript.src = chrome.runtime.getURL("hotlist.js");
   document.head.append(hotlistScript);
@@ -38,12 +35,10 @@ function updateSortBy(sortBy: string, iteration: number) {
     console.log("Iteration over 10000, breaking updateSortBy");
     return;
   }
-  const button = document.querySelector<HTMLButtonElement>("button#sortBy");
+  const button = document.querySelector<HTMLButtonElement>("button#sortBy") as HTMLButtonElement;
   button?.click();
 
-  const element = document.querySelector(
-    'div[data-test-id="dropdown-core-container"]'
-  );
+  const element = document.querySelector('div[data-test-id="dropdown-core-container"]');
   if (element === null) {
     requestAnimationFrame(() => {
       updateSortBy(sortBy, iteration + 1);
@@ -51,7 +46,7 @@ function updateSortBy(sortBy: string, iteration: number) {
     return;
   }
 
-  const listBox = element.firstElementChild;
+  const listBox = element.firstElementChild as HTMLDivElement;
   const children = Array.from(listBox.children);
   const userPreference = children[
     ["Trending", "Top Voted", "Recent"].indexOf(sortBy)

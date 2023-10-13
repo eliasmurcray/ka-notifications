@@ -1,10 +1,13 @@
 {
-  "exclude": ["./dist/"],
+  "exclude": ["./chrome/", "./firefox/", "./node_modules/", "./scripts/"],
+  "include": ["./src/ts/**.ts"],
   "compilerOptions": {
     "types": ["chrome"],
     "target": "ESNext",
     "module": "CommonJS",
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "strict": true,
+    "strictNullChecks": true
   }
 }
