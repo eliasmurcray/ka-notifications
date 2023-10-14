@@ -5,7 +5,7 @@
   "author": "Elias Murcray",
   "version": "2.0.1",
   "homepage_url": "https://github.com/eliasmurcray/ka-notifications",
-  "description": "Enhance your Khan Academy experience with timely notifications and other helpful tweaks.",
+  "description": "Enhance your Khan Academy experience with timely notifications and subtle improvements.",
   "minimum_chrome_version": "109",
   "icons": {
     "16": "16.png",

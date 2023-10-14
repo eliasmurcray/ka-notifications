@@ -3,7 +3,11 @@
   <head> </head>
   <body>
     <header class="notifications-header">
-      <a href="https://discord.gg/peexFK5dz6" target="_blank" title="Khan Academy Notifications Discord">
+      <a
+        href="https://discord.gg/peexFK5dz6"
+        target="_blank"
+        title="Khan Academy Notifications Discord"
+      >
         <svg
           stroke="#ffffff"
           fill="#ffffff"
@@ -18,7 +22,11 @@
           ></path>
         </svg>
       </a>
-      <a href="https://github.com/eliasmurcray/ka-notifications" target="_blank" title="Khan Academy Notifications GitHub Repository">
+      <a
+        href="https://github.com/eliasmurcray/ka-notifications"
+        target="_blank"
+        title="Khan Academy Notifications GitHub Repository"
+      >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 96" width="18" height="18">
           <path
             fill-rule="evenodd"
@@ -59,7 +67,7 @@
           />
         </svg>
       </button>
-      <div id="mark-all-read-loading" class="mini-loading-spinner">
+      <div id="mark-all-read-loading" class="mini-loading-spinner hidden">
         <div></div>
         <div></div>
         <div></div>
@@ -81,20 +89,25 @@
     </section>
     <section id="settings-section" class="hidden">
       <h1>Settings</h1>
-      <div>
-        Here you can set your preferences. For some settings you may need to reload for them to propagate. This section is a work in
-        progress.
-      </div>
+      <div>Customize your experience.</div>
       <h2>Default T&T Sort</h2>
+      <div>Set your default comment sort on Khan Academy.</div>
       <select id="sort-comments">
         <option value="Trending">Trending</option>
         <option value="Top Voted">Top Voted</option>
         <option value="Recent">Recent</option>
       </select>
+      <h2>Clear Notification Cache</h2>
+      <div>Clear your notification cache and check for new notifications.</div>
+      <button id="clear-notification-cache">Clear Cache</button>
       <h2>Leave a review</h2>
       <div>
-        If you are enjoying this extension and want to make it more visible to others, we would appreciate it if you
-        <a class="hyperlink" href="https://chrome.google.com/webstore/detail/gdlfnahbohjggjhpcmabnfikiigncjbd/reviews" target="_blank"
+        If you are enjoying this extension and want to make it more visible to others, we would
+        appreciate it if you
+        <a
+          class="hyperlink"
+          href="https://chrome.google.com/webstore/detail/gdlfnahbohjggjhpcmabnfikiigncjbd/reviews"
+          target="_blank"
           >left a review</a
         >. Thank you.
       </div>

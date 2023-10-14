@@ -77,13 +77,24 @@
   font-size: 12px;
   line-height: 18px;
   width: 100%;
-  color: var(--notification-content-text-color);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .notification-content pre {
-  overflow: auto;
+  width: 100%;
+  overflow-x: auto;
+  font-family: Söhne Mono, Monaco, Andale Mono, Ubuntu Mono, monospace;
+  font-size: 10px;
+  padding: 6px;
+  background-color: var(--button-hover-color);
+  color: var(--button-text-color);
+  box-sizing: border-box;
+  border-radius: 2px;
+  white-space: pre-wrap;
+  width: 100%;
+  margin-block: 8px;
+  box-shadow: 0 0 1px #000a;
 }
 
 #active-textarea {

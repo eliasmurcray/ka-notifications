@@ -23,7 +23,6 @@ window.fetch = async function (input: RequestInfo | URL, init?: RequestInit): Pr
     try {
       return await originalFetch(input, init);
     } catch (error) {
-      console.error("Error:", error);
       return new Response(null, {
         status: 500,
         statusText: "Internal Server Error",

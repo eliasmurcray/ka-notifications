@@ -28,6 +28,30 @@ async function init() {
     ]);
     initUserInterface(theme);
 
+    /**
+     * Clear cache button in settings
+     */
+    let isClearing = false,
+      clearMessageTimeout: number;
+    const clearCacheButton = document.getElementById(
+      "clear-notification-cache",
+    ) as HTMLButtonElement;
+    clearCacheButton.onclick = async () => {
+      if (isClearing) return;
+      if (clearMessageTimeout) clearTimeout(clearMessageTimeout);
+      isClearing = true;
+      clearCacheButton.innerText = "Clearing cache...";
+      notificationsContainer.innerHTML = "";
+      notificationsSection.removeEventListener("scroll", handleScroll);
+      localCursor = "";
+      await appendNotifications();
+      clearCacheButton.innerText = "Cache cleared";
+      isClearing = false;
+      clearMessageTimeout = setTimeout(() => {
+        clearCacheButton.innerText = "Clear cache";
+      }, 4000);
+    };
+
     if (prefetchData) {
       switch (prefetchData) {
         case "info:cookie":

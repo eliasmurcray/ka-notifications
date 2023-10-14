@@ -1,0 +1,46 @@
+#settings-section {
+  padding: 15px;
+  color: var(--notification-content-text-color);
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+#settings-section h1 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+#settings-section h2 {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+#settings-section select {
+  margin-top: 0.5rem;
+  background-color: var(--button-color);
+  color: var(--button-text-color);
+  padding: 0.2rem 0.5rem;
+  font: inherit;
+  border: 0;
+  outline: 0;
+  box-shadow: 0 0 1px var(--box-shadow-color);
+}
+
+#settings-section button {
+  margin-top: 0.5rem;
+  background-color: var(--button-color);
+  color: var(--button-text-color);
+  padding: 0.4rem 0.8rem;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+  border: 0;
+  outline: 0;
+  box-shadow: 0 0 1px var(--box-shadow-color);
+  cursor: pointer;
+  transition: background-color 0.1s ease-in-out;
+}
+
+#settings-section button:hover {
+  background-color: var(--button-hover-color);
+}
