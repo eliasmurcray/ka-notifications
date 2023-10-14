@@ -24,65 +24,61 @@ export async function graphQLFetch(
   fkey: string,
   variables: graphQLVariables = {},
 ): Promise<Response> {
-  try {
-    const requestUrl = `https://www.khanacademy.org/api/internal/graphql/${queryName}?/fastly/`;
+  const requestUrl = `https://www.khanacademy.org/api/internal/graphql/${queryName}?/fastly/`;
 
-    // British request object
-    const requestInit: RequestInit = {
-      method: "POST",
-      headers: {
-        "X-KA-fkey": fkey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        operationName: queryName,
-        query: graphQLQueries[queryName],
-        variables,
-      }),
-      credentials: "same-origin",
-    };
+  // British request object
+  const requestInit: RequestInit = {
+    method: "POST",
+    headers: {
+      "X-KA-fkey": fkey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      operationName: queryName,
+      query: graphQLQueries[queryName],
+      variables,
+    }),
+    credentials: "same-origin",
+  };
 
-    const response = await fetch(requestUrl, requestInit);
+  const response = await fetch(requestUrl, requestInit);
 
-    if (response.status === 200) {
-      return response;
-    } else if (response.status === 400) {
-      const isMutation = graphQLQueries[queryName].startsWith("mutation");
-      console.warn(
-        `The query for operation "${queryName}" is no longer in the safelist. Attempting to fetch the latest version from the safelist...`,
-      );
+  if (response.status === 200) {
+    return response;
+  } else if (response.status === 400) {
+    const isMutation = graphQLQueries[queryName].startsWith("mutation");
+    console.warn(
+      `The query for operation "${queryName}" is no longer in the safelist. Attempting to fetch the latest version from the safelist...`,
+    );
 
-      const latestQuery = isMutation
-        ? await getLatestMutation(queryName)
-        : await getLatestQuery(queryName);
+    const latestQuery = isMutation
+      ? await getLatestMutation(queryName)
+      : await getLatestQuery(queryName);
 
-      if (!latestQuery) {
-        throw new Error(`The query for operation "${queryName}" was not found in the safelist`);
-      }
+    if (!latestQuery) {
+      throw new Error(`The query for operation "${queryName}" was not found in the safelist`);
+    }
 
-      requestInit.body = JSON.stringify({
-        operationName: queryName,
-        query: latestQuery,
-        variables,
-      });
+    requestInit.body = JSON.stringify({
+      operationName: queryName,
+      query: latestQuery,
+      variables,
+    });
 
-      const updatedResponse = await fetch(requestUrl, requestInit);
+    const updatedResponse = await fetch(requestUrl, requestInit);
 
-      if (updatedResponse.status === 200) {
-        graphQLQueries[queryName] = latestQuery;
-        return updatedResponse;
-      } else {
-        throw new Error(
-          `Error in GraphQL "${queryName}" call: Server responded with status ${updatedResponse.status}.`,
-        );
-      }
+    if (updatedResponse.status === 200) {
+      graphQLQueries[queryName] = latestQuery;
+      return updatedResponse;
     } else {
       throw new Error(
-        `Error in GraphQL "${queryName}" call: Server responded with status ${response.status}.`,
+        `Error in GraphQL "${queryName}" call: Server responded with status ${updatedResponse.status}.`,
       );
     }
-  } catch (error) {
-    throw error;
+  } else {
+    throw new Error(
+      `Error in GraphQL "${queryName}" call: Server responded with status ${response.status}.`,
+    );
   }
 }
 
