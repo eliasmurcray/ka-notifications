@@ -65,7 +65,7 @@ async function init() {
           notificationsContainer.innerHTML = createNoNotificationsString();
           loadingSpinnerContainer?.remove();
           break;
-        default:
+        default: {
           const notifications = prefetchData as KaNotification[];
 
           if (!notifications) {
@@ -83,6 +83,7 @@ async function init() {
           notificationsSection.addEventListener("scroll", handleScroll, {
             passive: true,
           });
+        }
       }
     } else {
       await appendNotifications();
