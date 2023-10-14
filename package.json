@@ -2,20 +2,19 @@
   "name": "ka-notifications-2.0",
   "version": "2.0.1",
   "description": "The updated version of the original Khan Academy notifications extension with more maintainable code.",
-  "main": "index.js",
   "scripts": {
     "build": "webpack && node scripts/firefox-build.js",
     "build.chrome": "webpack",
-    "commit": "sh -c 'git add . && git commit -m \"$0\" && git push -u origin v2'",
-    "clearcache": "git rm -r --cached .",
     "dev": "webpack -- --watch",
     "format": "prettier --write \"src/**/*.ts\"",
-    "release": "webpack && node scripts/firefox-build.js && node scripts/zip-extension.js"
+    "release": "webpack && node scripts/firefox-build.js && node scripts/zip-extension.js",
+    "release.chrome": "webpack && node scripts/zip-extension.js"
   },
   "repository": "git+https://github.com/eliasmurcray/ka-notifications.git",
   "keywords": [
     "chrome-extension",
-    "firefox-addon"
+    "firefox-addon",
+    "khan-academy"
   ],
   "author": "Elias Murcray",
   "license": "MIT",
