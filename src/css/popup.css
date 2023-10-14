@@ -136,8 +136,8 @@ body.dark ::-webkit-scrollbar-thumb:active {
   font: inherit;
   box-sizing: border-box;
   margin-bottom: 8px;
-  line-height: 1;
-  height: 30px;
+  line-height: 18px;
+  height: 36px;
 }
 
 .notification-header {
