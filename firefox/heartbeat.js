@@ -1,1 +1,0 @@
-(()=>{"use strict";window.setInterval((async()=>await chrome.runtime.sendMessage({keepAlive:!0})),2e4)})();
