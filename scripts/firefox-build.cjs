@@ -1,11 +1,19 @@
 const fs = require("fs-extra");
 
 // Clone Chrome dir into Firefox dir
-fs.copy("./chrome", "./firefox", function (error) {
+fs.remove("./firefox", (error) => {
   if (error) {
     return console.error(error);
   }
-  updateManifest();
+
+  // Copy files from "Chrome" directory to "Firefox" directory
+  fs.copy("./chrome", "./firefox", (error) => {
+    if (error) {
+      return console.error(error);
+    }
+
+    updateManifest();
+  });
 });
 
 // Update the manifest.json file in the cloned Firefox dir
