@@ -22,24 +22,22 @@
   },
   "homepage": "https://github.com/eliasmurcray/ka-notifications#readme",
   "devDependencies": {
+    "@bhavjit/khan-api": "^0.6.5",
     "@types/html-webpack-plugin": "^3.2.6",
     "@types/webpack-env": "^1.18.1",
     "@typescript-eslint/eslint-plugin": "^6.7.5",
     "@typescript-eslint/parser": "^6.7.5",
     "archiver": "^5.3.1",
+    "chrome-types": "^0.1.231",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
+    "eslint": "^8.51.0",
     "fs-extra": "^11.1.1",
     "html-webpack-plugin": "^5.5.3",
     "mini-css-extract-plugin": "^2.7.6",
     "ts-loader": "^9.4.4",
+    "typescript": "*",
     "webpack": "^5.88.1",
     "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
-    "@bhavjit/khan-api": "^0.6.5",
-    "chrome-types": "^0.1.231",
-    "eslint": "^8.51.0",
-    "typescript": "*"
   }
 }
