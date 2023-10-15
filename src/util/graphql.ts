@@ -94,7 +94,7 @@ export async function getUserFkeyCookie(): Promise<string> {
         name: "fkey",
       },
       (cookie) => {
-        if (cookie === undefined) {
+        if (!cookie) {
           reject("No fkey cookie found.");
         } else {
           resolve(cookie.value);
