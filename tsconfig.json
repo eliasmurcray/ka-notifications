@@ -2,7 +2,7 @@
   "exclude": ["./chrome/", "./firefox/", "./node_modules/", "./scripts/"],
   "include": ["./src/ts/**.ts"],
   "compilerOptions": {
-    "types": ["chrome"],
+    "types": ["chrome-types"],
     "target": "ESNext",
     "module": "CommonJS",
     "resolveJsonModule": true,

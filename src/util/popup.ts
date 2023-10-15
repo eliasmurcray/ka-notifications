@@ -86,6 +86,14 @@ export function createNotificationString(notification: KaNotification): string {
       )}</span></div><div class="notification-content">You earned <b>${
         notification.badge.description
       }</b>! <i>${notification.badge.fullDescription}</i>.</div></li>`;
+    case "ModeratorNotification":
+      return `<li class="notification ${
+        brandNew ? "new" : ""
+      }><div class="notification-header"><img class="notification-author-avatar" src="guardian-icon.png"><h3 class="notification-author-nickname">KA Guardian</h3><span class="notification-date">${timeSince(
+        new Date(date),
+      )}</span></div><div class="notification-content">${parseMarkdown(
+        notification.text,
+      )}</div></li>`;
     default:
       console.log(`Notification type ${notification.__typename} is currently unsupported.`);
       return `<li class="notification ${

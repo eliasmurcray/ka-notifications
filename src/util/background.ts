@@ -5,13 +5,11 @@ import { graphQLFetchJsonResponse } from "./graphql";
  * Creates a new offscreen heartbeat window if one doesn't already exist.
  */
 export async function createOffscreenHeartbeat(): Promise<void> {
-  if (!(await chrome.offscreen.hasDocument())) {
-    await chrome.offscreen.createDocument({
-      url: chrome.runtime.getURL("heartbeat.html"),
-      reasons: [chrome.offscreen.Reason.BLOBS],
-      justification: "Keep service worker alive.",
-    });
-  }
+  chrome.offscreen.createDocument({
+    url: chrome.runtime.getURL("heartbeat.html"),
+    reasons: ["BLOBS"],
+    justification: "Keep service worker alive.",
+  });
 }
 
 /**

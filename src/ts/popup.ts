@@ -72,6 +72,8 @@ async function init() {
             return;
           }
 
+          console.log("Preloaded successfully.");
+
           notificationsContainer.innerHTML = notifications.map(createNotificationString).join("");
           addReplyButtonEventListeners();
 
