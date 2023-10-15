@@ -9,7 +9,7 @@ import { FeedbackQueryResponse } from "../@types/graphql";
 import * as graphQLQueriesJson from "../json/graphql-queries.json";
 import { getLatestMutation, getLatestQuery } from "@bhavjit/khan-api";
 
-const graphQLQueries: StringMap = graphQLQueriesJson;
+const graphQLQueries: StringMap = { ...graphQLQueriesJson };
 
 /**
  * Executes a fetch to Khan Academy's GraphQL API.
