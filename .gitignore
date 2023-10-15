@@ -45,7 +45,6 @@ lerna-debug.log*
 *.bmp
 *.pdf
 *.doc
-*.md
 *.woff
 *.woff2
 *.ttf
