@@ -19,8 +19,9 @@
 
 ## Feedback
 
-Check out our [Discord server](https://discord.com/invite/peexFK5dz6) to get in direct contact with the developer team.
-If you would like to report a bug, please [create an issue](https://github.com/eliasmurcray/ka-notifications/issues).
+For direct contact with the developer team, check out our [Discord server](https://discord.com/invite/peexFK5dz6).
+
+If you would like to report a bug or have any other feedback, please [create an issue](https://github.com/eliasmurcray/ka-notifications/issues) on our GitHub repository.
 
 ## Features
 
