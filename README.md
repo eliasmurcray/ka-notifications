@@ -14,7 +14,7 @@
 
 <h2 align="center">Khan Academy Notifications</h2>
 
-<p align="center">Inspired by <a href="https://github.com/ka-extension/ka-extension-ts">The Khan Academy Extension</a>, Khan Academy Notifications is an extension designed to deliver user notifications in a timely manner. The extension also offers features such as direct reply from the popup, loading more replies at once in Khan Academy discussions, and setting default comment sorting.</p>
+<p align="center">Inspired by <a href="https://github.com/ka-extension/ka-extension-ts">The Khan Academy Extension</a>, Khan Academy Notifications is an extension dedicated to timely delivery of user notifications, alongside additional features aimed at augmenting the learner's experience.</p>
 <br />
 
 ## Feedback
@@ -29,3 +29,79 @@ If you would like to report a bug, please [create an issue](https://github.com/e
 - Experience lightning-fast loading times with predictive preloading techniques.
 - Boost your Khan Academy experience with the ability to load 100 replies at a time, instead of just 10.
 - Take control of your browsing experience with customizable comment sorting on Khan Academy.
+
+## Development
+
+Outlined below are two pre-established development processes for prospective contributors. Prior to beginning either process, ensure you have a clone of the code.
+
+```bash
+git clone https://github.com/eliasmurcray/ka-notifications.git
+cd ka-notifications
+npm install
+```
+
+### Chrome
+
+To begin, run the following command:
+
+```bash
+npm run dev
+```
+
+Proceed to make your code changes. It should update after every save. To test the extension on Chrome, follow these steps:
+
+1. Open a new tab in your Chrome browser.
+
+2. In the address bar, type `chrome://extensions` and press Enter.
+
+3. In the top right corner of the "Extensions" page, you'll find a switch that says "Developer Mode." Turn it on.
+
+4. With "Developer Mode" enabled, you can now click the "Load Unpacked" button located in the top left corner of the same "Extensions" page.
+
+5. Navigate to and select your `chrome/` folder.
+
+6. Your extension should now be loaded and running in Chrome.
+
+**Note:** In the future, if you have the extension already running locally, you can update it as follows:
+
+1. Open a new tab in your Chrome browser.
+
+2. In the address bar, type `chrome://extensions` and press Enter.
+
+3. On the "Extensions" page, look in the top left corner, and you'll see an "Update" button.
+
+4. Click the "Update" button, and it will pull the latest version of the extension from the same location on your computer and update it.
+
+### Firefox
+
+Unfortunately, Firefox does not have a hot reload technique. You will have to run the following command whenever making a code change for testing on Firefox:
+
+```bash
+npm run release
+```
+
+To test the extension on Firefox, follow these steps:
+
+1. Navigate to `about:debugging#/runtime/this-firefox` in your browser.
+
+2. Expand the "Temporary Extensions" section.
+
+3. Click "Load Temporary Add-on" and upload the latest zip file from the `zip/` directory, which should contain a file with the letter "f."
+
+4. To grant the extension the necessary permissions, right-click on the extension icon in your toolbar.
+
+5. Click on "Manage Extension" from the context menu.
+
+6. Go to the Permissions tab.
+
+7. Turn on the switch that allows access to `https://www.khanacademy.org`.
+
+### Submitting a PR
+
+Before submitting a PR, please run the following command to ensure the code passes the syntax and style checks:
+
+```bash
+npm run release
+```
+
+Then submit a PR as normal.
