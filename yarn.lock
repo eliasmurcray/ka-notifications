@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@bhavjit/khan-api@^0.6.2":
-  version "0.6.4"
-  resolved "https://registry.yarnpkg.com/@bhavjit/khan-api/-/khan-api-0.6.4.tgz#5daf93283f526190dc8ffb5ccb9f625d3a80be33"
-  integrity sha512-IUDvBUMBANNrP245pE84vmPaQBE0R1xJzFMtIdIdooy90RctLZaOVrSUf7gGoH/NUaS/eH+xqF7a9lUQixSUdg==
+"@bhavjit/khan-api@^0.6.5":
+  version "0.6.5"
+  resolved "https://registry.yarnpkg.com/@bhavjit/khan-api/-/khan-api-0.6.5.tgz#23db6c2826c715fbf3982c184e8c3512b7e87dd9"
+  integrity sha512-8Xq7Qhdvd/AtUZYumJAcIpCSEsaKwrdYPt6ESuruALeCyq0Yub84jTBI/U0hHvl1sUPCRqlRnRUqlpHL4HoweQ==
   dependencies:
     cross-fetch "^4.0.0"
 

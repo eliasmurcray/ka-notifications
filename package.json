@@ -1,14 +1,14 @@
 {
   "name": "ka-notifications-2.0",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "description": "The updated version of the original Khan Academy notifications extension with more maintainable code.",
   "scripts": {
-    "build": "webpack && node scripts/firefox-build.js",
+    "build": "webpack && node scripts/firefox-build.cjs",
     "build.chrome": "webpack",
     "dev": "webpack -- --watch",
     "format": "prettier --write \"src/**/*.ts\"",
-    "release": "webpack && node scripts/firefox-build.js && node scripts/zip-extension.js",
-    "release.chrome": "webpack && node scripts/zip-extension.js"
+    "release": "webpack && node scripts/firefox-build.cjs && node scripts/zip-extension.cjs",
+    "release.chrome": "webpack && node scripts/zip-extension.cjs"
   },
   "repository": "git+https://github.com/eliasmurcray/ka-notifications.git",
   "keywords": [
