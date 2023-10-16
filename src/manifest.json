@@ -34,7 +34,7 @@
   "host_permissions": ["https://www.khanacademy.org/"],
   "web_accessible_resources": [
     {
-      "resources": ["project.js", "hotlist.js", "monaco/*"],
+      "resources": ["project.js", "hotlist.js"],
       "matches": ["https://www.khanacademy.org/*"]
     }
   ],

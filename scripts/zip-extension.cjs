@@ -34,6 +34,7 @@ function createExtensionZips() {
   const firefoxZipStream = fs.createWriteStream(firefoxOutputPath);
   firefoxZipStream.on("close", function () {
     console.log(`${firefoxZipName} has been created successfully.`);
+    fs.rmSync("./firefox", { recursive: true });
   });
   firefoxArchive.pipe(firefoxZipStream);
   firefoxArchive.directory(path.join(__dirname, "..", "firefox"), false);

@@ -23,6 +23,7 @@ async function updateManifest() {
 
     extensionManifest.background.scripts = ["background.js"];
     delete extensionManifest.background.service_worker;
+    delete extensionManifest.background.type;
 
     extensionManifest.browser_specific_settings = {
       gecko: {
@@ -31,6 +32,7 @@ async function updateManifest() {
     };
 
     extensionManifest.permissions.pop();
+    extensionManifest.host_permissions[0] = "*://www.khanacademy.org/*";
 
     await fs.writeJson("./firefox/manifest.json", extensionManifest, {
       spaces: 2,
@@ -39,5 +41,6 @@ async function updateManifest() {
     console.log("Firefox package has been built successfully.");
   } catch (error) {
     console.error(error);
+    process.exit(1);
   }
 }
