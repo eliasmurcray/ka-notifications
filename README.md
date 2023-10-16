@@ -3,7 +3,7 @@
 <br />
 <p align="center">The unofficial extension for Khan Academy notifications.</p>
 <br />
-<p align="center"><a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/khan-academy-notification/gdlfnahbohjggjhpcmabnfikiigncjbd/"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a>  <a rel="noreferrer noopener" href="https://addons.mozilla.org/en-US/firefox/addon/khan-academy-notifications/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-141e24.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white"></a>
+<p align="center"><a rel="noreferrer noopener" href="https://chromewebstore.google.com/detail/khan-academy-notification/gdlfnahbohjggjhpcmabnfikiigncjbd"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a>  <a rel="noreferrer noopener" href="https://addons.mozilla.org/en-US/firefox/addon/khan-academy-notifications/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-141e24.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white"></a>
 <p align="center">
   <a href="https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications">
     <img src="https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications/badge" alt="CodeFactor">
