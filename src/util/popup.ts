@@ -1,11 +1,122 @@
-import { KaNotification } from "../@types/notification";
 import { addFeedback, getUserFkeyCookie, graphQLFetchJsonResponse } from "./graphql";
 import { cleanse, parseMarkdown } from "./markdown";
+import { KhanAcademyNotification } from "../@types/notification";
 import { StringMap } from "../@types/common-types";
 import AVATAR_REQUIREMENTS from "../json/avatar-requirements.json";
 import AVATAR_SHORTNAMES from "../json/avatar-shortnames.json";
 const avatarRequirements: StringMap = AVATAR_REQUIREMENTS;
 const avatarShortnames: StringMap = AVATAR_SHORTNAMES;
+
+export function createNotificationElement(notification: KhanAcademyNotification): Element {
+  const { date, url } = notification;
+
+  // Construct baseline notification element
+  const notificationElement = document.createElement("li");
+  notificationElement.className = "notification";
+  const notificationHeader = document.createElement("div");
+  notificationHeader.className = "notification-header";
+  const notificationAuthorAvatar = document.createElement("img");
+  notificationAuthorAvatar.className = "notification-author-avatar";
+  const notificationAuthorNickname = document.createElement("h3");
+  notificationAuthorNickname.className = "notification-author-nickname";
+  const notificationContent = document.createElement("div");
+  notificationContent.className = "notification-content";
+  const notificationDate = document.createElement("span");
+  notificationDate.className = "notification-date";
+  notificationDate.innerText = `${timeSince(new Date(date))} ago`;
+
+  // Optional Elements
+  const notificationUrl = document.createElement("a");
+  notificationUrl.className = "hyperlink";
+  notificationUrl.target = "_blank";
+  const notificationFeedbackContainer = document.createElement("div");
+  notificationFeedbackContainer.className = "notification-feedback-container";
+  const notificationFeedbackButton = document.createElement("button");
+  notificationFeedbackButton.className = "notification-feedback-button add-listeners";
+
+  switch (notification.__typename) {
+    case "ResponseFeedbackNotification":
+      notificationAuthorAvatar.src = notification.authorAvatarUrl;
+      notificationAuthorNickname.innerText = cleanse(notification.authorNickname);
+      notificationContent.innerText = parseMarkdown(notification.content);
+      notificationUrl.href = `https://www.khanacademy.org${url}`;
+      notificationUrl.innerText = `${
+        notification.feedbackType === "REPLY" ? "added a comment" : "answered your question"
+      } on ${notification.focusTranslatedTitle}`;
+      break;
+    case "ProgramFeedbackNotification":
+      notificationAuthorAvatar.src = notification.authorAvatarSrc;
+      notificationAuthorNickname.innerText = cleanse(notification.authorNickname);
+      notificationContent.innerText = parseMarkdown(notification.content);
+      notificationUrl.href = `https://www.khanacademy.org${url}`;
+      notificationUrl.innerText = `${
+        notification.feedbackType === "COMMENT" ? "commented" : "asked a question"
+      } on ${cleanse(notification.translatedScratchpadTitle)}`;
+      break;
+    case "AvatarNotification": {
+      notificationAuthorAvatar.src = notification.thumbnailSrc.startsWith(
+        "https://cdn.kastatic.org/",
+      )
+        ? notification.thumbnailSrc
+        : "https://cdn.kastatic.org" + notification.thumbnailSrc;
+      notificationAuthorNickname.innerText = "KA Avatars";
+      notificationUrl.href = `https://www.khanacademy.org${url}`;
+      notificationUrl.innerText = "use avatar";
+
+      const b = document.createElement("b");
+      b.innerText = avatarShortnames[notification.name];
+      const i = document.createElement("i");
+      i.innerText = avatarRequirements[notification.name];
+
+      notificationContent.appendChild(new Text("You unlocked "));
+      notificationContent.appendChild(b);
+      notificationContent.appendChild(new Text("! "));
+      notificationContent.appendChild(i);
+    }
+    case "GroupedBadgeNotification": {
+      console.log(notification);
+      notificationAuthorAvatar.src = notification.badgeNotifications[0].badge.icons.compactUrl;
+      notificationAuthorNickname.innerText = "KA Badges";
+      notificationUrl.href = "https://www.khanacademy.org" + notification.url;
+      notificationUrl.innerText = "view badges";
+      notificationContent.appendChild(new Text("You earned "));
+      const b = document.createElement("b");
+      b.innerText = notification.badgeNotifications[0].badge.description;
+      notificationContent.appendChild(b);
+      notificationContent.appendChild(
+        new Text(` and ${notification.badgeNotifications.length - 1} more! Congratulations!`),
+      );
+    }
+    default:
+      console.log(`Notification type ${notification.__typename} is currently unsupported.`);
+      notificationAuthorAvatar.src = "48.png";
+      notificationAuthorNickname.innerText = "Unsupported Notification Type";
+      notificationContent.innerText = JSON.stringify(notification);
+  }
+
+  notificationHeader.appendChild(notificationAuthorAvatar);
+  notificationHeader.appendChild(notificationAuthorNickname);
+  if (notificationUrl.href) {
+    notificationHeader.appendChild(notificationUrl);
+  }
+  notificationHeader.appendChild(notificationDate);
+
+  notificationElement.appendChild(notificationHeader);
+  notificationElement.appendChild(notificationContent);
+  if (
+    notification.__typename === "ResponseFeedbackNotification" ||
+    notification.__typename === "ProgramFeedbackNotification"
+  ) {
+    notificationFeedbackButton.dataset.url = url;
+    notificationFeedbackButton.dataset.typename = notification.__typename;
+    notificationFeedbackButton.dataset.feedbacktype = notification.feedbackType;
+    notificationFeedbackButton.innerText = "Reply";
+    notificationFeedbackContainer.appendChild(notificationFeedbackButton);
+    notificationElement.appendChild(notificationFeedbackContainer);
+  }
+
+  return notificationElement;
+}
 
 /**
  * Constructs notification string from input Khan Academy notification object
@@ -13,55 +124,9 @@ const avatarShortnames: StringMap = AVATAR_SHORTNAMES;
  * @param notification Khan Academy notification from GraphQL endpoint
  * @returns HTML parseable string to append to popup
  */
-export function createNotificationString(notification: KaNotification): string {
+export function createNotificationString(notification: KhanAcademyNotification): string {
   const { brandNew, date, url } = notification;
   switch (notification.__typename) {
-    case "ResponseFeedbackNotification":
-      return `<li class="notification ${
-        brandNew ? "new" : ""
-      }"><div class="notification-header"><img class="notification-author-avatar" src="${
-        notification.authorAvatarUrl
-      }"><h3 class="notification-author-nickname">${cleanse(
-        notification.authorNickname,
-      )}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${
-        notification.feedbackType === "REPLY" ? "added a comment" : "answered your question"
-      } on ${notification.focusTranslatedTitle}</a><span class="notification-date">${timeSince(
-        new Date(date),
-      )} ago</span></div><div class="notification-content">${parseMarkdown(
-        notification.content,
-      )}</div><div class="notification-feedback-container"><button class="notification-feedback-button add-listeners" data-url="${url}" data-typename="ResponseFeedbackNotification" data-feedbacktype="${
-        notification.feedbackType
-      }">Reply</button></div></li>`;
-    case "ProgramFeedbackNotification":
-      return `<li class="notification ${
-        brandNew ? "new" : ""
-      }"><div class="notification-header"><img class="notification-author-avatar" src="${
-        notification.authorAvatarSrc
-      }"><h3 class="notification-author-nickname">${cleanse(
-        notification.authorNickname,
-      )}</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">${
-        notification.feedbackType === "COMMENT" ? "commented" : "asked a question"
-      } on ${cleanse(
-        notification.translatedScratchpadTitle,
-      )}</a><span class="notification-date">${timeSince(
-        new Date(date),
-      )} ago</span></div><div class="notification-content">${parseMarkdown(
-        notification.content,
-      )}</div><div class="notification-feedback-container"><button class="notification-feedback-button add-listeners" data-url="${url}" data-typename="ProgramFeedbackNotification" data-feedbacktype="${
-        notification.feedbackType
-      }">Reply</button></div></li>`;
-    case "AvatarNotification":
-      return `<li class="notification ${
-        brandNew ? "new" : ""
-      }"><div class="notification-header"><img class="notification-author-avatar" src="${
-        notification.thumbnailSrc.startsWith("https://cdn.kastatic.org/")
-          ? notification.thumbnailSrc
-          : "https://cdn.kastatic.org" + notification.thumbnailSrc
-      }"><h3 class="notification-author-nickname">KA Avatars</h3><a class="hyperlink" href="https://www.khanacademy.org${url}" target="_blank">use avatar</a><span class="notification-date">${timeSince(
-        new Date(date),
-      )} ago</span></div><div class="notification-content">You unlocked <b>${
-        avatarShortnames[notification.name]
-      }</b>! <i>${avatarRequirements[notification.name]}</i></div></li>`;
     case "GroupedBadgeNotification":
       return `<li class="notification ${
         brandNew ? "new" : ""
@@ -334,11 +399,12 @@ async function sendMessageOnClick(event: Event) {
         textarea.remove();
       }, 5000);
     } else {
-      textarea.value = "Error in sending request.";
-      button.textContent = "Failure!";
+      button.textContent = "Failed";
     }
   } catch (e) {
-    console.error("Error in sending message: " + value + "; " + e);
-    textarea.value = "Error in sending request: " + e;
+    const errorMessage = `Error in sending request: ${value}; ${e}`;
+    console.log(textarea.value);
+    textarea.value = errorMessage;
+    console.error(errorMessage);
   }
 }

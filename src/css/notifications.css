@@ -60,6 +60,8 @@
   margin: 0;
   padding: 0;
   line-height: 1;
+  font-family: inherit;
+  font-size: inherit;
   color: var(--hyperlink-color);
   text-decoration: underline 1px #0000;
   background-color: #0000;

@@ -1,11 +1,12 @@
 import "../css/popup.css";
-import { KaNotification } from "../@types/notification";
+import { KhanAcademyNotification } from "../@types/notification";
 import { getNotificationData } from "../util/background";
 import {
   addReplyButtonEventListeners,
   createLoggedOutString,
   createNoCookieString,
   createNoNotificationsString,
+  createNotificationElement,
   createNotificationString,
   initUserInterface,
 } from "../util/popup";
@@ -66,7 +67,7 @@ async function init() {
           loadingSpinnerContainer?.remove();
           break;
         default: {
-          const notifications = prefetchData as KaNotification[];
+          const notifications = prefetchData as KhanAcademyNotification[];
 
           if (!notifications) {
             return;
@@ -74,7 +75,14 @@ async function init() {
 
           console.log("Preloaded successfully.");
 
-          notificationsContainer.innerHTML = notifications.map(createNotificationString).join("");
+          const fragment = new DocumentFragment();
+
+          notifications.forEach((notification: KhanAcademyNotification) => {
+            fragment.appendChild(createNotificationElement(notification));
+          });
+
+          notificationsContainer.appendChild(fragment);
+
           addReplyButtonEventListeners();
 
           if (!prefetchCursor) {
@@ -122,10 +130,15 @@ async function appendNotifications(): Promise<void> {
       }
     } else {
       const { notifications, cursor } = response.value;
-      notificationsContainer.insertAdjacentHTML(
-        "beforeend",
-        notifications.map(createNotificationString).join(""),
-      );
+
+      const fragment = new DocumentFragment();
+
+      notifications.forEach((notification: KhanAcademyNotification) => {
+        fragment.appendChild(createNotificationElement(notification));
+      });
+
+      notificationsContainer.appendChild(fragment);
+
       addReplyButtonEventListeners();
 
       if (cursor === null) {

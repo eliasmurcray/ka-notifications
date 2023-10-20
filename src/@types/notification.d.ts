@@ -1,43 +1,4 @@
-export interface AssignmentCreatedNotification {
-  numAssignments: string;
-  contentTitle: string;
-  coachAvatarURL: string;
-  coachName: string;
-  curationNodeIconURL: string;
-  className: string;
-}
-
-export interface AssignmentDueDateNotification {
-  numAssignments: string;
-  dueDate: string;
-  contentTitle: string;
-  curationNodeIconURL: string;
-}
-
-export interface AvatarNotification {
-  name: string;
-  thumbnailSrc: string;
-}
-
-export interface Badge {
-  __typename: "Badge";
-  badgeCategory?: number;
-  description: string;
-  fullDescription: string;
-  relativeUrl?: string;
-  icons: {
-    __typename: "BadgeIcons";
-    compactUrl: string;
-  };
-  name: string;
-}
-
-export interface BadgeNotification {
-  badge: Badge;
-  badgeName: string;
-}
-
-export interface BasicNotification {
+type BaseNotification = {
   __typename: string;
   brandNew: boolean;
   class_: string[];
@@ -46,9 +7,45 @@ export interface BasicNotification {
   read: boolean;
   url: string;
   urlsafeKey: string;
-}
+};
 
-export interface CoachRequestAcceptedNotification {
+type AssignmentCreatedNotificationType = BaseNotification & {
+  numAssignments: number;
+  contentTitle: string;
+  curationNodeIconURL: string;
+  className: string;
+};
+
+type AssignmentDueDateNotificationType = BaseNotification & {
+  numAssignments: number;
+  dueDate: string; // You might want to use a Date type if appropriate
+  contentTitle: string;
+  curationNodeIconURL: string;
+};
+
+type AvatarNotificationType = BaseNotification & {
+  name: string;
+  thumbnailSrc: string;
+};
+
+type BadgeNotificationType = BaseNotification & {
+  badgeName: string;
+  badge: {
+    description: string;
+    fullDescription: string;
+    name: string;
+    relativeUrl: string;
+    icons: {
+      compactUrl: string;
+    };
+  };
+};
+
+type BasicNotificationType = {
+  /* ... */
+};
+
+type CoachRequestAcceptedNotificationType = BaseNotification & {
   isMultipleClassrooms: boolean;
   student: {
     id: string;
@@ -59,76 +56,140 @@ export interface CoachRequestAcceptedNotification {
     cacheId: string;
     id: string;
     name: string;
-    topics: {
+    topics: Array<{
       id: string;
       slug: string;
       iconUrl: string;
       key: string;
       translatedStandaloneTitle: string;
-    };
+    }>;
   };
-}
+};
 
-export interface CoachRequestNotification {
+type CoachRequestNotificationType = BaseNotification & {
   coachIsParent: boolean;
   coach: {
     id: string;
     kaid: string;
     nickname: string;
   };
-}
+};
 
-export interface CourseMasteryGoalCreatedNotification {
+type CourseMasteryDueDateCreatedNotificationType = BaseNotification & {
+  dueDate: string; // You might want to use a Date type if appropriate
+  course: {
+    id: string;
+    iconUrl: string;
+    translatedStandaloneTitle: string;
+  };
+};
+
+type CourseMasteryGoalCreatedNotificationType = BaseNotification & {
   curationNodeIconURL: string;
   curationNodeTranslatedTitle: string;
-  masteryPercentage: string;
-}
+  masteryPercentage: number;
+};
 
-export interface GroupedBadgeNotification {
+type GroupedBadgeNotificationType = BaseNotification & {
   badgeNotifications: Array<{
-    __typename: "BadgeNotification";
-    badge: Badge;
+    badge: {
+      badgeCategory: string;
+      description: string;
+      fullDescription: string;
+      name: string;
+      icons: {
+        compactUrl: string;
+      };
+    };
   }>;
-}
+};
 
-export interface InfoNotification {
-  notificationinterface: string;
-}
+type InfoNotificationType = BaseNotification & {
+  notificationType: string;
+};
 
-export interface ModeratorNotification {
+type MasteryGoalDueDateApproachingCreatedNotificationType = BaseNotification & {
+  classroomInfo: {
+    id: string;
+    cacheId: string;
+  };
+};
+
+type ModeratorNotificationType = BaseNotification & {
   text: string;
-}
+};
 
-export interface ResponseFeedbackNotification {
-  authorAvatarUrl: string;
-  authorNickname: string;
-  content: string;
-  feedbackType: string;
-  focusTranslatedTitle: string;
-  sumVotesIncremented: number;
-}
-
-export interface ProgramFeedbackNotification {
+type ProgramFeedbackNotificationType = BaseNotification & {
   authorAvatarSrc: string;
   authorNickname: string;
-  content: string;
   feedbackType: string;
   translatedScratchpadTitle: string;
-}
+  content: string;
+};
 
-export interface KaNotification
-  extends AssignmentCreatedNotification,
-    AssignmentDueDateNotification,
-    AvatarNotification,
-    BadgeNotification,
-    CoachRequestAcceptedNotification,
-    CoachRequestNotification,
-    CourseMasteryGoalCreatedNotification,
-    GroupedBadgeNotification,
-    InfoNotification,
-    ModeratorNotification,
-    ProgramFeedbackNotification,
-    ResponseFeedbackNotification,
-    BasicNotification {
-  __typename: string;
-}
+type ResponseFeedbackNotificationType = BaseNotification & {
+  authorAvatarUrl: string;
+  authorNickname: string;
+  feedbackType: string;
+  focusTranslatedTitle: string;
+  content: string;
+  sumVotesIncremented: number;
+};
+
+type ThreadCreatedNotificationType = BaseNotification & {
+  coachee: {
+    id: string;
+    kaid: string;
+    nickname: string;
+  };
+  threadId: string;
+  flagged: boolean;
+};
+
+type UnitMasteryDueDateCreatedNotificationType = BaseNotification & {
+  dueDate: string; // You might want to use a Date type if appropriate
+  unit: {
+    id: string;
+    iconUrl: string;
+    translatedStandaloneTitle: string;
+  };
+};
+
+type UnitMasteryGoalCreatedNotificationType = BaseNotification & {
+  numAssignmentsCount: number;
+  classroomInfo: {
+    cacheId: string;
+    id: string;
+    coach: {
+      id: string;
+      nickname: string;
+    };
+  };
+  unit: {
+    id: string;
+    iconUrl: string;
+    parent: {
+      id: string;
+      iconUrl: string;
+    };
+  };
+};
+
+export type KhanAcademyNotification = AssignmentCreatedNotificationType &
+  AssignmentDueDateNotificationType &
+  AvatarNotificationType &
+  BadgeNotificationType &
+  BasicNotificationType &
+  CoachRequestAcceptedNotificationType &
+  CoachRequestNotificationType &
+  CourseMasteryDueDateCreatedNotificationType &
+  CourseMasteryGoalCreatedNotificationType &
+  GroupedBadgeNotificationType &
+  InfoNotificationType &
+  MasteryGoalDueDateApproachingCreatedNotificationType &
+  ModeratorNotificationType &
+  ProgramFeedbackNotificationType &
+  ResponseFeedbackNotificationType &
+  ThreadCreatedNotificationType &
+  UnitMasteryDueDateCreatedNotificationType &
+  UnitMasteryGoalCreatedNotificationType;

@@ -94,7 +94,7 @@ export async function getUserFkeyCookie(): Promise<string> {
         name: "fkey",
       },
       (cookie) => {
-        if (!cookie) {
+        if (cookie === null || cookie === undefined) {
           reject("No fkey cookie found.");
         } else {
           resolve(cookie.value);
@@ -175,10 +175,12 @@ export async function addFeedback(
     let focusKind = "scratchpad";
 
     if (typename === "ResponseFeedbackNotification") {
+      console.log("feedback");
       requestType = feedbackType === "ANSWER" ? "QUESTION" : "COMMENT";
       responseType = "REPLY";
       focusKind = params.get("qa_expand_type") as string;
     } else if (typename === "ProgramFeedbackNotification") {
+      console.log("program", arguments);
       requestType = feedbackType as FeedbackRequestType;
       responseType = feedbackType === "QUESTION" ? "ANSWER" : "REPLY";
     } else {
@@ -187,12 +189,14 @@ export async function addFeedback(
 
     const topicId = url.split("?")[0].split("/").pop();
 
+    console.log(requestType);
+
     const feedbackResponse = await graphQLFetch("feedbackQuery", fkey, {
-      topicId,
+      currentSort: 1,
       feedbackType: requestType,
-      currentSort: 5,
-      qaExpandKey: params.get("qa_expand_key") as string,
       focusKind,
+      qaExpandKey: params.get("qa_expand_key") as string,
+      topicId,
     });
 
     const feedbackJson: FeedbackQueryResponse = await feedbackResponse.json();
