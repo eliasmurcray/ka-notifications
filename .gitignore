@@ -28,29 +28,6 @@ lerna-debug.log*
 .pnpify
 /yarn-error.log
 
-# Ignore artifacts and binary files
-*.bak
-*.swp
-*.swo
-*.db
-*.sqlite
-*.sqlite3
-*.jpg
-*.jpeg
-*.gif
-*.png
-*.ico
-*.tif
-*.tiff
-*.bmp
-*.pdf
-*.doc
-*.woff
-*.woff2
-*.ttf
-*.eot
-*.svg
-
 # Ignore package-lock files
 package-lock.json
 yarn.lock
