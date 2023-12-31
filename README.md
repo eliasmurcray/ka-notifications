@@ -6,8 +6,7 @@
 <p align="center"><a rel="noreferrer noopener" href="https://chromewebstore.google.com/detail/khan-academy-notification/gdlfnahbohjggjhpcmabnfikiigncjbd"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a></p>
 <p align="center">
   <a href="https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications">
-    <img src="https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications/badge" alt="CodeFactor">
-  </a>
+    <img src="https://www.codefactor.io/repository/github/eliasmurcray/ka-notifications/badge" alt="CodeFactor"></a>
   <img src="https://img.shields.io/chrome-web-store/rating/gdlfnahbohjggjhpcmabnfikiigncjbd.svg?color=00b16a" alt="Rating">
   <img src="https://img.shields.io/chrome-web-store/users/gdlfnahbohjggjhpcmabnfikiigncjbd.svg?color=07f" alt="User Count">
 </p>
