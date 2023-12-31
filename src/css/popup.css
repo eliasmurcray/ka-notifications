@@ -95,7 +95,9 @@ body.dark ::-webkit-scrollbar-thumb:active {
   height: 38px;
   width: 100%;
   background: var(--header-background);
-  transition: border-color 0.1s ease-in-out, background-color 0.1s ease-in-out;
+  transition:
+    border-color 0.1s ease-in-out,
+    background-color 0.1s ease-in-out;
   padding: 0 20px;
   column-gap: 16px;
   box-sizing: border-box;

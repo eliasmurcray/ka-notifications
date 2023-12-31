@@ -1,3 +1,3 @@
 export type StringMap = {
-  [key: string]: string;
+	[key: string]: string;
 };

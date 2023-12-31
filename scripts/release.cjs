@@ -21,5 +21,4 @@ function runCommand(command, message, color) {
 runCommand("npm run lint", "Linting", "\x1b[32m");
 runCommand("npm run format", "Formatting", "\x1b[32m");
 runCommand("npm run build", "Building Chrome package", "\x1b[32m");
-runCommand("node scripts/firefox-build.cjs", "Building Firefox package", "\x1b[32m");
-runCommand("node scripts/zip-extension.cjs", "Zipping packages", "\x1b[32m");
+runCommand("node scripts/zip-extension.cjs", "Zipping package", "\x1b[32m");
