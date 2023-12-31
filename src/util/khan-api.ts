@@ -44,7 +44,7 @@ export async function khanApiFetch(queryName: string, authToken: string, variabl
 }
 
 export function getAuthToken(): Promise<string | undefined> {
-  return new Promise<string>((resolve, reject) => {
+  return new Promise<string>((resolve) => {
     chrome.cookies.get(
       {
         url: "https://www.khanacademy.org",
