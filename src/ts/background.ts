@@ -8,7 +8,6 @@ chrome.cookies.onChanged.addListener(async ({ cookie, removed }) => {
 		chrome.action.setBadgeText({ text: "" });
 		if (removed) {
 			// Logged out
-			console.log("Logged out");
 			chrome.alarms.clear(ALARM_NAME);
 			chrome.storage.local.remove(["prefetch_cursor"]);
 			chrome.storage.local.set({
@@ -16,7 +15,6 @@ chrome.cookies.onChanged.addListener(async ({ cookie, removed }) => {
 			});
 		} else {
 			// Logged in
-			console.log("Logged in");
 			if (await chrome.alarms.get(ALARM_NAME)) return;
 			chrome.alarms.create(ALARM_NAME, {
 				periodInMinutes: 1,
