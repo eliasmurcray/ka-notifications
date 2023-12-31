@@ -60,9 +60,9 @@ async function refreshNotifications() {
 				text: "",
 			});
 			chrome.storage.local.remove(["cached_cursor"]);
-                        chrome.storage.local.set({
-                                cached_data: "[]",
-                        });
+			chrome.storage.local.set({
+				cached_data: "[]",
+			});
 			return;
 		}
 
