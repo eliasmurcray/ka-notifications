@@ -49,9 +49,9 @@ async function refreshNotifications() {
 	const token = await getAuthToken();
 	if (!token) {
 		chrome.action.setBadgeText({ text: "" });
+		chrome.storage.local.remove(["cached_cursor"]);
 		chrome.storage.local.set({
 			cached_data: "$token_expired",
-			cached_cursor: "",
 		});
 		return;
 	}
