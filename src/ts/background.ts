@@ -3,17 +3,22 @@ import { khanApiFetch, getAuthToken } from "../util/khan-api";
 const ALARM_NAME = "KHAN_ACADEMY_NOTIFICATIONS";
 
 // Authentication status monitoring
-chrome.cookies.onChanged.addListener(({ cookie, removed }) => {
+chrome.cookies.onChanged.addListener(async ({ cookie, removed }) => {
 	if (cookie.name === "KAAS") {
 		chrome.action.setBadgeText({ text: "" });
 		if (removed) {
 			// Logged out
+			chrome.alarms.clear(ALARM_NAME);
 			chrome.storage.local.remove(["prefetch_cursor"]);
 			chrome.storage.local.set({
 				prefetch_data: "$logged_out",
 			});
 		} else {
 			// Logged in
+			if (await chrome.alarms.get(ALARM_NAME)) return;
+			chrome.alarms.create(ALARM_NAME, {
+				periodInMinutes: 1,
+			});
 			chrome.storage.local.remove(["prefetch_cursor", "prefetch_data"]);
 			refreshNotifications();
 		}
@@ -45,7 +50,7 @@ async function refreshNotifications() {
 	if (!token) {
 		chrome.action.setBadgeText({ text: "" });
 		chrome.storage.local.set({
-			cached_data: "$logged_out",
+			cached_data: "$token_expired",
 			cached_cursor: "",
 		});
 		return;
