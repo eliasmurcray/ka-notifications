@@ -1,7 +1,7 @@
 {
-  "name": "ka-notifications-2.0",
-  "version": "2.0.3",
-  "description": "The updated version of the original Khan Academy notifications extension with more maintainable code.",
+  "name": "ka-notifications",
+  "version": "3",
+  "description": "Khan Academy Notifications, no Firefox.",
   "scripts": {
     "build": "webpack",
     "dev": "webpack -- --watch",
@@ -12,7 +12,6 @@
   "repository": "git+https://github.com/eliasmurcray/ka-notifications.git",
   "keywords": [
     "chrome-extension",
-    "firefox-addon",
     "khan-academy"
   ],
   "author": "Elias Murcray",

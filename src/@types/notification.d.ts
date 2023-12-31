@@ -18,7 +18,7 @@ type AssignmentCreatedNotificationType = BaseNotification & {
 
 type AssignmentDueDateNotificationType = BaseNotification & {
   numAssignments: number;
-  dueDate: string; // You might want to use a Date type if appropriate
+  dueDate: string;
   contentTitle: string;
   curationNodeIconURL: string;
 };
@@ -39,10 +39,6 @@ type BadgeNotificationType = BaseNotification & {
       compactUrl: string;
     };
   };
-};
-
-type BasicNotificationType = {
-  /* ... */
 };
 
 type CoachRequestAcceptedNotificationType = BaseNotification & {
@@ -76,7 +72,7 @@ type CoachRequestNotificationType = BaseNotification & {
 };
 
 type CourseMasteryDueDateCreatedNotificationType = BaseNotification & {
-  dueDate: string; // You might want to use a Date type if appropriate
+  dueDate: string;
   course: {
     id: string;
     iconUrl: string;
@@ -147,7 +143,7 @@ type ThreadCreatedNotificationType = BaseNotification & {
 };
 
 type UnitMasteryDueDateCreatedNotificationType = BaseNotification & {
-  dueDate: string; // You might want to use a Date type if appropriate
+  dueDate: string;
   unit: {
     id: string;
     iconUrl: string;

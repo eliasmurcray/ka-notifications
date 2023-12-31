@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const archiver = require("archiver");
 
-function createExtensionZips() {
+function createExtensionZip() {
   // Read the version number from manifest.json
   const manifestPath = path.join(__dirname, "..", "src", "manifest.json");
   const manifestData = fs.readFileSync(manifestPath, "utf8");
@@ -15,7 +15,6 @@ function createExtensionZips() {
   }
 
   const chromeZipName = `c-ka-notifications-${version}.zip`;
-  const firefoxZipName = `f-ka-notifications-${version}.zip`;
 
   // Create the chrome zip
   const chromeOutputPath = path.join(outputDir, chromeZipName);
@@ -27,18 +26,6 @@ function createExtensionZips() {
   chromeArchive.pipe(chromeZipStream);
   chromeArchive.directory(path.join(__dirname, "..", "chrome"), false);
   chromeArchive.finalize();
-
-  // Create the firefox zip
-  const firefoxOutputPath = path.join(outputDir, firefoxZipName);
-  const firefoxArchive = archiver("zip");
-  const firefoxZipStream = fs.createWriteStream(firefoxOutputPath);
-  firefoxZipStream.on("close", function () {
-    console.log(`${firefoxZipName} has been created successfully.`);
-    fs.rmSync("./firefox", { recursive: true });
-  });
-  firefoxArchive.pipe(firefoxZipStream);
-  firefoxArchive.directory(path.join(__dirname, "..", "firefox"), false);
-  firefoxArchive.finalize();
 }
 
-createExtensionZips();
+createExtensionZip();

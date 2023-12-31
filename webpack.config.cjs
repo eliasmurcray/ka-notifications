@@ -6,12 +6,8 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 module.exports = {
   mode: "production",
   entry: {
-    router: "/src/ts/router.ts",
     background: "/src/ts/background.ts",
     popup: "/src/ts/popup.ts",
-    project: "/src/ts/project.ts",
-    hotlist: "/src/ts/hotlist.ts",
-    heartbeat: "/src/ts/heartbeat.ts",
   },
   resolve: {
     extensions: [".ts"],
@@ -34,6 +30,7 @@ module.exports = {
     path: path.resolve(__dirname, "chrome"),
     filename: "[name].js",
     clean: true,
+    iife: false,
   },
   plugins: [
     new MiniCssExtractPlugin({
@@ -50,11 +47,6 @@ module.exports = {
           to: "",
         },
       ],
-    }),
-    new HtmlWebpackPlugin({
-      templateContent: "",
-      filename: "heartbeat.html",
-      chunks: ["heartbeat"],
     }),
     new HtmlWebpackPlugin({
       template: "./src/html/popup.html",

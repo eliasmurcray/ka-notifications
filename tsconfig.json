@@ -1,5 +1,5 @@
 {
-  "exclude": ["./chrome/", "./firefox/", "./node_modules/", "./scripts/"],
+  "exclude": ["./chrome/", "./node_modules/", "./scripts/"],
   "include": ["./src/ts/**.ts"],
   "compilerOptions": {
     "types": ["chrome-types"],
