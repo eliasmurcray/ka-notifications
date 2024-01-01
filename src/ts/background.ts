@@ -95,6 +95,12 @@ async function refreshNotifications() {
 			text: notificationCount > 98 ? "99+" : notificationCount.toString(),
 		});
 	} catch (err) {
-		console.error(err);
+		if (err instanceof Error && err.message === "Failed to fetch") {
+			console.warn(
+				"Possible network disconnect detected, please check your internet connection.",
+			);
+		} else {
+			console.error(err);
+		}
 	}
 }
