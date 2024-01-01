@@ -34,9 +34,10 @@ chrome.storage.local.get(["prefetchCursor", "prefetchData"], ({ prefetchCursor, 
 		case undefined:
 			break;
 		default:
-			if (!Array.isArray(prefetchData)) return;
+			if (!Array.isArray(prefetchData)) break;
 			if (prefetchData.length === 0) {
-				console.log("No notifications");
+				notificationsContainer.innerHTML =
+					'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You have no notifications.</div></li>';
 				return;
 			}
 			notificationsContainer.innerHTML = prefetchData.map(createNotificationString).join("");
