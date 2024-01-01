@@ -86,8 +86,9 @@ async function loadNotifications(): Promise<void> {
 			return;
 		}
 
-		notificationsContainer.innerHTML +=
-			notifications.notifications.map(createNotificationString);
+		notificationsContainer.innerHTML += notifications.notifications
+			.map(createNotificationString)
+			.join("");
 
 		if (notifications.pageInfo?.nextCursor === null) {
 			notificationsSection.onscroll = null;
