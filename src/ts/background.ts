@@ -91,6 +91,11 @@ async function refreshNotifications() {
 			return;
 		}
 
+		chrome.storage.local.set({
+			prefetch_data: notifications.notifications,
+			prefetch_cursor: notifications.pageInfo.nextCursor,
+		});
+
 		chrome.action.setBadgeText({
 			text: notificationCount > 98 ? "99+" : notificationCount.toString(),
 		});
