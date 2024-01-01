@@ -9,9 +9,9 @@ chrome.cookies.onChanged.addListener(async ({ cookie, removed }) => {
 		if (removed) {
 			// Logged out
 			chrome.alarms.clear(ALARM_NAME);
-			chrome.storage.local.remove(["prefetch_cursor"]);
+			chrome.storage.local.remove(["prefetchCursor"]);
 			chrome.storage.local.set({
-				prefetch_data: "$logged_out",
+				prefetchData: "$logged_out",
 			});
 		} else {
 			// Logged in
@@ -19,7 +19,7 @@ chrome.cookies.onChanged.addListener(async ({ cookie, removed }) => {
 			chrome.alarms.create(ALARM_NAME, {
 				periodInMinutes: 1,
 			});
-			chrome.storage.local.remove(["prefetch_cursor", "prefetch_data"]);
+			chrome.storage.local.remove(["prefetchCursor", "prefetchData"]);
 			refreshNotifications();
 		}
 	}
@@ -38,6 +38,7 @@ chrome.alarms.create(ALARM_NAME, {
 	periodInMinutes: 1,
 });
 
+chrome.storage.local.remove(["prefetch_cursor", "prefetch_data"]);
 refreshNotifications();
 
 // Teal background for notification count badge
@@ -64,17 +65,20 @@ async function refreshNotifications() {
 			chrome.action.setBadgeText({
 				text: "",
 			});
-			chrome.storage.local.remove(["cached_cursor"]);
+			chrome.storage.local.remove(["prefetchCursor"]);
 			chrome.storage.local.set({
-				cached_data: "[]",
+				prefetchData: "[]",
 			});
 			return;
 		}
 
 		if (!notificationCount) {
-			throw new Error(
-				"Notification count is undefined in: " + JSON.stringify(notificationCountJSON),
-			);
+			chrome.alarms.clear(ALARM_NAME);
+			chrome.storage.local.remove(["prefetchCursor"]);
+			chrome.storage.local.set({
+				prefetchData: "$logged_out",
+			});
+			return;
 		}
 
 		const notificationsResponse = await khanApiFetch("getNotificationsForUser", token);
@@ -84,16 +88,16 @@ async function refreshNotifications() {
 			chrome.action.setBadgeText({
 				text: "",
 			});
-			chrome.storage.local.remove(["cached_cursor"]);
+			chrome.storage.local.remove(["prefetchCursor"]);
 			chrome.storage.local.set({
-				cached_data: "[]",
+				prefetchData: "[]",
 			});
 			return;
 		}
 
 		chrome.storage.local.set({
-			prefetch_data: notifications.notifications,
-			prefetch_cursor: notifications.pageInfo.nextCursor,
+			prefetchData: notifications.notifications,
+			prefetchCursor: notifications.pageInfo.nextCursor,
 		});
 
 		chrome.action.setBadgeText({

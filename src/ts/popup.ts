@@ -16,28 +16,30 @@ pageButton.onclick = () => {
 
 // Notifications from local storage
 const notificationsContainer = document.getElementById("notifications-container") as HTMLDivElement;
+const loadingSpinner = document.getElementById("loading-spinner-container") as HTMLDivElement;
 let __global_cursor = "";
-chrome.storage.local.get(
-	["prefetch_cursor", "prefetch_data"],
-	({ prefetch_cursor, prefetch_data }) => {
-		__global_cursor = prefetch_cursor;
-		switch (prefetch_data) {
-			case "$logged_out":
-				break;
-			case "$token_expired":
-				break;
-			case undefined:
-				break;
-			default:
-				if (!Array.isArray(prefetch_data)) return;
-				if (prefetch_data.length === 0) {
-					console.log("No notifications");
-					return;
-				}
-				notificationsContainer.innerHTML = prefetch_data
-					.map(createNotificationString)
-					.join("");
-				setTimeout(addReplyButtonEventListeners, 1000);
-		}
-	},
-);
+chrome.storage.local.get(["prefetchCursor", "prefetchData"], ({ prefetchCursor, prefetchData }) => {
+	__global_cursor = prefetchCursor;
+	switch (prefetchData) {
+		case "$logged_out":
+			notificationsContainer.innerHTML =
+				'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You are logged out. Please <a class="hyperlink" href="https://khanacademy.org/login" target="_blank">log in to Khan Academy</a> to use this extension.</div></li>';
+			loadingSpinner.remove();
+			return;
+		case "$token_expired":
+			notificationsContainer.innerHTML =
+				'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">Your authentication cookie has expired. Please <a class="hyperlink" href="https://khanacademy.org/" target="_blank">navigate to Khan Academy</a> to refresh it.</div></li>';
+			loadingSpinner.remove();
+			return;
+		case undefined:
+			break;
+		default:
+			if (!Array.isArray(prefetchData)) return;
+			if (prefetchData.length === 0) {
+				console.log("No notifications");
+				return;
+			}
+			notificationsContainer.innerHTML = prefetchData.map(createNotificationString).join("");
+			addReplyButtonEventListeners();
+	}
+});
