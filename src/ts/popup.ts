@@ -113,6 +113,30 @@ chrome.storage.local.get(
 				console.error(err);
 			}
 		};
+
+		// Clear cache
+		const clearNotificationCache = document.getElementById(
+			"clear-notification-cache",
+		) as HTMLButtonElement;
+		let isClearingCache = false;
+		let clearingCompleteInterval: number;
+		clearNotificationCache.onclick = async () => {
+			if (isClearingCache) return;
+			if (clearingCompleteInterval) window.clearInterval(clearingCompleteInterval);
+			isClearingCache = true;
+			clearNotificationCache.innerText = "Clearing cache...";
+			notificationsContainer.onscroll = null;
+			notificationsContainer.innerHTML = "";
+			loadingSpinner.classList.remove("hidden");
+			__loading_notifications__ = true;
+			__global_cursor__ = "";
+			await loadNotifications();
+			clearNotificationCache.innerText = "Cache cleared";
+			isClearingCache = false;
+			clearingCompleteInterval = window.setInterval(() => {
+				clearNotificationCache.innerText = "Clear cache";
+			}, 4000);
+		};
 	},
 );
 
