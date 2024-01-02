@@ -1,5 +1,8 @@
-import { getAuthToken, khanApiFetch } from "../util/khan-api";
-import { createNotificationString, addReplyButtonEventListeners } from "../util/notification-utils";
+import { getAuthToken, khanApiFetch } from "../utils/khan-api";
+import {
+	createNotificationString,
+	addReplyButtonEventListeners,
+} from "../utils/notification-utils";
 import "../css/popup.css";
 
 // Page switching

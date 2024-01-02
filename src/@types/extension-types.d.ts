@@ -1,7 +1,7 @@
 export type KhanAPIVariables = {
 	limit?: number;
 	topicId?: number;
-	feedbackType?: "QUESTION" | "COMMENT" | "REPLY" | "ANSWER";
+	feedbackType?: string;
 	currentSort?: number;
 	qaExpandKey?: string;
 	focusKind?: string;

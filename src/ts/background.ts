@@ -1,4 +1,4 @@
-import { khanApiFetch, getAuthToken } from "../util/khan-api";
+import { khanApiFetch, getAuthToken } from "../utils/khan-api";
 
 const ALARM_NAME = "KHAN_ACADEMY_NOTIFICATIONS";
 
