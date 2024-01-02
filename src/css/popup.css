@@ -115,7 +115,7 @@ body.dark ::-webkit-scrollbar-thumb:active {
   cursor: pointer;
 }
 
-.notifications-header button#settings-button {
+.notifications-header button#page-button {
   margin-left: auto;
 }
 
