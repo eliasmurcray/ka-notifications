@@ -31,12 +31,12 @@ chrome.storage.local.get(
 			case "$logged_out":
 				notificationsContainer.innerHTML =
 					'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You are logged out. Please <a class="hyperlink" href="https://khanacademy.org/login" target="_blank">log in to Khan Academy</a> to use this extension.</div></li>';
-				loadingSpinner.remove();
+				loadingSpinner.classList.add("hidden");
 				return;
 			case "$token_expired":
 				notificationsContainer.innerHTML =
 					'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">Your authentication cookie has expired. Please <a class="hyperlink" href="https://khanacademy.org/" target="_blank">navigate to Khan Academy</a> to refresh it.</div></li>';
-				loadingSpinner.remove();
+				loadingSpinner.classList.add("hidden");
 				return;
 			case undefined:
 				__loading_notifications__ = true;
@@ -47,7 +47,7 @@ chrome.storage.local.get(
 				if (prefetchData.length === 0) {
 					notificationsContainer.innerHTML =
 						'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You have no notifications.</div></li>';
-					loadingSpinner.remove();
+					loadingSpinner.classList.add("hidden");
 					break;
 				}
 				notificationsContainer.innerHTML = prefetchData
@@ -136,7 +136,7 @@ async function loadNotifications(): Promise<void> {
 		notificationsContainer.innerHTML =
 			'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You are logged out. Please <a class="hyperlink" href="https://khanacademy.org/login" target="_blank">log in to Khan Academy</a> to use this extension.</div></li>';
 		notificationsSection.onscroll = null;
-		loadingSpinner.remove();
+		loadingSpinner.classList.add("hidden");
 		return;
 	}
 	try {
@@ -149,7 +149,7 @@ async function loadNotifications(): Promise<void> {
 			notificationsContainer.innerHTML =
 				'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You have no notifications.</div></li>';
 			notificationsSection.onscroll = null;
-			loadingSpinner.remove();
+			loadingSpinner.classList.add("hidden");
 			return;
 		}
 
@@ -160,7 +160,7 @@ async function loadNotifications(): Promise<void> {
 
 		if (notifications.pageInfo?.nextCursor === null) {
 			notificationsSection.onscroll = null;
-			loadingSpinner.remove();
+			loadingSpinner.classList.add("hidden");
 		} else {
 			__global_cursor__ = notifications.pageInfo.nextCursor;
 			__loading_notifications__ = false;
