@@ -23,34 +23,61 @@ const notificationsContainer = document.getElementById("notifications-container"
 const loadingSpinner = document.getElementById("loading-spinner-container") as HTMLDivElement;
 let __global_cursor__ = "";
 let __loading_notifications__ = false;
-chrome.storage.local.get(["prefetchCursor", "prefetchData"], ({ prefetchCursor, prefetchData }) => {
-	__global_cursor__ = prefetchCursor ?? "";
-	switch (prefetchData) {
-		case "$logged_out":
-			notificationsContainer.innerHTML =
-				'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You are logged out. Please <a class="hyperlink" href="https://khanacademy.org/login" target="_blank">log in to Khan Academy</a> to use this extension.</div></li>';
-			loadingSpinner.remove();
-			return;
-		case "$token_expired":
-			notificationsContainer.innerHTML =
-				'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">Your authentication cookie has expired. Please <a class="hyperlink" href="https://khanacademy.org/" target="_blank">navigate to Khan Academy</a> to refresh it.</div></li>';
-			loadingSpinner.remove();
-			return;
-		case undefined:
-			break;
-		default:
-			if (!Array.isArray(prefetchData)) break;
-			if (prefetchData.length === 0) {
+chrome.storage.local.get(
+	["prefetchCursor", "prefetchData", "preferredTheme"],
+	({ prefetchCursor, prefetchData, preferredTheme }) => {
+		__global_cursor__ = prefetchCursor ?? "";
+		switch (prefetchData) {
+			case "$logged_out":
 				notificationsContainer.innerHTML =
-					'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You have no notifications.</div></li>';
+					'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You are logged out. Please <a class="hyperlink" href="https://khanacademy.org/login" target="_blank">log in to Khan Academy</a> to use this extension.</div></li>';
+				loadingSpinner.remove();
 				return;
-			}
-			notificationsContainer.innerHTML = prefetchData.map(createNotificationString).join("");
-			addReplyButtonEventListeners();
-	}
+			case "$token_expired":
+				notificationsContainer.innerHTML =
+					'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">Your authentication cookie has expired. Please <a class="hyperlink" href="https://khanacademy.org/" target="_blank">navigate to Khan Academy</a> to refresh it.</div></li>';
+				loadingSpinner.remove();
+				return;
+			case undefined:
+				break;
+			default:
+				if (!Array.isArray(prefetchData)) break;
+				if (prefetchData.length === 0) {
+					notificationsContainer.innerHTML =
+						'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You have no notifications.</div></li>';
+					return;
+				}
+				notificationsContainer.innerHTML = prefetchData
+					.map(createNotificationString)
+					.join("");
+				addReplyButtonEventListeners();
+		}
 
-	notificationsSection.onscroll = handleScroll;
-});
+		notificationsSection.onscroll = handleScroll;
+
+		let theme = preferredTheme ?? "light";
+		const themeButton = document.getElementById("theme-button") as HTMLButtonElement;
+		const lightIcon = document.getElementById("light-icon") as HTMLElement & SVGElement;
+		const darkIcon = document.getElementById("dark-icon") as HTMLElement & SVGElement;
+
+		if (theme === "dark") {
+			lightIcon.classList.toggle("hidden");
+			darkIcon.classList.toggle("hidden");
+		}
+
+		document.body.className = theme;
+
+		themeButton.onclick = () => {
+			theme = theme === "light" ? "dark" : "light";
+			chrome.storage.local.set({
+				preferredTheme: theme,
+			});
+			lightIcon.classList.toggle("hidden");
+			darkIcon.classList.toggle("hidden");
+			document.body.className = theme;
+		};
+	},
+);
 
 function handleScroll(): void {
 	if (
