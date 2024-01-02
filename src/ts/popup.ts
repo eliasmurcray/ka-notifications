@@ -43,19 +43,20 @@ chrome.storage.local.get(
 				loadNotifications();
 				break;
 			default:
+				prefetchData = JSON.parse(prefetchData);
 				if (!Array.isArray(prefetchData)) break;
 				if (prefetchData.length === 0) {
 					notificationsContainer.innerHTML =
 						'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">You have no notifications.</div></li>';
-					return;
+					loadingSpinner.remove();
+					break;
 				}
 				notificationsContainer.innerHTML = prefetchData
 					.map(createNotificationString)
 					.join("");
 				addReplyButtonEventListeners();
+				notificationsSection.onscroll = handleScroll;
 		}
-
-		notificationsSection.onscroll = handleScroll;
 
 		// Theme switching
 		let theme = preferredTheme ?? "light";

@@ -72,7 +72,7 @@ async function refreshNotifications() {
 			return;
 		}
 
-		if (!notificationCount) {
+		if (notificationCount === null) {
 			chrome.alarms.clear(ALARM_NAME);
 			chrome.storage.local.remove(["prefetchCursor"]);
 			chrome.storage.local.set({
