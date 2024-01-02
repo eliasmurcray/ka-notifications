@@ -1,4 +1,3 @@
-// import { getLatestMutation, getLatestQuery } from "@bhavjit/khan-api";
 import { KhanAPIVariables } from "../@types/extension-types";
 import { StringMap } from "../@types/common-types";
 import * as QUERIES_JSON from "../json/khan-api-queries.json";
@@ -74,6 +73,12 @@ export function getAuthToken(): Promise<string> {
 	});
 }
 
+/**
+ * Stolen code from @bhavjit/khan-api:
+ * https://www.npmjs.com/package/@bhavjit/khan-api
+ * Tree shaking wasn't working, so putting the functions manually saves
+ * about 30kb from output size.
+ */
 const SAFELIST_URL = "https://cdn.jsdelivr.net/gh/bhavjitChauhan/khan-api@safelist";
 
 /**
