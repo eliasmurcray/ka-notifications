@@ -61,16 +61,6 @@ async function refreshNotifications() {
 		const notificationCountResponse = await khanApiFetch("getFullUserProfile", token);
 		const notificationCountJSON = await notificationCountResponse.json();
 		const notificationCount = notificationCountJSON?.data?.user?.newNotificationCount;
-		if (notificationCount === 0) {
-			chrome.action.setBadgeText({
-				text: "",
-			});
-			chrome.storage.local.remove(["prefetchCursor"]);
-			chrome.storage.local.set({
-				prefetchData: "[]",
-			});
-			return;
-		}
 
 		if (notificationCount === null) {
 			chrome.alarms.clear(ALARM_NAME);
@@ -84,13 +74,13 @@ async function refreshNotifications() {
 		const notificationsResponse = await khanApiFetch("getNotificationsForUser", token);
 		const notificationsJSON = await notificationsResponse.json();
 		const notifications = notificationsJSON?.data?.user?.notifications;
-		if (!notifications) {
+		if (notifications === null) {
 			chrome.action.setBadgeText({
 				text: "",
 			});
 			chrome.storage.local.remove(["prefetchCursor"]);
 			chrome.storage.local.set({
-				prefetchData: "[]",
+				prefetchData: [],
 			});
 			return;
 		}
@@ -101,7 +91,12 @@ async function refreshNotifications() {
 		});
 
 		chrome.action.setBadgeText({
-			text: notificationCount > 98 ? "99+" : notificationCount.toString(),
+			text:
+				notificationCount === 0
+					? ""
+					: notificationCount > 98
+						? "99+"
+						: notificationCount.toString(),
 		});
 	} catch (err) {
 		if (err instanceof Error && err.message === "Failed to fetch") {

@@ -43,7 +43,6 @@ chrome.storage.local.get(
 				loadNotifications();
 				break;
 			default:
-				prefetchData = JSON.parse(prefetchData);
 				if (!Array.isArray(prefetchData)) break;
 				if (prefetchData.length === 0) {
 					notificationsContainer.innerHTML =
