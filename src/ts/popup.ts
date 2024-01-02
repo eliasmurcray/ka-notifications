@@ -39,6 +39,8 @@ chrome.storage.local.get(
 				loadingSpinner.remove();
 				return;
 			case undefined:
+				__loading_notifications__ = true;
+				loadNotifications();
 				break;
 			default:
 				if (!Array.isArray(prefetchData)) break;
@@ -55,6 +57,7 @@ chrome.storage.local.get(
 
 		notificationsSection.onscroll = handleScroll;
 
+		// Theme switching
 		let theme = preferredTheme ?? "light";
 		const themeButton = document.getElementById("theme-button") as HTMLButtonElement;
 		const lightIcon = document.getElementById("light-icon") as HTMLElement & SVGElement;
@@ -75,6 +78,40 @@ chrome.storage.local.get(
 			lightIcon.classList.toggle("hidden");
 			darkIcon.classList.toggle("hidden");
 			document.body.className = theme;
+		};
+
+		// Mark all read
+		const markAllRead = document.getElementById("mark-all-read") as HTMLButtonElement;
+		const markAllReadLoading = document.getElementById(
+			"mark-all-read-loading",
+		) as HTMLDivElement;
+		let isMarkingRead = false;
+		markAllRead.onclick = async () => {
+			if (isMarkingRead) return;
+			isMarkingRead = true;
+			markAllReadLoading.classList.remove("hidden");
+			try {
+				const token = await getAuthToken();
+				if (!token) {
+					notificationsContainer.innerHTML =
+						'<li class="notification new"><div class="notification-header"><img class="notification-author-avatar" src="32.png"><h3 class="notification-author-nickname">KA Notifications</h3></div><div class="notification-content">Your authentication cookie has expired. Please <a class="hyperlink" href="https://khanacademy.org/" target="_blank">navigate to Khan Academy</a> to refresh it.</div></li>';
+					return;
+				}
+
+				const clearNotificationsResponse = await khanApiFetch(
+					"clearBrandNewNotifications",
+					token,
+				);
+				if (clearNotificationsResponse.ok) {
+					isMarkingRead = false;
+					markAllReadLoading.classList.add("hidden");
+					chrome.action.setBadgeText({
+						text: "",
+					});
+				}
+			} catch (err) {
+				console.error(err);
+			}
 		};
 	},
 );
