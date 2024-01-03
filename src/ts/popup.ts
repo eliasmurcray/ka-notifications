@@ -24,8 +24,8 @@ const loadingSpinner = document.getElementById("loading-spinner-container") as H
 let __global_cursor__ = "";
 let __loading_notifications__ = false;
 chrome.storage.local.get(
-	["prefetchCursor", "prefetchData", "preferredTheme"],
-	({ prefetchCursor, prefetchData, preferredTheme }) => {
+	["prefetchCursor", "prefetchData", "preferredTheme", "defaultCommentSort"],
+	({ prefetchCursor, prefetchData, preferredTheme, defaultCommentSort }) => {
 		__global_cursor__ = prefetchCursor ?? "";
 		switch (prefetchData) {
 			case "$logged_out":
@@ -136,6 +136,15 @@ chrome.storage.local.get(
 			clearingCompleteInterval = window.setInterval(() => {
 				clearNotificationCache.innerText = "Clear cache";
 			}, 4000);
+		};
+
+		// Default comment sort
+		const commentSort = document.getElementById("sort-comments") as HTMLInputElement;
+		commentSort.value = defaultCommentSort ?? "Top Voted";
+		commentSort.onchange = () => {
+			chrome.storage.local.set({
+				defaultCommentSort: commentSort.value,
+			});
 		};
 	},
 );
