@@ -52,7 +52,7 @@ async function refreshNotifications() {
 		chrome.action.setBadgeText({ text: "" });
 		chrome.storage.local.remove(["cached_cursor"]);
 		chrome.storage.local.set({
-			cached_data: "$token_expired",
+			prefetchData: "$token_expired",
 		});
 		return;
 	}
