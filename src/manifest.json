@@ -30,7 +30,7 @@
 		"run_at": "document_end"
 	}
   ],
-  "permissions": ["cookies", "storage", "alarms", "offscreen"],
+  "permissions": ["cookies", "storage", "alarms"], 
   "host_permissions": ["https://www.khanacademy.org/"],
   "background": {
     "service_worker": "background.js",
