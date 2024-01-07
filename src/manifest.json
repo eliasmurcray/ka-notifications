@@ -1,39 +1,45 @@
 {
-  "manifest_version": 3,
-  "name": "Khan Academy Notifications",
-  "short_name": "KA Notifications",
-  "author": "Elias Murcray",
-  "version": "3.0.1",
-  "minimum_chrome_version": "109",
-  "homepage_url": "https://github.com/eliasmurcray/ka-notifications",
-  "description": "Enhance your Khan Academy experience with timely notifications and subtle improvements.",
-  "icons": {
-    "16": "16.png",
-    "32": "32.png",
-    "48": "48.png",
-    "128": "128.png"
-  },
-  "action": {
-    "default_title": "Khan Academy Notifications",
-    "default_icon": {
-      "16": "16.png",
-      "32": "32.png",
-      "48": "48.png",
-      "128": "128.png"
-    },
-    "default_popup": "popup.html"
-  },
-  "content_scripts": [
-  	{
-		"js": ["content.js"],
-		"matches": ["https://www.khanacademy.org/*"],
-		"run_at": "document_end"
+	"manifest_version": 3,
+	"name": "Khan Academy Notifications",
+	"short_name": "KA Notifications",
+	"author": "Elias Murcray",
+	"version": "3.0.1",
+	"minimum_chrome_version": "109",
+	"homepage_url": "https://github.com/eliasmurcray/ka-notifications",
+	"description": "Enhance your Khan Academy experience with timely notifications and subtle improvements.",
+	"icons": {
+		"16": "16.png",
+		"32": "32.png",
+		"48": "48.png",
+		"128": "128.png"
+	},
+	"action": {
+		"default_title": "Khan Academy Notifications",
+		"default_icon": {
+			"16": "16.png",
+			"32": "32.png",
+			"48": "48.png",
+			"128": "128.png"
+		},
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+		{
+			"js": ["content.js"],
+			"matches": ["https://www.khanacademy.org/*"],
+			"run_at": "document_end"
+		}
+	],
+	"permissions": ["cookies", "storage", "alarms"],
+	"host_permissions": ["https://www.khanacademy.org/"],
+	"web_accessible_resources": [
+		{
+			"resources": ["fetch-override.js"],
+			"matches": ["https://www.khanacademy.org/*"]
+		}
+	],
+	"background": {
+		"service_worker": "background.js",
+		"type": "module"
 	}
-  ],
-  "permissions": ["cookies", "storage", "alarms"], 
-  "host_permissions": ["https://www.khanacademy.org/"],
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  }
 }

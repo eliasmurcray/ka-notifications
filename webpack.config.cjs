@@ -10,7 +10,8 @@ module.exports = {
 	entry: {
 		background: "/src/ts/background.ts",
 		popup: "/src/ts/popup.ts",
-		content: "/src/ts/content.ts"
+		content: "/src/ts/content.ts",
+		"fetch-override": "/src/ts/fetch-override.ts",
 	},
 	resolve: {
 		extensions: [".ts"],

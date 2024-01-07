@@ -1,21 +1,21 @@
 const { execSync } = require("child_process");
 
 function colorMessage(message, color, isBold = true) {
-  let formattedMessage = message;
-  if (isBold) {
-    formattedMessage = `\x1b[1m${message}\x1b[0m`;
-  }
-  console.log(`${color}${formattedMessage}`);
+	let formattedMessage = message;
+	if (isBold) {
+		formattedMessage = `\x1b[1m${message}\x1b[0m`;
+	}
+	console.log(`${color}${formattedMessage}`);
 }
 
 function runCommand(command, message, color) {
-  try {
-    colorMessage(`\n${message}...`, color);
-    execSync(command, { stdio: "inherit" });
-  } catch (error) {
-    colorMessage(`${message} failed`, "\x1b[31m");
-    process.exit(1);
-  }
+	try {
+		colorMessage(`\n${message}...`, color);
+		execSync(command, { stdio: "inherit" });
+	} catch (error) {
+		colorMessage(`${message} failed`, "\x1b[31m");
+		process.exit(1);
+	}
 }
 
 runCommand("npm run lint", "Linting", "\x1b[32m");
