@@ -3,7 +3,7 @@
 	"name": "Khan Academy Notifications",
 	"short_name": "KA Notifications",
 	"author": "Elias Murcray",
-	"version": "3.0.2",
+	"version": "3.0.3",
 	"minimum_chrome_version": "109",
 	"homepage_url": "https://github.com/eliasmurcray/ka-notifications",
 	"description": "Enhance your Khan Academy experience with timely notifications and subtle improvements.",
