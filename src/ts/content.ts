@@ -20,19 +20,19 @@ if (
 			case "question":
 			case "answer":
 				button = document.getElementById(
-					"ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-0",
+					"ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-1",
 				) as HTMLButtonElement;
 				break;
 			case "comment":
 			case "reply":
 			case null:
 				button = document.getElementById(
-					"ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-1",
+					"ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-2",
 				) as HTMLButtonElement;
 				break;
 			case "project_help_question":
 				button = document.getElementById(
-					"ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-2",
+					"ka-uid-discussiontabbedpanel-0--tabbedpanel-tab-0",
 				) as HTMLButtonElement;
 				break;
 		}
