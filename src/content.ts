@@ -1,4 +1,4 @@
-import { waitForId, waitForSelector } from './lib/dom';
+import { waitForId } from './lib/dom';
 import { EditorSettings } from './types/extension';
 
 const pathSegments = window.location.pathname.split('/');
