@@ -70,11 +70,11 @@ async function initializeContentScript(): Promise<void> {
       const sortButton = await waitForId('sortBy');
       if (sortButton instanceof HTMLButtonElement) {
         sortButton.click();
-        const dropdown = await waitForSelector("div[data-testid='dropdown-popper']");
+        const dropdown = await waitForId('\\:r8\\:');
         const sortButtons = dropdown.getElementsByTagName('button');
 
         for (const button of sortButtons) {
-          if (button.innerText.includes(defaultCommentSort)) {
+          if (button.textContent.includes(defaultCommentSort)) {
             button.click();
             sortButton.blur();
             break;

@@ -6,6 +6,7 @@ import { renderAvatar } from './components/avatar';
 import { renderUnauthenticated } from './components/unauthenticated';
 import { setupDropdown } from './components/dropdown';
 import { setupSignoutDropdown } from './components/signoutDropdown';
+import { setupCommentSort } from './components/commentSort';
 import { setupSync } from './components/sync';
 import { setupSwitches } from './components/switches';
 import { setupSettingsModal } from './components/settingsModal';
@@ -81,6 +82,7 @@ async function main() {
   setupFontFamily(store);
   setupEditorSettings(store);
   setupThemeSelect(store);
+  setupCommentSort(store);
 }
 
 main();
