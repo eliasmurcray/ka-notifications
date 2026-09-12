@@ -55,22 +55,30 @@ async function initializeContentScript(): Promise<void> {
     document.body.appendChild(scriptElement);
   }
 
-  if (isComputerSciencePage && /^\d{16}$/.test(projectId || '')) {
-    injectScriptFile('fetch-override.js');
+  function attachFormatCodeLoader(): void {
+    document.addEventListener('KA_REQUEST_FORMAT_CODE_SCRIPT', () => {
+      injectScriptFile('format-code.js');
+    });
+  }
 
+  const TAB_SELECTION_TIMEOUT_MS = 5000;
+
+  async function selectDefaultCommentTab(): Promise<void> {
     const expandType = new URLSearchParams(location.search).get('qa_expand_type');
     const tabId = getTabIdForExpandType(expandType);
-    const qaTabElement = await waitForId(tabId);
+    const qaTabElement = await waitForId(tabId, TAB_SELECTION_TIMEOUT_MS);
+    if (!qaTabElement) return;
 
     if (qaTabElement instanceof HTMLButtonElement) {
       qaTabElement.click();
 
       const { defaultCommentSort = 'Top Voted' } =
         await chrome.storage.local.get('defaultCommentSort');
-      const sortButton = await waitForId('sortBy');
+      const sortButton = await waitForId('sortBy', TAB_SELECTION_TIMEOUT_MS);
       if (sortButton instanceof HTMLButtonElement) {
         sortButton.click();
-        const dropdown = await waitForId('\\:r8\\:');
+        const dropdown = await waitForId('\\:r8\\:', TAB_SELECTION_TIMEOUT_MS);
+        if (!dropdown) return;
         const sortButtons = dropdown.getElementsByTagName('button');
 
         for (const button of sortButtons) {
@@ -93,11 +101,18 @@ async function initializeContentScript(): Promise<void> {
         }
       }
     }
+  }
 
+  if (isComputerSciencePage && /^\d{16}$/.test(projectId || '')) {
+    injectScriptFile('fetch-override.js');
     attachEditorSettingsSync();
+    attachFormatCodeLoader();
     injectScriptFile('ace-override.js');
+
+    void selectDefaultCommentTab();
   } else if (isComputerSciencePage && pathSegments[2] === 'new') {
     attachEditorSettingsSync();
+    attachFormatCodeLoader();
     injectScriptFile('ace-override.js');
   }
 }

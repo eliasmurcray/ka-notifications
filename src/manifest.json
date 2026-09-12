@@ -3,10 +3,10 @@
   "name": "Khan Academy Notifications",
   "short_name": "KA Notifications",
   "author": "Elias Murcray",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "minimum_chrome_version": "109",
   "homepage_url": "https://github.com/eliasmurcray/ka-notifications",
-  "description": "Thoughtful enhancements for the Khan Academy experience.",
+  "description": "Reply to notifications and customize your code editor on Khan Academy.",
   "icons": {
     "16": "16.png",
     "32": "32.png",
@@ -35,7 +35,7 @@
   "host_permissions": ["https://www.khanacademy.org/"],
   "web_accessible_resources": [
     {
-      "resources": ["ace-override.js", "fetch-override.js"],
+      "resources": ["ace-override.js", "fetch-override.js", "format-code.js"],
       "matches": ["https://www.khanacademy.org/*"]
     }
   ],

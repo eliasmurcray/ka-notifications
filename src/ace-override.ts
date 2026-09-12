@@ -31,6 +31,8 @@ interface EditorState {
   scratchpadWrap: HTMLDivElement | null;
   slimCursorStyle: HTMLStyleElement | null;
   initialized: boolean;
+  formatButton: HTMLButtonElement | null;
+  formatButtonObserver: MutationObserver | null;
 }
 
 function createEditorState(): EditorState {
@@ -43,6 +45,8 @@ function createEditorState(): EditorState {
     scratchpadWrap: null,
     slimCursorStyle: null,
     initialized: false,
+    formatButton: null,
+    formatButtonObserver: null,
   };
 }
 
@@ -69,6 +73,8 @@ function teardown(): void {
     document.body.removeEventListener('mouseup', boundHandleSaveClick);
   }
   state.slimCursorStyle?.remove();
+  state.formatButton?.remove();
+  state.formatButtonObserver?.disconnect();
   editorObserver?.disconnect();
   editorObserver = null;
   boundSaveProgram = null;
@@ -153,9 +159,9 @@ async function cacheDOMReferences(): Promise<void> {
     waitForClass('scratchpad-wrap-outer'),
     waitForClass('scratchpad-wrap'),
   ]);
-  state.scratchpadWrapOuter = wrapOuterEls[0] as HTMLDivElement;
+  state.scratchpadWrapOuter = wrapOuterEls?.[0] as HTMLDivElement;
   state.scratchpadWrapOuterChild = state.scratchpadWrapOuter?.children[0] as HTMLDivElement;
-  state.scratchpadWrap = wrapEls[0] as HTMLDivElement;
+  state.scratchpadWrap = wrapEls?.[0] as HTMLDivElement;
   state.slimCursorStyle = document.createElement('style');
   state.slimCursorStyle.setAttribute('data-slim-cursor', 'true');
   state.slimCursorStyle.textContent = `
@@ -168,6 +174,140 @@ async function cacheDOMReferences(): Promise<void> {
 
 function isNewProgramURL(url: string): boolean {
   return KA_NEW_PROGRAM_URL_RE.test(url);
+}
+
+function findRequestHelpButton(): HTMLElement | null {
+  if (!state.scratchpadWrap) return null;
+  const candidates = state.scratchpadWrap.querySelectorAll('button, a, [role="button"]');
+  for (const el of candidates) {
+    if (el.textContent?.trim().toLowerCase() === 'request help') {
+      return el as HTMLElement;
+    }
+  }
+  return null;
+}
+
+function handleFormatCodeClick(event: MouseEvent): void {
+  void formatCode(event.currentTarget as HTMLButtonElement);
+}
+
+function getButtonLabelEl(button: HTMLElement): HTMLElement {
+  let labelEl = button;
+  let current: HTMLElement = button;
+  for (;;) {
+    const children = Array.from(current.children) as HTMLElement[];
+    const childWithText = children.find(child => (child.textContent ?? '').trim().length > 0);
+    if (!childWithText) break;
+    labelEl = childWithText;
+    current = childWithText;
+  }
+  return labelEl;
+}
+
+function buildFormatButton(reference: HTMLElement): HTMLButtonElement {
+  const button = reference.cloneNode(true) as HTMLButtonElement;
+  button.removeAttribute('id');
+  button.setAttribute('data-ka-format-code', 'true');
+  getButtonLabelEl(button).textContent = 'Format Code';
+  button.addEventListener('click', handleFormatCodeClick);
+  return button;
+}
+
+function ensureFormatButton(): void {
+  if (state.formatButton?.isConnected) return;
+  const reference = findRequestHelpButton();
+  if (!reference?.parentElement) return;
+  if (reference.nextElementSibling?.hasAttribute('data-ka-format-code')) return;
+  const button = buildFormatButton(reference);
+  reference.insertAdjacentElement('afterend', button);
+  state.formatButton = button;
+}
+
+function observeFormatButtonTarget(): void {
+  if (state.formatButtonObserver || !state.scratchpadWrap) return;
+  ensureFormatButton();
+  state.formatButtonObserver = new MutationObserver(() => ensureFormatButton());
+  state.formatButtonObserver.observe(state.scratchpadWrap, { childList: true, subtree: true });
+}
+
+let formatCodeReadyPromise: Promise<void> | null = null;
+
+function ensureFormatCodeScriptLoaded(): Promise<void> {
+  if (window.__kaFormatCode) return Promise.resolve();
+  if (formatCodeReadyPromise) return formatCodeReadyPromise;
+  formatCodeReadyPromise = new Promise(resolve => {
+    const onReady = () => {
+      document.removeEventListener('KA_FORMAT_CODE_READY', onReady);
+      resolve();
+    };
+    document.addEventListener('KA_FORMAT_CODE_READY', onReady);
+    document.dispatchEvent(new CustomEvent('KA_REQUEST_FORMAT_CODE_SCRIPT'));
+  });
+  return formatCodeReadyPromise;
+}
+
+const ACE_MODE_TO_PRETTIER_PARSER: Record<string, string> = {
+  'ace/mode/javascript': 'babel',
+  'ace/mode/html': 'html',
+  'ace/mode/css': 'css',
+  'ace/mode/less': 'less',
+  'ace/mode/scss': 'scss',
+};
+
+function getPrettierParserForEditor(): string | null {
+  const modeId = (state.editor?.session.getMode() as { $id?: string } | undefined)?.$id;
+  if (!modeId) return null;
+  return ACE_MODE_TO_PRETTIER_PARSER[modeId] ?? null;
+}
+
+async function formatCode(button: HTMLButtonElement): Promise<void> {
+  if (!state.editor) return;
+  const label = getButtonLabelEl(button);
+  const originalLabel = label.textContent;
+
+  const parser = getPrettierParserForEditor();
+  if (!parser) {
+    label.textContent = 'Unsupported file type';
+    setTimeout(() => {
+      label.textContent = originalLabel;
+    }, 1500);
+    return;
+  }
+
+  button.disabled = true;
+  button.setAttribute('aria-disabled', 'true');
+  label.textContent = 'Formatting...';
+  try {
+    await ensureFormatCodeScriptLoaded();
+    if (!window.__kaFormatCode) throw new Error('Formatter failed to load');
+
+    const code = state.editor.getValue();
+    const cursorOffset = state.editor.session.doc.positionToIndex(
+      state.editor.getCursorPosition(),
+      0,
+    );
+    const { formatted, cursorOffset: newCursorOffset } = await window.__kaFormatCode(code, {
+      parser,
+      tabWidth: parseInt(settings?.tabSize ?? '2', 10),
+      useTabs: !(settings?.softTabs ?? true),
+      cursorOffset,
+    });
+
+    state.editor.setValue(formatted, -1);
+    state.editor.moveCursorToPosition(state.editor.session.doc.indexToPosition(newCursorOffset, 0));
+    state.editor.renderer.scrollCursorIntoView();
+    button.disabled = false;
+    button.setAttribute('aria-disabled', 'false');
+    label.textContent = originalLabel;
+  } catch (error) {
+    console.error('[formatCode] Failed to format code:', error);
+    label.textContent = 'Format failed';
+    setTimeout(() => {
+      button.disabled = false;
+      button.setAttribute('aria-disabled', 'false');
+      label.textContent = originalLabel;
+    }, 1500);
+  }
 }
 
 async function fetchExtensionSettings(): Promise<void> {
@@ -397,6 +537,7 @@ async function initializeEditor(href: string): Promise<void> {
   (_ace as unknown as AceConfig).config.set('themePath', ACE_THEME_PATH);
   await Promise.all([cacheDOMReferences(), fetchExtensionSettings()]);
   await updateEditorSettings();
+  observeFormatButtonTarget();
 
   if (!isNewProgramURL(href)) return;
 

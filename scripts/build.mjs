@@ -32,6 +32,7 @@ const config = {
     background: 'src/background/index.ts',
     'fetch-override': 'src/fetch-override.ts',
     'ace-override': 'src/ace-override.ts',
+    'format-code': 'src/format-code.ts',
   },
   outdir: 'chrome',
   bundle: true,
